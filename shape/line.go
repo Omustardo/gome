@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/bytecoder"
 	"github.com/omustardo/gome/shader"
+	"github.com/omustardo/gome/util/bytecoder"
 )
 
 var _ Shape = (*Line)(nil)

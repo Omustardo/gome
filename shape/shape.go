@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/bytecoder"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/entity"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
+	"github.com/omustardo/gome/util/bytecoder"
 )
 
 type Shape interface {

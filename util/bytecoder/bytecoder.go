@@ -1,4 +1,4 @@
-// bytes provides functions for converting standard arrays into byte arrays.
+// bytecoder provides functions for converting standard arrays into byte arrays.
 // Based on the Bytes function from golang.org\x\mobile\exp\f32\f32.go
 package bytecoder
 
