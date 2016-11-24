@@ -171,10 +171,15 @@ func (r *ParallaxRect) DrawFilled() {
 
 type OrbitingRect struct {
 	Rect
-	revolutionSpeed int64 // milliseconds to go entirely around the orbit. i.e. one year for the earth.
+	// milliseconds to go entirely around the orbit. i.e. one year for the earth.
+	// Goes counterclockwise by default. Set negative to go clockwise.
+	revolutionSpeed int64
 	orbit           Circle
-	orbitTarget     entity.Entity // Makes the center of the orbit an object that can move. If nil, just uses the orbit's static center.
-	rotateSpeed     int64         // milliseconds to do one full rotation. 0 to not rotate. i.e. one day for the earth.
+	// Makes the center of the orbit an object that can move. If nil, just uses the orbit's static center.
+	orbitTarget entity.Entity
+	// rotateSpeed is the milliseconds to do one full rotation. i.e. one day for the earth.
+	// Goes counterclockwise by default. Set negative to go clockwise. Use 0 to not rotate.
+	rotateSpeed int64
 }
 
 func NewOrbitingRect(rect Rect, orbitCenter mgl32.Vec2, orbitRadius float32, orbitTarget entity.Entity, revolutionSpeed, rotateSpeed int64) *OrbitingRect {
@@ -193,8 +198,6 @@ func NewOrbitingRect(rect Rect, orbitCenter mgl32.Vec2, orbitRadius float32, orb
 	return r
 }
 
-// TODO: Allow orbits and rotations to go counterclockwise.
-
 func (r *OrbitingRect) Update() {
 	if r.orbitTarget != nil {
 		r.orbit.P = r.orbitTarget.Center()
@@ -206,8 +209,10 @@ func (r *OrbitingRect) Update() {
 	x, y, _ := r.orbit.Center().Add(offset).Elem()
 	r.SetCenter(x, y)
 
-	percentRotation := float32(now%r.rotateSpeed) / float32(r.rotateSpeed)
-	r.Angle = percentRotation * 2 * math.Pi
+	if r.rotateSpeed != 0 {
+		percentRotation := float32(now%r.rotateSpeed) / float32(r.rotateSpeed)
+		r.Angle = percentRotation * 2 * math.Pi
+	}
 }
 
 func (r *OrbitingRect) DrawOrbit() {

@@ -198,8 +198,8 @@ func main() {
 			mgl32.Vec2{0, 0}, // Center of the orbit
 			400,              // Orbit radius // TODO: Allow elliptical orbits.
 			orbitingRects[0],
-			2000, // Time to make a full revolution (all the way around the orbit)
-			500,  // Time to make a full rotation (turn fully around itself, i.e. 1 day)
+			-2000, // Time to make a full revolution (all the way around the orbit)
+			-500,  // Time to make a full rotation (turn fully around itself, i.e. 1 day)
 		),
 	)
 
