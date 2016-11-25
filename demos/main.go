@@ -26,11 +26,10 @@ var (
 	windowWidth    = flag.Int("window_width", 1000, "initial window width")
 	windowHeight   = flag.Int("window_height", 1000, "initial window height")
 	screenshotPath = flag.String("screenshot_dir", `C:\Users\Omar\Desktop\screenshots\`, "Folder to save screenshots in. Name is the timestamp of when they are taken.")
-)
 
-const (
-	gametick  = time.Second / 3
-	framerate = time.Second / 60
+	frameRate    = flag.Duration("framerate", time.Second/60, `Cap on framerate. Provide with units, like "16.66ms"`)
+	gametickRate = flag.Duration("gametick_rate", time.Second/3, `How often to calculate major game actions. Provide with units, like "200ms"`)
+	debugLogRate = flag.Duration("debug_log_rate", time.Second, `How often to do periodic debug logging. Provide with units, like "5s"`)
 )
 
 func init() {
@@ -161,11 +160,16 @@ func main() {
 	// Put the parallax info in buffers on the GPU. TODO: Consider using a single interleaved buffer. Stride and offset are annoying though, and I don't think a few extra buffers matter.
 	parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer, parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer := shape.GetParallaxBuffers(parallaxObjects)
 
-	ticker := time.NewTicker(framerate)
-	gameTicker := time.NewTicker(gametick)
-	debugLogTicker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(*frameRate)
+	gameTicker := time.NewTicker(*gametickRate)
+	debugLogTicker := time.NewTicker(*debugLogRate)
 	for !view.Window.ShouldClose() {
 		fps.Handler.Update()
+		glfw.PollEvents() // Reads window events, like keyboard and mouse input.
+		// Handler.Update takes current input and stores it. This is necessary to detect things like the start of a keypress.
+		keyboard.Handler.Update()
+		mouse.Handler.Update()
+
 		for _, r := range orbitingRects {
 			r.Update()
 		}
@@ -232,30 +236,23 @@ func main() {
 
 		// Swaps the buffer that was drawn on to be visible. The visible buffer becomes the one that gets drawn on until it's swapped again.
 		view.Window.SwapBuffers()
-		// Handler.Update takes current input and stores it. This is necessary to detect things like the start of a keypress.
-		// It's important to do the update for inputs here before PollEvents. Doing these calls at the top of the game loop
-		// is equivalent to doing them immediately after PollEvents, and would result in the current input state being
-		// skipped, because it would immediately be stored as the previous state.
-		keyboard.Handler.Update()
-		mouse.Handler.Update()
-		glfw.PollEvents() // Reads window events, like keyboard and mouse input.
-		<-ticker.C        // wait up to 1/60th of a second. This caps framerate to 60 FPS.
+		<-ticker.C // wait up to 1/60th of a second. This caps framerate to 60 FPS.
 	}
 }
 
 func ApplyInputs(player shape.Shape, cam camera.Camera) {
 	var move mgl32.Vec2
 	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
-		move[0] = -1
+		move[0] += -1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyD, glfw.KeyRight) {
-		move[0] = 1
+		move[0] += 1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyW, glfw.KeyUp) {
-		move[1] = 1
+		move[1] += 1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyS, glfw.KeyDown) {
-		move[1] = -1
+		move[1] += -1
 	}
 	playerSpeed := float32(500)
 	move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
@@ -272,5 +269,6 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 		player.ModifyCenter(move[0], move[1])
 	}
 	if mouse.Handler.RightPressed() {
+
 	}
 }

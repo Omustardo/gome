@@ -10,8 +10,6 @@ per-frame which isn't consistent, and definitely won't work for multiplayer.
 Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
 * DirectionalCamera that follows player orientation (up on the screen is always the direction the player faces).
 * Draw with specific layers. Right now everything is based on the order of draw calls.
-* Make fps handler hold a GetNow interface so it can be tested. Since pretty much all update logic is based
-on its DeltaTime function, it definitely needs to be able to be mocked.
 * http://www.gopherjs.org/ #Performance Tips
   * Consider switching everything to float64 as it's more efficient with gopherjs if performance is an issue.
 
