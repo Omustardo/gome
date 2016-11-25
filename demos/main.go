@@ -40,7 +40,7 @@ func init() {
 }
 
 func main() {
-	// Initialize gl constants and the glfw window.
+	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
 	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
 		log.Fatal(err)
 	}
@@ -154,10 +154,10 @@ func main() {
 	)
 
 	// Generate parallax rectangles.
-	parallaxObjects := shape.GenParallaxRects(cam, 500, 8, 5, 0.1, 0.2)                                // Near
-	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 300, 5, 3.5, 0.35, 0.5)...)  // Med
-	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 200, 2, 0.5, 0.75, 0.85)...) // Far
-	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 100, 1, 0.1, 0.9, 0.95)...)  // Distant
+	parallaxObjects := shape.GenParallaxRects(cam, 5000, 8, 5, 0.1, 0.2)                                // Near
+	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 3000, 5, 3.5, 0.35, 0.5)...)  // Med
+	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 2000, 2, 0.5, 0.75, 0.85)...) // Far
+	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 1000, 1, 0.1, 0.9, 0.95)...)  // Distant
 	// Put the parallax info in buffers on the GPU. TODO: Consider using a single interleaved buffer. Stride and offset are annoying though, and I don't think a few extra buffers matter.
 	parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer, parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer := shape.GetParallaxBuffers(parallaxObjects)
 
@@ -222,6 +222,8 @@ func main() {
 				// if mouseHandler.LeftPressed() {
 				// 	 log.Println("detected mouse press at", mouseHandler.Position)
 				// }
+				// log.Println(fps.Handler.FPS(), "fps")
+				// log.Println(fps.Handler.DeltaTime(), "delta time")
 				// log.Println("zoom%:", cam.GetCurrentZoomPercent())
 				// log.Println("mouse screen->world:", mouseHandler.Position, cam.ScreenToWorldCoord2D(mouseHandler.Position, WindowSize))
 			}
@@ -255,7 +257,8 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 	if keyboard.Handler.IsKeyDown(glfw.KeyS, glfw.KeyDown) {
 		move[1] = -1
 	}
-	move = move.Normalize().Mul(10)
+	playerSpeed := float32(500)
+	move = move.Normalize().Mul(playerSpeed * float32(fps.Handler.DeltaTime().Seconds()))
 	player.ModifyCenter(move[0], move[1])
 
 	w, h := view.Window.GetSize()
@@ -265,7 +268,7 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 	if mouse.Handler.LeftPressed() {
 		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())
 
-		move = move.Normalize().Mul(10)
+		move = move.Normalize().Mul(playerSpeed * float32(fps.Handler.DeltaTime().Seconds()))
 		player.ModifyCenter(move[0], move[1])
 	}
 	if mouse.Handler.RightPressed() {

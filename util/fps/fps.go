@@ -30,8 +30,8 @@ type tracker interface {
 	FPS() int
 	// Framerate returns an estimate of the average millisecond duration of each frame. i.e. 16.66
 	Framerate() float32
-	// DeltaTime returns the millisecond time elapsed between the last two calls to Update.
-	DeltaTime() float32
+	// DeltaTime returns the time elapsed between the last two calls to Update.
+	DeltaTime() time.Duration
 }
 
 // rollingFPSCounter keeps track of the number of frames in the last second.
@@ -88,14 +88,14 @@ func (f *rollingTracker) Framerate() float32 {
 }
 
 // DeltaTime returns the time elapsed between the last two calls to Update.
-func (f *rollingTracker) DeltaTime() float32 {
+func (f *rollingTracker) DeltaTime() time.Duration {
 	// This should only happen when the game first loads, and only for two frames, so shouldn't be noticeable by the user.
 	if f.framesLastSecond.Len() < 2 {
-		return 0
+		return time.Nanosecond * 0
 	}
 	lastCall := f.framesLastSecond.Back().Value.(time.Time)
 	prevLastCall := f.framesLastSecond.Back().Prev().Value.(time.Time)
-	return float32(lastCall.Sub(prevLastCall).Nanoseconds()) / float32(time.Millisecond/time.Nanosecond)
+	return lastCall.Sub(prevLastCall)
 }
 
 // simpleTracker keeps track of the number of frames in the last second.
@@ -145,6 +145,6 @@ func (f *simpleTracker) Framerate() float32 {
 }
 
 // DeltaTime returns the time elapsed between the last two calls to Update.
-func (f *simpleTracker) DeltaTime() float32 {
-	return float32(f.lastUpdateTime.Sub(f.prevLastUpdateTime).Nanoseconds()) / float32(time.Millisecond/time.Nanosecond)
+func (f *simpleTracker) DeltaTime() time.Duration {
+	return f.lastUpdateTime.Sub(f.prevLastUpdateTime)
 }
