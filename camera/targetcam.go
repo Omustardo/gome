@@ -68,11 +68,11 @@ func (c *TargetCamera) Position() mgl32.Vec3 {
 // ScreenToWorldCoord2D returns the world coordinates of a point on the screen.
 // This depends on the camera always looking directly down onto the XY-plane. e.g. camera position has positive Z.
 // The screen space coordinate is expected in the coordinate system where the top left corner is (0,0), Y increases down, and X increases right.
-func (c *TargetCamera) ScreenToWorldCoord2D(screenPoint mgl32.Vec2, windowSize [2]int) mgl32.Vec2 {
+func (c *TargetCamera) ScreenToWorldCoord2D(screenPoint mgl32.Vec2, windowWidth, windowHeight int) mgl32.Vec2 {
 	zoomPercent := c.GetCurrentZoomPercent()
 	return mgl32.Vec2{
-		c.Pos.X() + (screenPoint.X()-float32(windowSize[0])/2)/zoomPercent,
-		c.Pos.Y() - (screenPoint.Y()-float32(windowSize[1])/2)/zoomPercent,
+		c.Pos.X() + (screenPoint.X()-float32(windowWidth)/2)/zoomPercent,
+		c.Pos.Y() - (screenPoint.Y()-float32(windowHeight)/2)/zoomPercent,
 	}
 }
 

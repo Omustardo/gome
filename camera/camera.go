@@ -17,5 +17,5 @@ type Camera interface {
 	GetCurrentZoomPercent() float32
 
 	// ScreenToWorldCoord2D returns the world coordinates of a point on the screen.
-	ScreenToWorldCoord2D(screenPoint mgl32.Vec2, windowSize [2]int) mgl32.Vec2
+	ScreenToWorldCoord2D(screenPoint mgl32.Vec2, windowWidth, windowHeight int) mgl32.Vec2
 }

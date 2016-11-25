@@ -19,81 +19,32 @@ import (
 	"github.com/omustardo/gome/shape"
 	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/fps"
+	"github.com/omustardo/gome/view"
 )
 
 var (
-	windowWidth  = flag.Int("window_width", 1000, "initial window width")
-	windowHeight = flag.Int("window_height", 1000, "initial window height")
-	WindowSize   [2]int // Up to date window size.
+	windowWidth    = flag.Int("window_width", 1000, "initial window width")
+	windowHeight   = flag.Int("window_height", 1000, "initial window height")
+	screenshotPath = flag.String("screenshot_dir", `C:\Users\Omar\Desktop\screenshots\`, "Folder to save screenshots in. Name is the timestamp of when they are taken.")
 )
 
 const (
 	gametick  = time.Second / 3
 	framerate = time.Second / 60
-
-	// Screenshots are saved in the target folder. Their name is the millisecond timestamp when they are taken.
-	screenshotPath = `C:\Users\Omar\Desktop\screenshots\`
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile) // log print with .go file and line number.
+	// log print with .go file and line number.
+	log.SetFlags(log.Lshortfile)
 	log.SetOutput(os.Stdout)
-
-	// To log to multiple locations:
-	//var b bytes.Buffer
-	//bufWriter := bufio.NewWriter(&b)
-	//log.SetOutput(io.MultiWriter(os.Stdout, os.Stderr, bufWriter))
 }
 
 func main() {
-	WindowSize[0], WindowSize[1] = *windowWidth, *windowHeight
-	windowWidth, windowHeight = nil, nil // Clear the flags. They're only for initialization and shouldn't be used elsewhere.
-
-	err := glfw.Init(gl.ContextWatcher)
-	if err != nil {
+	// Initialize gl constants and the glfw window.
+	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
 		log.Fatal(err)
 	}
-	defer glfw.Terminate()
-	glfw.WindowHint(glfw.Samples, 16) // Anti-aliasing.
-
-	// Window hints to require OpenGL 3.2 or above, and to disable deprecated functions. https://open.gl/context#GLFW
-	// These hints are not supported since we're using goxjs/glfw rather than the regular glfw, but should be used in a
-	// standard desktop glfw project. TODO: Add support for these in goxjs/glfw/hint_glfw.go or consider using a conditional build rule.
-	//glfw.WindowHint(glfw.ContextVersionMajor, 3)
-	//glfw.WindowHint(glfw.ContextVersionMinor, 2)
-	//glfw.WindowHint(glfw.OpenGLProfile, glfw.OPENGL_CORE_PROFILE)
-	//glfw.WindowHint(glfw.OpenGLForwardCompatible, gl.TRUE)
-
-	// Note CreateWindow ignores input size for WebGL/HTML canvas - it expands to fill browser window. This still matters for desktop.
-	window, err := glfw.CreateWindow(WindowSize[0], WindowSize[1], "Graphics Demo", nil, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	window.MakeContextCurrent()
-	fmt.Printf("OpenGL: %s %s %s; %v samples.\n", gl.GetString(gl.VENDOR), gl.GetString(gl.RENDERER), gl.GetString(gl.VERSION), gl.GetInteger(gl.SAMPLES))
-	fmt.Printf("GLSL: %s.\n", gl.GetString(gl.SHADING_LANGUAGE_VERSION))
-
-	glfw.SwapInterval(1) // Vsync.
-
-	gl.ClearColor(0, 0, 0, 1) // Background Color
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	gl.Enable(gl.CULL_FACE) // NOTE: If triangles appear to be missing, this is probably the cause. The order that vertices are listed matters.
-	//gl.Enable(gl.DEPTH_TEST) // TODO: Enable once everything uses 3D meshes. For now just depend on draw order.
-	//gl.DepthFunc(gl.LESS) // Accept fragment if it's closer to the camera than the former one
-
-	// Set up a callback for when the window is resized. Call it once for good measure.
-	framebufferSizeCallback := func(w *glfw.Window, framebufferSize0, framebufferSize1 int) {
-		gl.Viewport(0, 0, framebufferSize0, framebufferSize1)
-		WindowSize[0], WindowSize[1] = w.GetSize()
-	}
-	{
-		framebufferSizeX, framebufferSizeY := window.GetFramebufferSize()
-		framebufferSizeCallback(window, framebufferSizeX, framebufferSizeY)
-	}
-	window.SetFramebufferSizeCallback(framebufferSizeCallback)
+	defer view.Terminate()
 
 	// Initialize Shaders
 	if err := shader.Initialize(); err != nil {
@@ -103,11 +54,10 @@ func main() {
 		log.Fatalf("gl error: %v", err)
 	}
 
-	// Initialize Input
-	mouse.Initialize(window)
-	keyboard.Initialize(window)
-
-	fpsCounter := fps.NewFPSCounter()
+	// Initialize singletons.
+	mouse.Initialize(view.Window)
+	keyboard.Initialize(view.Window)
+	fps.Initialize()
 
 	// Load standard meshes.
 	shape.LoadModels()
@@ -214,8 +164,8 @@ func main() {
 	ticker := time.NewTicker(framerate)
 	gameTicker := time.NewTicker(gametick)
 	debugLogTicker := time.NewTicker(time.Second)
-	for !window.ShouldClose() {
-		fpsCounter.Update()
+	for !view.Window.ShouldClose() {
+		fps.Handler.Update()
 		for _, r := range orbitingRects {
 			r.Update()
 		}
@@ -233,7 +183,8 @@ func main() {
 
 		// Set up Model-View-Projection Matrix and send it to the shader programs.
 		mvMatrix := cam.ModelView()
-		pMatrix := cam.Projection(float32(WindowSize[0]), float32(WindowSize[1]))
+		w, h := view.Window.GetSize()
+		pMatrix := cam.Projection(float32(w), float32(h))
 		shader.Basic.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Parallax.SetMVPMatrix(pMatrix, mvMatrix)
 
@@ -271,7 +222,7 @@ func main() {
 				// if mouseHandler.LeftPressed() {
 				// 	 log.Println("detected mouse press at", mouseHandler.Position)
 				// }
-				// log.Println(fpsCounter.GetFPS(), "fps")
+				log.Println(fps.Handler.GetFPS(), "fps")
 				// log.Println("zoom%:", cam.GetCurrentZoomPercent())
 				// log.Println("mouse screen->world:", mouseHandler.Position, cam.ScreenToWorldCoord2D(mouseHandler.Position, WindowSize))
 			}
@@ -279,7 +230,7 @@ func main() {
 		}
 
 		// Swaps the buffer that was drawn on to be visible. The visible buffer becomes the one that gets drawn on until it's swapped again.
-		window.SwapBuffers()
+		view.Window.SwapBuffers()
 		// Handler.Update takes current input and stores it. This is necessary to detect things like the start of a keypress.
 		// It's important to do the update for inputs here before PollEvents. Doing these calls at the top of the game loop
 		// is equivalent to doing them immediately after PollEvents, and would result in the current input state being
@@ -308,12 +259,12 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 	move = move.Normalize().Mul(10)
 	player.ModifyCenter(move[0], move[1])
 
+	w, h := view.Window.GetSize()
 	if keyboard.Handler.JustPressed(glfw.KeySpace) {
-		util.SaveScreenshot(WindowSize[0], WindowSize[1], filepath.Join(screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
+		util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
 	}
-
 	if mouse.Handler.LeftPressed() {
-		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), WindowSize).Sub(player.Center().Vec2())
+		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())
 
 		move = move.Normalize().Mul(10)
 		player.ModifyCenter(move[0], move[1])

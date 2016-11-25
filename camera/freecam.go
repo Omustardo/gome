@@ -46,9 +46,9 @@ func (c *FreeCamera) GetCurrentZoomPercent() float32 {
 	return 1
 }
 
-func (c *FreeCamera) ScreenToWorldCoord2D(screenPoint mgl32.Vec2, windowSize [2]int) mgl32.Vec2 {
+func (c *FreeCamera) ScreenToWorldCoord2D(screenPoint mgl32.Vec2, windowWidth, windowHeight int) mgl32.Vec2 {
 	return mgl32.Vec2{
-		c.Pos.X() + (screenPoint.X() - float32(windowSize[0])/2),
-		c.Pos.Y() - (screenPoint.Y() - float32(windowSize[1])/2),
+		c.Pos.X() + (screenPoint.X() - float32(windowWidth)/2),
+		c.Pos.Y() - (screenPoint.Y() - float32(windowHeight)/2),
 	}
 }
