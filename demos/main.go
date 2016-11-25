@@ -222,7 +222,6 @@ func main() {
 				// if mouseHandler.LeftPressed() {
 				// 	 log.Println("detected mouse press at", mouseHandler.Position)
 				// }
-				log.Println(fps.Handler.GetFPS(), "fps")
 				// log.Println("zoom%:", cam.GetCurrentZoomPercent())
 				// log.Println("mouse screen->world:", mouseHandler.Position, cam.ScreenToWorldCoord2D(mouseHandler.Position, WindowSize))
 			}
