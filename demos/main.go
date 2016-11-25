@@ -258,7 +258,7 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 		move[1] = -1
 	}
 	playerSpeed := float32(500)
-	move = move.Normalize().Mul(playerSpeed * float32(fps.Handler.DeltaTime().Seconds()))
+	move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
 	player.ModifyCenter(move[0], move[1])
 
 	w, h := view.Window.GetSize()
@@ -268,7 +268,7 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 	if mouse.Handler.LeftPressed() {
 		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())
 
-		move = move.Normalize().Mul(playerSpeed * float32(fps.Handler.DeltaTime().Seconds()))
+		move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
 		player.ModifyCenter(move[0], move[1])
 	}
 	if mouse.Handler.RightPressed() {
