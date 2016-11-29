@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"image"
 
+	// for decoding of different file types:
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/util"
 )
