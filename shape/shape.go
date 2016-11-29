@@ -53,7 +53,7 @@ func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSp
 	for i := 0; i < count; i++ {
 		shapes[i] = ParallaxRect{
 			Rect: Rect{
-				X: rand.Float32()*20000 - 10000, Y: rand.Float32()*20000 - 10000, // Note not even distribution - they are drawn from bottom left corner so everything is Up and Right shifted slightly
+				X: rand.Float32()*20000 - 10000, Y: rand.Float32()*20000 - 10000,
 				R: rand.Float32(), G: rand.Float32(), B: rand.Float32(), A: 1,
 				Width:  rand.Float32()*(maxWidth-minWidth) + minWidth,
 				Height: rand.Float32()*(maxWidth-minWidth) + minWidth,

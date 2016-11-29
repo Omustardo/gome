@@ -22,6 +22,10 @@ var (
 	// of those points in the rectTriangleBuffer.
 	rectTriangleIndexBuffer  gl.Buffer
 	rectLineStripIndexBuffer gl.Buffer
+
+	// Texture coordinate buffer maps points in a rectangle to points on a texture. Note it assumes all textures match the
+	// rectangle perfectly, so there will be distortion if you try to use a square texture with a rectangle.
+	rectTextureCoordBuffer gl.Buffer
 )
 
 func loadRectangles() {
@@ -46,7 +50,21 @@ func loadRectangles() {
 	// For drawing 4 line segments, must specify five points. (gl.LINE_LOOP)
 	rectLineStripIndexBuffer = gl.CreateBuffer()
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, rectLineStripIndexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, 0, 1, 2, 3, 0), gl.STATIC_DRAW) // TODO: test leaving out the last index - does it automatically connect back? probably not.
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, 0, 1, 2, 3, 0), gl.STATIC_DRAW)
+
+	rectTextureCoordBuffer = gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, rectTextureCoordBuffer)
+	textureCoordinates := bytecoder.Float32(binary.LittleEndian,
+		0.0, 1.0,
+		0.0, 0.0,
+		1.0, 0.0,
+		1.0, 1.0,
+		//0.0, 0.0, // @@@
+		//1.0, 0.0,
+		//1.0, 1.0,
+		//0.0, 1.0,
+	)
+	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
 }
 
 type Rect struct {
@@ -93,6 +111,31 @@ func (r *Rect) DrawFilled() {
 	gl.DrawElements(gl.TRIANGLES, 6 /* num vertices for 2 triangles */, gl.UNSIGNED_SHORT, 0)
 
 	gl.DisableVertexAttribArray(shader.Basic.VertexPositionAttrib)
+}
+
+func (r *Rect) DrawTextured(texture gl.Texture) {
+	shader.Texture.SetDefaults()
+	shader.Texture.SetColor(r.R, r.G, r.B, r.A)
+	shader.Texture.SetRotationMatrix2D(r.Angle)
+	shader.Texture.SetScaleMatrix(r.Width, r.Height, 0)
+	shader.Texture.SetTranslationMatrix(r.X, r.Y, 0)
+	shader.Texture.SetTextureSampler(texture)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rectTextureCoordBuffer)
+	gl.VertexAttribPointer(shader.Texture.TextureCoordAttrib, 2, gl.FLOAT, false, 0, 0)
+	gl.EnableVertexAttribArray(shader.Texture.TextureCoordAttrib)
+
+	// Bind the array buffer before binding the element buffer, so it knows which array it's referencing.
+	gl.BindBuffer(gl.ARRAY_BUFFER, rectVertexBuffer)
+	// Bind element buffer so it is the target for DrawElements().
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, rectTriangleIndexBuffer)
+
+	gl.VertexAttribPointer(shader.Texture.VertexPositionAttrib, 3 /* floats per vertex */, gl.FLOAT, false, 0, 0) // glVertexAttribPointer uses the buffer object that was bound to GL_ARRAY_BUFFER at the moment the function was called @@@ SUPER IMPORTANT
+	gl.EnableVertexAttribArray(shader.Texture.VertexPositionAttrib)                                               // https://www.opengl.org/sdk/docs/man2/xhtml/glEnableVertexAttribArray.xml
+	gl.DrawElements(gl.TRIANGLES, 6 /* num vertices for 2 triangles */, gl.UNSIGNED_SHORT, 0)
+
+	gl.DisableVertexAttribArray(shader.Texture.TextureCoordAttrib)
+	gl.DisableVertexAttribArray(shader.Texture.VertexPositionAttrib)
 }
 
 //func DrawRectsFilled(rects []Rect) {

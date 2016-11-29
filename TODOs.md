@@ -11,7 +11,13 @@ Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
 * DirectionalCamera that follows player orientation (up on the screen is always the direction the player faces).
 * Draw with specific layers. Right now everything is based on the order of draw calls.
 * http://www.gopherjs.org/ #Performance Tips
-  * Consider switching everything to float64 as it's more efficient with gopherjs if performance is an issue.
+  * Consider switching everything to float64 as it's more efficient with gopherjs, only if web performance is an issue.
+* Look into golang benchmarks 
+  * https://golang.org/pkg/testing/
+  * https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go
+* Is there a way to get physical screen dimensions? a 1080p phone should have a different display (larger font for 
+example) compared to a desktop monitor.
+
 
 == Thread Safety
 * Mouse/keyboard handler reads and writes.
@@ -20,6 +26,7 @@ Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
 == Web
 * How to cache so the whole client doesn't need to be re-downloaded each time. Keep in mind, a new version of the client
 will require at least a partial update.
+  * This gzip utility may be handy: https://github.com/NYTimes/gziphandler
 
 == Bugs
 * Holding a key, then click and hold on the title bar, and release the key. It becomes stuck in the pressed state

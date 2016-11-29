@@ -10,7 +10,7 @@ import (
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
-const numCircleSegments = 60
+const numCircleSegments = 360
 
 var _ Shape = (*Circle)(nil)
 

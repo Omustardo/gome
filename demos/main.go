@@ -11,6 +11,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/glfw"
+	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
 	"github.com/omustardo/gome/input/keyboard"
@@ -160,6 +161,18 @@ func main() {
 	// Put the parallax info in buffers on the GPU. TODO: Consider using a single interleaved buffer. Stride and offset are annoying though, and I don't think a few extra buffers matter.
 	parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer, parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer := shape.GetParallaxBuffers(parallaxObjects)
 
+	tex, err := asset.LoadTexture("assets/sample_texture.png")
+	if err != nil {
+		log.Fatalf("error loading texture: %v", err)
+	}
+	texturedRect := shape.Rect{
+		X: 0, Y: -512,
+		Width:  256,
+		Height: 256,
+		R:      0.4, G: 0.8, B: 0.6, A: 1,
+		Angle: 0,
+	}
+
 	ticker := time.NewTicker(*frameRate)
 	gameTicker := time.NewTicker(*gametickRate)
 	debugLogTicker := time.NewTicker(*debugLogRate)
@@ -191,6 +204,7 @@ func main() {
 		pMatrix := cam.Projection(float32(w), float32(h))
 		shader.Basic.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Parallax.SetMVPMatrix(pMatrix, mvMatrix)
+		shader.Texture.SetMVPMatrix(pMatrix, mvMatrix)
 
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // TODO: Some cool graphical effects result from not clearing the screen.
@@ -218,18 +232,23 @@ func main() {
 
 		player.Draw()
 
+		texturedRect.DrawTextured(*tex)
+		texturedRect.Draw()
+
 		// Debug logging - limited to once every X seconds to avoid spam.
 		select {
 		case _, ok := <-debugLogTicker.C:
 			if ok {
 				// log.Println("location:", cam.Position())
-				// if mouseHandler.LeftPressed() {
-				// 	 log.Println("detected mouse press at", mouseHandler.Position)
+				// if mouse.Handler.LeftPressed() {
+				//  log.Println("detected mouse press at", mouse.Handler.Position())
 				// }
 				// log.Println(fps.Handler.FPS(), "fps")
 				// log.Println(fps.Handler.DeltaTime(), "delta time")
 				// log.Println("zoom%:", cam.GetCurrentZoomPercent())
-				// log.Println("mouse screen->world:", mouseHandler.Position, cam.ScreenToWorldCoord2D(mouseHandler.Position, WindowSize))
+
+				//w, h := view.Window.GetSize()
+				//log.Println("mouse screen->world:", mouse.Handler.Position(), cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h))
 			}
 		default:
 		}

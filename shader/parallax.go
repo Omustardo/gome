@@ -17,7 +17,7 @@ const (
 attribute vec3 aPosition; // Rectangle vertices. These are the same for every rectangle.. bad.
 attribute vec2 aTranslation;
 attribute float aTranslationRatio; // Parallax objects move a percentage of the camera's position.
-attribute float aAngle; // Parallax objects move a percentage of the camera's position.
+attribute float aAngle; // in radians
 attribute vec2 aScale;
 attribute vec4 uColor;
 
@@ -30,8 +30,8 @@ uniform mat4 uPMatrix;  // Projection (transforms camera's view into screen spac
 // http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(float angle) {
 		vec3 axis = vec3(0,0,1); // This must be normalized
-    float s = sin(radians(angle));
-    float c = cos(radians(angle));
+    float s = sin(angle);
+    float c = cos(angle);
     float oc = 1.0 - c;
 
     return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
