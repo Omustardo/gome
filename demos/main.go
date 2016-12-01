@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/omustardo/gome/input/mouse"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/shape"
+	"github.com/omustardo/gome/shape/cube"
 	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
@@ -71,12 +73,20 @@ func main() {
 		R:      0.8, G: 0.1, B: 0.3, A: 1,
 		Angle: 0,
 	}
-	cam := camera.NewTargetCamera(
-		player,
-		zoom.NewScrollZoom(0.25, 3,
-			func() float32 { return mouse.Handler.Scroll().Y() },
+
+	cam := &camera.TargetCamera{
+		Target:       player,
+		TargetOffset: mgl32.Vec3{0, 0, 200},
+		Up:           mgl32.Vec3{0, 1, 0},
+		Zoomer: zoom.NewScrollZoom(0.25, 3,
+			func() float32 {
+				return mouse.Handler.Scroll().Y()
+			},
 		),
-	)
+		Near: 0.1,
+		Far:  1000,
+		FOV:  45,
+	}
 
 	miscCircles := []*shape.Circle{
 		{
@@ -173,6 +183,13 @@ func main() {
 		Angle: 0,
 	}
 
+	texturedCube := cube.Cube{
+		Center:   mgl32.Vec3{0, 0, -100},
+		Dim:      mgl32.Vec3{32, 32, 32},
+		Rotation: mgl32.Vec3{},
+	}
+	rotationPerSecond := float32(math.Pi / 4)
+
 	ticker := time.NewTicker(*frameRate)
 	gameTicker := time.NewTicker(*gametickRate)
 	debugLogTicker := time.NewTicker(*debugLogRate)
@@ -186,6 +203,10 @@ func main() {
 		for _, r := range orbitingRects {
 			r.Update()
 		}
+		// Update the cube's X and Z rotation.
+		texturedCube.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
+		texturedCube.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
+
 		// Handle Input
 		ApplyInputs(player, cam)
 
@@ -201,7 +222,7 @@ func main() {
 		// Set up Model-View-Projection Matrix and send it to the shader programs.
 		mvMatrix := cam.ModelView()
 		w, h := view.Window.GetSize()
-		pMatrix := cam.Projection(float32(w), float32(h))
+		pMatrix := cam.ProjectionOrthographic(float32(w), float32(h))
 		shader.Basic.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Parallax.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Texture.SetMVPMatrix(pMatrix, mvMatrix)
@@ -230,10 +251,12 @@ func main() {
 			r.DrawFilled()
 		}
 
-		player.Draw()
-
 		texturedRect.DrawTextured(*tex)
 		texturedRect.Draw()
+
+		texturedCube.DrawTextured(*tex)
+
+		player.Draw()
 
 		// Debug logging - limited to once every X seconds to avoid spam.
 		select {

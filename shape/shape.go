@@ -11,6 +11,7 @@ import (
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/entity"
 	"github.com/omustardo/gome/shader"
+	"github.com/omustardo/gome/shape/cube"
 	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -33,6 +34,7 @@ type Shape interface {
 func LoadModels() {
 	loadRectangles()
 	loadCircles()
+	cube.Initialize()
 }
 
 var _ Shape = (*ParallaxRect)(nil)

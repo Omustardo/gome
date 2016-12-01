@@ -4,9 +4,8 @@ import "github.com/go-gl/mathgl/mgl32"
 
 type Camera interface {
 	ModelView() mgl32.Mat4
-	Projection(width, height float32) mgl32.Mat4
-	Near() float32
-	Far() float32
+	ProjectionOrthographic(width, height float32) mgl32.Mat4
+	ProjectionPerspective(width, height float32) mgl32.Mat4
 	Update()
 	Position() mgl32.Vec3
 

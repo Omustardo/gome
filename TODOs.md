@@ -1,4 +1,5 @@
 == General
+* Replace any public structs with protos. This allows for the possibility of non-go interaction.
 * Test how well the mouse and keyboard handlers deal with unusual events. 
 Try unplugging mouse/keyboard. Using multiple mice.
 * Gestures / touchpad support. Probably requires modifying goxjs/glfw
@@ -18,6 +19,8 @@ Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
 * Is there a way to get physical screen dimensions? a 1080p phone should have a different display (larger font for 
 example) compared to a desktop monitor.
 
+== Graphical
+* Add motion blur https://github.com/goxjs/example/tree/master/motionblur
 
 == Thread Safety
 * Mouse/keyboard handler reads and writes.
@@ -28,8 +31,25 @@ example) compared to a desktop monitor.
 will require at least a partial update.
   * This gzip utility may be handy: https://github.com/NYTimes/gziphandler
 
-== Bugs
+== Goxjs
+* support WebGL Extensions, like anisotropic filtering.
+  * In webgl, to load an extension: http://blog.tojicode.com/2012/03/anisotropic-filtering-in-webgl.html
+    ```
+    var ext = gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
+    gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, 4);
+    ```
+    while in OpenGL use glGetString to get a list of all available extensions, and then enable it:
+    https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml
+    ```
+ 	extensions := gl.GetString(gl.EXTENSIONS)
+ 	if strings.Contains(extensions, "GL_EXT_texture_filter_anisotropic") {
+ 		gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, 4)
+ 	}
+    ```
+
+== Existing Bugs
 * Holding a key, then click and hold on the title bar, and release the key. It becomes stuck in the pressed state
 since the key-release wasn't caught.
 * Scrolling is erratic in the web build. It jumps around, so it must be detecting something. I expect the values
 are just different from the 1.0 per tick on the desktop. 
+
