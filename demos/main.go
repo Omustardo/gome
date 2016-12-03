@@ -199,15 +199,16 @@ func main() {
 		keyboard.Handler.Update()
 		mouse.Handler.Update()
 
-		for _, r := range orbitingRects {
-			r.Update()
-		}
+		// Handle Input
+		ApplyInputs(player, cam)
+
 		// Update the cube's X and Z rotation.
 		texturedCube.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
 		texturedCube.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
 
-		// Handle Input
-		ApplyInputs(player, cam)
+		for _, r := range orbitingRects {
+			r.Update()
+		}
 
 		// Run game logic
 		select {

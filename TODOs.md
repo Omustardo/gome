@@ -22,6 +22,7 @@ example) compared to a desktop monitor.
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur
+* Resizing screen shouldn't cause everything to be black.
 
 == Thread Safety
 * Mouse/keyboard handler reads and writes.
