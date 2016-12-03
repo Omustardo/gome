@@ -18,6 +18,7 @@ Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
   * https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go
 * Is there a way to get physical screen dimensions? a 1080p phone should have a different display (larger font for 
 example) compared to a desktop monitor.
+* The TargetCamera's Orthographic and Perspective projections don't deal with zoom in the same fashion. P4
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur

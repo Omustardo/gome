@@ -2,11 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"math"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -20,7 +18,6 @@ import (
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/shape"
 	"github.com/omustardo/gome/shape/cube"
-	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
 )
@@ -76,7 +73,7 @@ func main() {
 
 	cam := &camera.TargetCamera{
 		Target:       player,
-		TargetOffset: mgl32.Vec3{0, 0, 200},
+		TargetOffset: mgl32.Vec3{0, 0, 500},
 		Up:           mgl32.Vec3{0, 1, 0},
 		Zoomer: zoom.NewScrollZoom(0.25, 3,
 			func() float32 {
@@ -84,8 +81,8 @@ func main() {
 			},
 		),
 		Near: 0.1,
-		Far:  1000,
-		FOV:  45,
+		Far:  10000,
+		FOV:  math.Pi / 2.0,
 	}
 
 	miscCircles := []*shape.Circle{
@@ -222,7 +219,7 @@ func main() {
 		// Set up Model-View-Projection Matrix and send it to the shader programs.
 		mvMatrix := cam.ModelView()
 		w, h := view.Window.GetSize()
-		pMatrix := cam.ProjectionOrthographic(float32(w), float32(h))
+		pMatrix := cam.ProjectionPerspective(float32(w), float32(h))
 		shader.Basic.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Parallax.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Texture.SetMVPMatrix(pMatrix, mvMatrix)
@@ -302,7 +299,7 @@ func ApplyInputs(player shape.Shape, cam camera.Camera) {
 
 	w, h := view.Window.GetSize()
 	if keyboard.Handler.JustPressed(glfw.KeySpace) {
-		util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
+		// util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
 	}
 	if mouse.Handler.LeftPressed() {
 		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())

@@ -13,6 +13,13 @@ const step = 60
 type Zoom interface {
 	// GetCurrentPercent returns the current percent zoom. Always a positive value.
 	GetCurrentPercent() float32
+
+	// Range returns the limits of zooming in and out.
+	// min is the limit of zooming out, max is the limit of zooming in.
+	// For example a min of 0.25 means objects appear to be 25% of their original size when zoomed out fully.
+	// A max of 3 means objects will appear to be 300% of their original size when fully zoomed in.
+	Range() (min, max float32)
+
 	// Update must be called every frame.
 	Update()
 }
@@ -61,6 +68,10 @@ func (z *ScrollZoom) Update() {
 		percentChange := z.percentPerScrollAmount * ticks
 		z.curr = mgl32.Clamp(z.curr+percentChange, z.Min, z.Max)
 	}
+}
+
+func (z *ScrollZoom) Range() (min, max float32) {
+	return z.Min, z.Max
 }
 
 func (z *ScrollZoom) GetCurrentPercent() float32 {

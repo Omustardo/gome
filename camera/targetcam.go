@@ -10,48 +10,31 @@ import (
 
 var _ Camera = (*TargetCamera)(nil)
 
-// TargetCamera is a camera that is always positioned at an offset from the target entity. It always looks toward that
-// entity with the provided Up vector being up.
+// TargetCamera is a camera that is always positioned at an offset from the target entity. Zoomer can modify the length
+// of the offset. The camera always looks toward the target entity with the provided Up vector being up.
 type TargetCamera struct {
 	Target entity.Entity
 	// targetOffset is where the camera is positioned in relation to the target.
 	TargetOffset mgl32.Vec3
-	Up           mgl32.Vec3
-	Near, Far    float32
-	Zoomer       zoom.Zoom
-
-	// Field of view - only matters if using ProjectionPerspective.
+	// Up is a vector pointing in the same direction as the top of the screen.
+	Up mgl32.Vec3
+	// Near and Far are the range to render entities in front of the camera. Be sure to make them small and large enough
+	// to compensate for Zoomer. For example, if your object is 100 units away and your Zoomer can zoom in to 300%,
+	// and zoom out to 25%, then the you must set Near<33.3 and Far>400 in order to always keep the target in view.
+	Near, Far float32
+	// Zoomer handles camera zoom.
+	Zoomer zoom.Zoom
+	// Field of view in radians. This only matters if using a perspective projection and can be ignored if using an orthographic projection.
 	FOV float32
 }
 
-//
-//func NewTargetCamera(target entity.Entity, targetOffset, up mgl32.Vec3, zoomer zoom.Zoom, near, far float32) (Camera, error) {
-//	if near >= far {
-//		return nil, fmt.Errorf("near(%v) >= far(%v)", near, far)
-//	}
-//	basicCam, err := NewBasicCamera(target.Center(), near, far)
-//	if err != nil {
-//		return nil, err
-//	}
-//	p := &TargetCamera{
-//		BasicCamera: basicCam,
-//		Target:      target,
-//		zoomer:      zoomer,
-//	}
-//
-//	p.Update()
-//	return p, nil
-//}
-
 func (c *TargetCamera) ModelView() mgl32.Mat4 {
-	targetPos := c.Target.Center()
-	return mgl32.LookAt(
-		targetPos.X(), targetPos.Y(), 1, // Camera Position. Always above target.
-		targetPos.X(), targetPos.Y(), 0, // Target Position.
-		0, 1, 0) // Up vector // TODO: For a camera that has Screen Up always as the direction the entity is facing, I think we just need to modify this line.
+	return mgl32.LookAtV(c.Position(), c.Target.Center(), c.Up)
 }
 
 func (c *TargetCamera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
+	// Since distance from target doesn't do a "zoom" effect in an orthographic projection, simulate one
+	// by changing how wide the view is.
 	zoomPercent := c.GetCurrentZoomPercent()
 	width /= zoomPercent
 	height /= zoomPercent
@@ -61,15 +44,7 @@ func (c *TargetCamera) ProjectionOrthographic(width, height float32) mgl32.Mat4 
 }
 
 func (c *TargetCamera) ProjectionPerspective(width, height float32) mgl32.Mat4 {
-	return mgl32.Mat4{} // TODO
-	//zoomPercent := c.GetCurrentZoomPercent()
-	//width /= zoomPercent
-	//height /= zoomPercent
-	//if c.FOV <= 0 {
-	//	log.Printf("invalid Field of View (%v). Using 45 degrees.", c.FOV)
-	//	return mgl32.Perspective(45, float32(width)/float32(height), c.Near, c.Far)
-	//}
-	//return mgl32.Perspective(c.FOV, float32(width)/float32(height), c.Near, c.Far)
+	return mgl32.Perspective(c.FOV, float32(width)/float32(height), c.Near, c.Far)
 }
 
 func (c *TargetCamera) Update() {
@@ -82,7 +57,10 @@ func (c *TargetCamera) Update() {
 }
 
 func (c *TargetCamera) Position() mgl32.Vec3 {
-	return c.Target.Center().Add(c.TargetOffset)
+	// Adjust the distance from camera to target by the amount of zoom.
+	// A zoom of 3 means everything should be 3 times as large, so the distance from target to camera should be 1/3 the default.
+	offset := c.TargetOffset.Mul(1.0 / c.GetCurrentZoomPercent())
+	return c.Target.Center().Add(offset)
 }
 
 // ScreenToWorldCoord2D returns the world coordinates of a point on the screen.
