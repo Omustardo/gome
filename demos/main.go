@@ -39,6 +39,8 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
 	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
 		log.Fatal(err)
@@ -87,17 +89,17 @@ func main() {
 
 	miscCircles := []*shape.Circle{
 		{
-			P:      mgl32.Vec3{100, 200, 0},
+			Pos:    mgl32.Vec3{100, 200, 0},
 			Radius: 20,
 			R:      0.2, G: 0.7, B: 0.5, A: 1,
 		},
 		{
-			P:      mgl32.Vec3{-200, -100, 0},
+			Pos:    mgl32.Vec3{-200, -100, 0},
 			Radius: 15,
 			R:      0.4, G: 0.9, B: 0.1, A: 1,
 		},
 		{
-			P:      mgl32.Vec3{0, 50, 0},
+			Pos:    mgl32.Vec3{0, 50, 0},
 			Radius: 35,
 			R:      1, G: 0.5, B: 0.2, A: 1,
 		},
@@ -181,7 +183,7 @@ func main() {
 	}
 
 	texturedCube := cube.Cube{
-		Center:   mgl32.Vec3{0, 0, -100},
+		Center:   mgl32.Vec3{0, 0, 0},
 		Dim:      mgl32.Vec3{32, 32, 32},
 		Rotation: mgl32.Vec3{},
 	}
@@ -248,10 +250,10 @@ func main() {
 			r.DrawFilled()
 		}
 
-		texturedRect.DrawTextured(*tex)
+		texturedRect.DrawTextured(tex)
 		texturedRect.Draw()
 
-		texturedCube.DrawTextured(*tex)
+		texturedCube.DrawTextured(tex)
 
 		player.Draw()
 

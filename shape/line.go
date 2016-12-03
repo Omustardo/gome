@@ -11,6 +11,14 @@ import (
 
 var _ Shape = (*Line)(nil)
 
+var (
+	lineBuffer gl.Buffer
+)
+
+func loadLines() {
+	lineBuffer = gl.CreateBuffer()
+}
+
 type Line struct {
 	P1, P2     mgl32.Vec3
 	R, G, B, A float32
@@ -40,8 +48,7 @@ func (l *Line) Center() mgl32.Vec3 {
 // It's fine for drawing a few lines, but for many lines use a batched call.
 func (l *Line) Draw() {
 	shader.Basic.SetDefaults()
-	vbuffer := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, lineBuffer)
 	vertices := bytecoder.Float32(binary.LittleEndian,
 		l.P1[0], l.P1[1], l.P1[2],
 		l.P2[0], l.P2[1], l.P2[2],
@@ -57,7 +64,6 @@ func (l *Line) Draw() {
 	gl.DrawArrays(gl.LINES, 0, itemCount)
 
 	gl.DisableVertexAttribArray(shader.Basic.VertexPositionAttrib)
-	gl.DeleteBuffer(vbuffer)
 }
 
 // DrawFilled for a line is equivalent to Draw, but still required for the Shape interface.

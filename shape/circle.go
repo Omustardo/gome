@@ -44,7 +44,7 @@ func loadCircles() {
 }
 
 type Circle struct {
-	P          mgl32.Vec3
+	Pos        mgl32.Vec3
 	Radius     float32
 	R, G, B, A float32
 }
@@ -56,9 +56,9 @@ func (c *Circle) SetCenter(x, y float32) {
 	if math.IsNaN(float64(y)) {
 		y = 0
 	}
-
-	c.P[0], c.P[1] = x, y
+	c.Pos[0], c.Pos[1] = x, y
 }
+
 func (c *Circle) ModifyCenter(x, y float32) {
 	if math.IsNaN(float64(x)) {
 		x = 0
@@ -66,17 +66,18 @@ func (c *Circle) ModifyCenter(x, y float32) {
 	if math.IsNaN(float64(y)) {
 		y = 0
 	}
-	c.P[0] += x
-	c.P[1] += y
+	c.Pos[0] += x
+	c.Pos[1] += y
 }
+
 func (c *Circle) Center() mgl32.Vec3 {
-	return c.P
+	return c.Pos
 }
 
 func (c *Circle) Draw() {
 	shader.Basic.SetDefaults()
 	shader.Basic.SetColor(c.R, c.G, c.B, c.A)
-	shader.Basic.SetTranslationMatrix(c.P.X(), c.P.Y(), 0)
+	shader.Basic.SetTranslationMatrix(c.Pos.X(), c.Pos.Y(), 0)
 	shader.Basic.SetScaleMatrix(c.Radius, c.Radius, 0)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, circleLineSegmentBuffer)
@@ -93,7 +94,7 @@ func (c *Circle) Draw() {
 func (c *Circle) DrawFilled() {
 	shader.Basic.SetDefaults()
 	shader.Basic.SetColor(c.R, c.G, c.B, c.A)
-	shader.Basic.SetTranslationMatrix(c.P.X(), c.P.Y(), 0)
+	shader.Basic.SetTranslationMatrix(c.Pos.X(), c.Pos.Y(), 0)
 	shader.Basic.SetScaleMatrix(c.Radius, c.Radius, 0)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, circleTriangleSegmentBuffer)

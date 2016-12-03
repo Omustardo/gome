@@ -34,6 +34,7 @@ type Shape interface {
 func LoadModels() {
 	loadRectangles()
 	loadCircles()
+	loadLines()
 	cube.Initialize()
 }
 
@@ -188,7 +189,7 @@ func NewOrbitingRect(rect Rect, orbitCenter mgl32.Vec2, orbitRadius float32, orb
 	r := &OrbitingRect{
 		Rect: rect,
 		orbit: Circle{
-			P:      orbitCenter.Vec3(0),
+			Pos:    orbitCenter.Vec3(0),
 			Radius: orbitRadius,
 			R:      0.6, G: 0.6, B: 0.6, A: 1.0,
 		},
@@ -202,7 +203,7 @@ func NewOrbitingRect(rect Rect, orbitCenter mgl32.Vec2, orbitRadius float32, orb
 
 func (r *OrbitingRect) Update() {
 	if r.orbitTarget != nil {
-		r.orbit.P = r.orbitTarget.Center()
+		r.orbit.Pos = r.orbitTarget.Center()
 	}
 	now := util.GetTimeMillis()
 	percentRevolution := float32(now%r.revolutionSpeed) / float32(r.revolutionSpeed)
