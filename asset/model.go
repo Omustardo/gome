@@ -15,12 +15,12 @@ type Model struct {
 	VecIndices, NormalIndices, UVIndices []float32
 }
 
-// NewModel reads an OBJ file and creates a Model from its contents.
+// LoadObj creates a model from a local obj file.
 // Based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4
 func LoadObj(path string) (Model, error) {
 	fileData, err := loadFile(path)
 	if err != nil {
-		return nil, err
+		return Model{}, err
 	}
 	reader := bytes.NewBuffer(fileData)
 

@@ -61,6 +61,6 @@ func LoadTextureData(width, height int, data []uint8) gl.Texture {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.GenerateMipmap(gl.TEXTURE_2D)
-	// gl.BindTexture(gl.TEXTURE_2D, gl.Texture{Value: 0}) // in js demo, they bind to null to prevent using the wrong texture by mistake. No way to do that with structs?
+	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 	return texture
 }
