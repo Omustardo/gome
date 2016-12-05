@@ -1,4 +1,4 @@
-package shape
+package geom
 
 import (
 	"encoding/binary"
@@ -9,13 +9,11 @@ import (
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
-var _ Shape = (*Line)(nil)
-
 var (
 	lineBuffer gl.Buffer
 )
 
-func loadLines() {
+func initializeLine() {
 	lineBuffer = gl.CreateBuffer()
 }
 
@@ -24,28 +22,14 @@ type Line struct {
 	R, G, B, A float32
 }
 
-func (l *Line) SetCenter(x, y float32) {
-	center := l.Center()
-	l.P1[0] += x - center[0]
-	l.P2[0] += x - center[0]
-	l.P1[1] += y - center[1]
-	l.P2[1] += y - center[1]
-}
-func (l *Line) ModifyCenter(x, y float32) {
-	l.P1[0] += x
-	l.P2[0] += x
-	l.P1[1] += y
-	l.P2[1] += y
-}
-
 func (l *Line) Center() mgl32.Vec3 {
 	x := (l.P1[0] + l.P2[0]) / 2
 	y := (l.P1[1] + l.P2[1]) / 2
 	return mgl32.Vec3{x, y, 0}
 }
 
-// Draw draws a line. It creates and deletes a buffer on the GPU to do this, whcih is relatively expensive.
-// It's fine for drawing a few lines, but for many lines use a batched call.
+// Draw draws a line.
+// It's fine for drawing a few lines, but for many lines use a batched call. TODO: add batched line function
 func (l *Line) Draw() {
 	shader.Basic.SetDefaults()
 	gl.BindBuffer(gl.ARRAY_BUFFER, lineBuffer)
@@ -66,7 +50,7 @@ func (l *Line) Draw() {
 	gl.DisableVertexAttribArray(shader.Basic.VertexPositionAttrib)
 }
 
-// DrawFilled for a line is equivalent to Draw, but still required for the Shape interface.
-func (l *Line) DrawFilled() {
-	l.Draw()
-}
+//// DrawFilled for a line is equivalent to Draw, but still required for the Shape interface.
+//func (l *Line) DrawFilled() {
+//	l.DrawWireframe()
+//}

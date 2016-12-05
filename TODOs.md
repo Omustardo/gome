@@ -18,11 +18,17 @@ Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
   * https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go
 * Is there a way to get physical screen dimensions? a 1080p phone should have a different display (larger font for 
 example) compared to a desktop monitor.
-* The TargetCamera's Orthographic and Perspective projections don't deal with zoom in the same fashion. P4
+* The TargetCamera's Orthographic and Perspective projections don't deal with zoom in the same fashion. This means
+their documentation about being able to zoom in/out to certain size percentages is not accurate.
+* using gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer{}) to bind a "null" buffer at the end of each draw call would be a
+safe thing to do to prevent using the wrong buffer at some point - but BindBuffer calls are expensive.
+* gl.UseProgram() is called way too often. Keep track of current shader in my shader package so only need to call 
+ UseProgram() when it's necessary.
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur
 * Resizing screen shouldn't cause everything to be black.
+* Anisotropic filtering
 
 == Thread Safety
 * Mouse/keyboard handler reads and writes.

@@ -1,4 +1,4 @@
-package shape
+package geom
 
 import (
 	"encoding/binary"
@@ -9,7 +9,13 @@ import (
 	"golang.org/x/mobile/exp/f32"
 )
 
-var _ Shape = (*Triangle)(nil)
+var (
+	triangleBuffer gl.Buffer
+)
+
+func initializeTriangle() {
+	triangleBuffer = gl.CreateBuffer()
+}
 
 type Triangle struct {
 	P1, P2, P3 mgl32.Vec3

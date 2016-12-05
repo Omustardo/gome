@@ -1,64 +1,50 @@
-package cube
+package geom
 
 import (
 	"encoding/binary"
 
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/gome/entity"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
 var (
-	// Buffers are the float32 coordinates of two triangles (composing a 1x1 square), converted to a byte array, and
-	// stored on the GPU. The gl.Buffer here is a reference to them.
-	// This is the format required by OpenGL vertex buffers. This one buffer is used for all rectangles by modifying
-	// the Scale, Rotation, and Translation matrices in the vertex shader.
-	vertexBuffer gl.Buffer
-	// Index buffer - rather than passing a minimum of 4 points (12 floats) to define a rectangle, just pass the indices
-	// of those points in the rectTriangleBuffer.
-	indexBuffer gl.Buffer
-
-	// Texture coordinate buffer maps points in a rectangle to points on a texture. Note it assumes all textures match the
-	// rectangle perfectly, so there will be distortion if you try to use a square texture with a rectangle.
+	vertexBuffer       gl.Buffer
+	indexBuffer        gl.Buffer
 	textureCoordBuffer gl.Buffer
 )
 
-func Initialize() {
-	// Store basic vertices in a buffer.
+func initializeCube() {
+	// Store basic vertices in a buffer. This is a unit cube centered at the origin.
 	lower, upper := float32(-0.5), float32(0.5)
 	rectVertices := bytecoder.Float32(binary.LittleEndian,
-		// Front face
+		// Front
 		lower, lower, upper,
 		upper, lower, upper,
 		upper, upper, upper,
 		lower, upper, upper,
-
-		// Back face
+		// Back
 		lower, lower, lower,
 		lower, upper, lower,
 		upper, upper, lower,
 		upper, lower, lower,
-
-		// Top face
+		// Top
 		lower, upper, lower,
 		lower, upper, upper,
 		upper, upper, upper,
 		upper, upper, lower,
-
-		// Bottom face
+		// Bottom
 		lower, lower, lower,
 		upper, lower, lower,
 		upper, lower, upper,
 		lower, lower, upper,
-
-		// Right face
+		// Right
 		upper, lower, lower,
 		upper, upper, lower,
 		upper, upper, upper,
 		upper, lower, upper,
-
-		// Left face
+		// Left
 		lower, lower, lower,
 		lower, lower, upper,
 		lower, upper, upper,
@@ -69,8 +55,7 @@ func Initialize() {
 	gl.BufferData(gl.ARRAY_BUFFER, rectVertices, gl.STATIC_DRAW) // store values in buffer
 
 	// Store references to the vertices in different buffers.
-	// For drawing full triangles, must specify two sets of 3 vertices. (gl.TRIANGLES)
-	// Be careful to specify the correct order or the wrong side of the triangle will be in front and won't be rendered.
+	// These are for drawing full triangles using mode gl.TRIANGLES
 	indexBuffer = gl.CreateBuffer()
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian,
@@ -120,20 +105,19 @@ func Initialize() {
 }
 
 type Cube struct {
-	// Center coordinates of the cube.
-	Center mgl32.Vec3
-	Dim    mgl32.Vec3
-	// Angle is radians of rotation around the center.
-	Rotation   mgl32.Vec3
+	entity.Entity
+
 	R, G, B, A float32
+
+	Texture gl.Texture
 }
 
-func (c *Cube) DrawTextured(texture gl.Texture) {
+func (c *Cube) Draw() {
 	shader.Texture.SetDefaults()
 	shader.Texture.SetRotationMatrix(c.Rotation.X(), c.Rotation.Y(), c.Rotation.Z())
-	shader.Texture.SetScaleMatrix(c.Dim.X(), c.Dim.Y(), c.Dim.Z())
-	shader.Texture.SetTranslationMatrix(c.Center.X(), c.Center.Y(), c.Center.Z())
-	shader.Texture.SetTextureSampler(texture)
+	shader.Texture.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
+	shader.Texture.SetTranslationMatrix(c.Position.X(), c.Position.Y(), c.Position.Z())
+	shader.Texture.SetTextureSampler(c.Texture)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
 	gl.VertexAttribPointer(shader.Texture.TextureCoordAttrib, 2, gl.FLOAT, false, 0, 0)
