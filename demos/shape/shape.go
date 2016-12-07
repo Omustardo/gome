@@ -188,7 +188,7 @@ func (r *OrbitingRect) Update() {
 	rads := percentRevolution * 2 * math.Pi
 	offset := mgl32.Vec3{float32(math.Cos(float64(rads))), float32(math.Sin(float64(rads))), 0}.Mul(r.orbit.Scale[0]) // TODO: use multiple scale dimensions (essentially the radius) to have elliptical orbits
 	x, y, _ := r.orbit.Center().Add(offset).Elem()
-	r.SetCenter(x, y)
+	r.SetCenter(x, y, 0)
 
 	// Elliptical orbit calculation: http://math.stackexchange.com/questions/22064/calculating-a-point-that-lies-on-an-ellipse-given-an-angle
 	//a, b := float64(r.orbit.Scale[0]), float64(r.orbit.Scale[1])

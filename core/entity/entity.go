@@ -2,7 +2,11 @@
 // Anything that lives in the game world should embed Entity.
 package entity
 
-import "github.com/go-gl/mathgl/mgl32"
+import (
+	"math"
+
+	"github.com/go-gl/mathgl/mgl32"
+)
 
 type Entity struct {
 	// Center coordinates of the entity.
@@ -20,7 +24,29 @@ func (e *Entity) Center() mgl32.Vec3 {
 	return e.Position
 }
 
+func (e *Entity) SetCenter(x, y, z float32) {
+	e.Position[0] = validFloat32(x)
+	e.Position[1] = validFloat32(y)
+}
+
+func (e *Entity) ModifyCenter(x, y float32) {
+	e.Position[0] += validFloat32(x)
+	e.Position[1] += validFloat32(y)
+}
+
 // Target has a center. If something only needs access to an entity's position, pass it as a Target.
 type Target interface {
 	Center() mgl32.Vec3
+}
+
+// validFloat32 checks for values that wouldn't exist in the coordinate system of the game world and returns
+// zero in those cases, or the input if there isn't an issue.
+// This could easily occur in practice when normalizing a vector. If the vector is length zero, then normalizing it
+// makes it a vector of NaN values.
+func validFloat32(x float32) float32 {
+	x64 := float64(x)
+	if math.IsNaN(x64) || math.IsInf(x64, 0) {
+		return 0
+	}
+	return x
 }

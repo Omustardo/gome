@@ -36,7 +36,7 @@ func init() {
 	}
 }
 
-// DrawXYZAxes is a utility function that simply draws the three basic X,Y,Z axes
+// DrawXYZAxes is a utility function that draws the three basic X,Y,Z axes colored red, green, and blue respectively.
 func DrawXYZAxes() {
 	xAxis.Draw()
 	yAxis.Draw()

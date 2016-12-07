@@ -2,7 +2,6 @@ package geom
 
 import (
 	"encoding/binary"
-	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
@@ -46,24 +45,6 @@ func initializeCircle() {
 type Circle struct {
 	entity.Entity
 	drawable.Drawable
-}
-
-func (c *Circle) SetCenter(x, y float32) {
-	if math.IsNaN(float64(x)) {
-		x = 0
-	}
-	if math.IsNaN(float64(y)) {
-		y = 0
-	}
-	c.Position[0], c.Position[1] = x, y
-}
-
-func (c *Circle) ModifyCenter(x, y float32) {
-	c.SetCenter(x+c.Position[0], y+c.Position[1]) // TODO: z + c.Position[2]
-}
-
-func (c *Circle) Center() mgl32.Vec3 {
-	return c.Position
 }
 
 func (c *Circle) DrawWireframe() {

@@ -2,7 +2,6 @@ package geom
 
 import (
 	"encoding/binary"
-	"math"
 
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/core/drawable"
@@ -127,26 +126,4 @@ func (r *Rect) DrawTextured(texture gl.Texture) {
 
 	gl.DisableVertexAttribArray(shader.Texture.TextureCoordAttrib)
 	gl.DisableVertexAttribArray(shader.Texture.VertexPositionAttrib)
-}
-
-func (r *Rect) SetCenter(x, y float32) {
-	if math.IsNaN(float64(x)) {
-		x = 0
-	}
-	if math.IsNaN(float64(y)) {
-		y = 0
-	}
-	r.Position[0] = x
-	r.Position[1] = y
-}
-
-func (r *Rect) ModifyCenter(x, y float32) {
-	if math.IsNaN(float64(x)) {
-		x = 0
-	}
-	if math.IsNaN(float64(y)) {
-		y = 0
-	}
-	r.Position[0] += x
-	r.Position[1] += y
 }

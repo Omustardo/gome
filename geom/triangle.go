@@ -10,9 +10,7 @@ import (
 	"golang.org/x/mobile/exp/f32"
 )
 
-var (
-	triangleBuffer gl.Buffer
-)
+var triangleBuffer gl.Buffer
 
 func initializeTriangle() {
 	triangleBuffer = gl.CreateBuffer()
@@ -64,8 +62,7 @@ func (t *Triangle) DrawFilled() {
 		t.P3.X(), t.P3.Y(), t.P3.Z(),
 	)
 
-	vbuffer := gl.CreateBuffer()                             // Generate buffer and returns a reference to it. https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenBuffers.xml
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbuffer)                  // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
+	gl.BindBuffer(gl.ARRAY_BUFFER, triangleBuffer)           // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
 	gl.BufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW) // store values in buffer
 
 	itemSize := 3                                                 // because the points consist of 3 floats
@@ -76,5 +73,4 @@ func (t *Triangle) DrawFilled() {
 	gl.DrawArrays(gl.TRIANGLES, 0, itemCount)
 
 	gl.DisableVertexAttribArray(shader.Basic.VertexPositionAttrib)
-	gl.DeleteBuffer(vbuffer)
 }
