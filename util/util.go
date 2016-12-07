@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fmt"
+	"math/rand"
 )
 
 // Why is this not in the standard time library? Am I missing something?
@@ -36,4 +37,8 @@ func FlipImageVertically(img image.Image) error {
 		return fmt.Errorf("unknown image type: %T", img)
 	}
 	return nil
+}
+
+func RandUint8() uint8 {
+	return uint8(rand.Uint32() % 256)
 }

@@ -5,7 +5,8 @@ import (
 	"math"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/entity"
+	"github.com/omustardo/gome/core/drawable"
+	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -63,12 +64,12 @@ func initializeRect() {
 
 type Rect struct {
 	entity.Entity
-	R, G, B, A float32
+	drawable.Drawable
 }
 
 func (r *Rect) Draw() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(r.R, r.G, r.B, r.A)
+	shader.Basic.SetColor(r.Color.R, r.Color.G, r.Color.B, r.Color.A)
 	shader.Basic.SetRotationMatrix2D(r.Rotation.Z())
 	shader.Basic.SetScaleMatrix(r.Scale[0], r.Scale[1], r.Scale[2])
 	shader.Basic.SetTranslationMatrix(r.Position.X(), r.Position.Y(), r.Position.Z())
@@ -86,7 +87,7 @@ func (r *Rect) Draw() {
 
 func (r *Rect) DrawFilled() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(r.R, r.G, r.B, r.A)
+	shader.Basic.SetColor(r.Color.R, r.Color.G, r.Color.B, r.Color.A)
 	shader.Basic.SetRotationMatrix2D(r.Rotation.Z())
 	shader.Basic.SetScaleMatrix(r.Scale[0], r.Scale[1], r.Scale[2])
 	shader.Basic.SetTranslationMatrix(r.Position.X(), r.Position.Y(), r.Position.Z())
@@ -105,7 +106,7 @@ func (r *Rect) DrawFilled() {
 
 func (r *Rect) DrawTextured(texture gl.Texture) {
 	shader.Texture.SetDefaults()
-	shader.Texture.SetColor(r.R, r.G, r.B, r.A)
+	shader.Texture.SetColor(r.Color.R, r.Color.G, r.Color.B, r.Color.A)
 	shader.Texture.SetRotationMatrix2D(r.Rotation.Z())
 	shader.Texture.SetScaleMatrix(r.Scale[0], r.Scale[1], r.Scale[2])
 	shader.Texture.SetTranslationMatrix(r.Position.X(), r.Position.Y(), r.Position.Z())

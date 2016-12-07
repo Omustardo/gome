@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/shader"
 	"golang.org/x/mobile/exp/f32"
 )
@@ -19,7 +20,7 @@ func initializeTriangle() {
 
 type Triangle struct {
 	P1, P2, P3 mgl32.Vec3
-	R, G, B, A float32
+	drawable.Drawable
 }
 
 func (t *Triangle) SetCenter(x, y float32) {
@@ -54,7 +55,7 @@ func (t *Triangle) Draw() {
 
 func (t *Triangle) DrawFilled() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(t.R, t.G, t.B, t.A)
+	shader.Basic.SetColor(t.Color.R, t.Color.G, t.Color.B, t.Color.A)
 
 	// NOTE: Be careful of using len(vertices). It's NOT an array of floats - it's an array of bytes.
 	vertices := f32.Bytes(binary.LittleEndian,

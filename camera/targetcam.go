@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/omustardo/gome/camera/zoom"
-	"github.com/omustardo/gome/entity"
+	"github.com/omustardo/gome/core/entity"
 )
 
 var _ Camera = (*TargetCamera)(nil)

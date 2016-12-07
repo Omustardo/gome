@@ -6,7 +6,8 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/entity"
+	"github.com/omustardo/gome/core/drawable"
+	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -44,7 +45,7 @@ func initializeCircle() {
 
 type Circle struct {
 	entity.Entity
-	R, G, B, A float32
+	drawable.Drawable
 }
 
 func (c *Circle) SetCenter(x, y float32) {
@@ -67,7 +68,7 @@ func (c *Circle) Center() mgl32.Vec3 {
 
 func (c *Circle) DrawWireframe() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(c.R, c.G, c.B, c.A)
+	shader.Basic.SetColor(c.Color.R, c.Color.G, c.Color.B, c.Color.A)
 	shader.Basic.SetTranslationMatrix(c.Position.X(), c.Position.Y(), c.Position.Z())
 	shader.Basic.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
 
@@ -84,7 +85,7 @@ func (c *Circle) DrawWireframe() {
 
 func (c *Circle) DrawFilled() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(c.R, c.G, c.B, c.A)
+	shader.Basic.SetColor(c.Color.R, c.Color.G, c.Color.B, c.Color.A)
 	shader.Basic.SetTranslationMatrix(c.Position.X(), c.Position.Y(), 0)
 	shader.Basic.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
 

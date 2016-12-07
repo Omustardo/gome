@@ -7,14 +7,17 @@ import (
 	"os"
 	"time"
 
+	"image/color"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/glfw"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
+	"github.com/omustardo/gome/core/drawable"
+	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/demos/shape"
-	"github.com/omustardo/gome/entity"
 	"github.com/omustardo/gome/geom"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
@@ -73,7 +76,9 @@ func main() {
 			Scale:    mgl32.Vec3{100, 100},
 			Rotation: mgl32.Vec3{},
 		},
-		R: 0.8, G: 0.1, B: 0.3, A: 1,
+		Drawable: drawable.Drawable{
+			Color: &color.RGBA{200, 25, 75, 255},
+		},
 	}
 
 	cam := &camera.TargetCamera{
@@ -97,7 +102,9 @@ func main() {
 				Scale:    mgl32.Vec3{20, 20, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			R: 0.2, G: 0.7, B: 0.5, A: 1,
+			Drawable: drawable.Drawable{
+				Color: &color.RGBA{50, 175, 125, 255},
+			},
 		},
 		{
 			Entity: entity.Entity{
@@ -105,7 +112,9 @@ func main() {
 				Scale:    mgl32.Vec3{15, 15, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			R: 0.4, G: 0.9, B: 0.1, A: 1,
+			Drawable: drawable.Drawable{
+				Color: &color.RGBA{100, 225, 25, 255},
+			},
 		},
 		{
 			Entity: entity.Entity{
@@ -113,7 +122,9 @@ func main() {
 				Scale:    mgl32.Vec3{35, 35, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			R: 1, G: 0.5, B: 0.2, A: 1,
+			Drawable: drawable.Drawable{
+				Color: &color.RGBA{255, 125, 50, 255},
+			},
 		},
 	}
 
@@ -123,7 +134,9 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{100, 100},
 				},
-				R: 0.3, G: 0.1, B: 0.9, A: 1,
+				Drawable: drawable.Drawable{
+					Color: &color.RGBA{75, 25, 225, 255},
+				},
 			},
 			mgl32.Vec2{250, 380}, // Center of the orbit
 			350,                  // Orbit radius // TODO: Allow elliptical orbits.
@@ -136,7 +149,9 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{80, 55},
 				},
-				R: 0.1, G: 0.4, B: 0.9, A: 1,
+				Drawable: drawable.Drawable{
+					Color: &color.RGBA{25, 100, 225, 255},
+				},
 			},
 			mgl32.Vec2{-400, -30}, // Center of the orbit
 			900, // Orbit radius // TODO: Allow elliptical orbits.
@@ -149,7 +164,9 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{256, 256},
 				},
-				R: 0.8, G: 0.1, B: 0.2, A: 1,
+				Drawable: drawable.Drawable{
+					Color: &color.RGBA{200, 25, 50, 255},
+				},
 			},
 			mgl32.Vec2{-1500, 800}, // Center of the orbit
 			800, // Orbit radius // TODO: Allow elliptical orbits.
@@ -164,7 +181,9 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{128, 128},
 				},
-				R: 0.4, G: 0.4, B: 0.6, A: 1,
+				Drawable: drawable.Drawable{
+					Color: &color.RGBA{100, 100, 150, 255},
+				},
 			},
 			mgl32.Vec2{0, 0}, // Center of the orbit
 			400,              // Orbit radius // TODO: Allow elliptical orbits.
@@ -191,7 +210,9 @@ func main() {
 			Position: mgl32.Vec3{0, -512},
 			Scale:    mgl32.Vec3{256, 256},
 		},
-		R: 0.4, G: 0.8, B: 0.6, A: 1,
+		Drawable: drawable.Drawable{
+			Color: &color.RGBA{100, 200, 150, 255},
+		},
 	}
 
 	texturedCube := geom.Cube{
@@ -200,7 +221,9 @@ func main() {
 			Scale:    mgl32.Vec3{32, 32, 32},
 			Rotation: mgl32.Vec3{},
 		},
-		Texture: tex,
+		Drawable: drawable.Drawable{
+			Texture: &tex,
+		},
 	}
 	rotationPerSecond := float32(math.Pi / 4)
 

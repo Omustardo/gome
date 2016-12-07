@@ -1,0 +1,1 @@
+The core folder contains the most basic interfaces and structs which are implemented by, or embedded in, most other structs.

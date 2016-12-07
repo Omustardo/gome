@@ -101,7 +101,7 @@ func setupTextureShader() error {
 
 func (s *texture) SetDefaults() {
 	gl.UseProgram(s.Program)
-	s.SetColor(1, 0.1, 1, 1) // Default to a bright purple.
+	s.SetColor(255, 25, 255, 255) // Default to a bright purple.
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
 	s.SetScaleMatrix(1, 1, 1)
@@ -155,17 +155,7 @@ func (s *texture) SetTextureSampler(texture gl.Texture) {
 
 }
 
-func (s *texture) SetColor(r, g, b, a float32) {
+func (s *texture) SetColor(r, g, b, a uint8) {
 	gl.UseProgram(s.Program)
-	// OpenGL is supposed to clamp automatically, but I haven't found the GL ES documentation that actually states that.
-	clamp := func(x float32) float32 {
-		if x > 1 {
-			return 1
-		}
-		if x < 0 {
-			return 0
-		}
-		return x
-	}
-	gl.Uniform4f(s.colorUniform, clamp(r), clamp(g), clamp(b), clamp(a))
+	gl.Uniform4f(s.colorUniform, float32(r)/255.0, float32(g)/255.0, float32(b)/255.0, float32(a)/255.0)
 }

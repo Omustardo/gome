@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -18,8 +19,8 @@ func initializeLine() {
 }
 
 type Line struct {
-	P1, P2     mgl32.Vec3
-	R, G, B, A float32
+	P1, P2 mgl32.Vec3
+	drawable.Drawable
 }
 
 func (l *Line) Center() mgl32.Vec3 {
@@ -44,7 +45,7 @@ func (l *Line) Draw() {
 	itemCount := 2                                                // 2 points
 	gl.VertexAttribPointer(shader.Basic.VertexPositionAttrib, itemSize, gl.FLOAT, false, 0, 0)
 
-	shader.Basic.SetColor(l.R, l.G, l.B, l.A)
+	shader.Basic.SetColor(l.Color.R, l.Color.G, l.Color.B, l.Color.A)
 	gl.DrawArrays(gl.LINES, 0, itemCount)
 
 	gl.DisableVertexAttribArray(shader.Basic.VertexPositionAttrib)

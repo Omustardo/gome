@@ -6,10 +6,13 @@ import (
 
 	"math"
 
+	"image/color"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/camera"
-	"github.com/omustardo/gome/entity"
+	"github.com/omustardo/gome/core/drawable"
+	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/geom"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
@@ -51,7 +54,9 @@ func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSp
 					Scale:    mgl32.Vec3{rand.Float32()*(maxWidth-minWidth) + minWidth, rand.Float32()*(maxWidth-minWidth) + minWidth, 0},
 					Rotation: mgl32.Vec3{0, 0, rand.Float32() * 2 * math.Pi},
 				},
-				R: rand.Float32(), G: rand.Float32(), B: rand.Float32(), A: 1,
+				Drawable: drawable.Drawable{
+					Color: &color.RGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255},
+				},
 			},
 			Target:           target,
 			TranslationRatio: rand.Float32()*(maxSpeedRatio-minSpeedRatio) + minSpeedRatio,
@@ -81,7 +86,7 @@ func GetParallaxBuffers(arr []ParallaxRect) (parallaxPositionBuffer, parallaxTra
 			transRatioData = append(transRatioData, rect.TranslationRatio)
 			angleData = append(angleData, rect.Rotation.Z())
 			scaleData = append(scaleData, rect.Scale.X(), rect.Scale.Y())
-			colorData = append(colorData, rect.R, rect.G, rect.B, rect.A)
+			colorData = append(colorData, float32(rect.Color.R)/255, float32(rect.Color.G)/255, float32(rect.Color.B)/255, float32(rect.Color.A)/255)
 		}
 	}
 	parallaxPositionBuffer = gl.CreateBuffer()
@@ -162,7 +167,9 @@ func NewOrbitingRect(rect geom.Rect, orbitCenter mgl32.Vec2, orbitRadius float32
 				Scale:    mgl32.Vec3{orbitRadius, orbitRadius, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			R: 0.6, G: 0.6, B: 0.6, A: 1.0,
+			Drawable: drawable.Drawable{
+				Color: &color.RGBA{140, 140, 140, 255},
+			},
 		},
 		orbitTarget:     orbitTarget,
 		revolutionSpeed: revolutionSpeed,

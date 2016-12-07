@@ -1,7 +1,10 @@
 package util
 
 import (
+	"image/color"
+
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/geom"
 )
 
@@ -13,17 +16,23 @@ func init() {
 	xAxis = &geom.Line{
 		P1: mgl32.Vec3{-axisLength, 0, 0},
 		P2: mgl32.Vec3{axisLength, 0, 0},
-		R:  1, G: 0, B: 0, A: 1,
+		Drawable: drawable.Drawable{
+			Color: &color.RGBA{255, 0, 0, 255},
+		},
 	}
 	yAxis = &geom.Line{
 		P1: mgl32.Vec3{0, -axisLength, 0},
 		P2: mgl32.Vec3{0, axisLength, 0},
-		R:  0, G: 1, B: 0, A: 1,
+		Drawable: drawable.Drawable{
+			Color: &color.RGBA{0, 255, 0, 255},
+		},
 	}
 	zAxis = &geom.Line{
 		P1: mgl32.Vec3{0, 0, -axisLength},
 		P2: mgl32.Vec3{0, 0, axisLength},
-		R:  0, G: 0, B: 1, A: 1,
+		Drawable: drawable.Drawable{
+			Color: &color.RGBA{0, 0, 255, 255},
+		},
 	}
 }
 
