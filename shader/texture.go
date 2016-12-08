@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"image/color"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/gl/glutil"
@@ -101,7 +103,7 @@ func setupTextureShader() error {
 
 func (s *texture) SetDefaults() {
 	gl.UseProgram(s.Program)
-	s.SetColor(255, 25, 255, 255) // Default to a bright purple.
+	s.SetColor(&color.RGBA{255, 25, 255, 255}) // Default to a bright purple.
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
 	s.SetScaleMatrix(1, 1, 1)
@@ -155,7 +157,10 @@ func (s *texture) SetTextureSampler(texture gl.Texture) {
 
 }
 
-func (s *texture) SetColor(r, g, b, a uint8) {
+func (s *texture) SetColor(color *color.RGBA) {
 	gl.UseProgram(s.Program)
-	gl.Uniform4f(s.colorUniform, float32(r)/255.0, float32(g)/255.0, float32(b)/255.0, float32(a)/255.0)
+	if color == nil {
+		gl.Uniform4f(s.colorUniform, 1, 1, 1, 1)
+	}
+	gl.Uniform4f(s.colorUniform, float32(color.R)/255.0, float32(color.G)/255.0, float32(color.B)/255.0, float32(color.A)/255.0)
 }

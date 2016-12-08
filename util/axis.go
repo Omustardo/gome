@@ -16,21 +16,21 @@ func init() {
 	xAxis = &geom.Line{
 		P1: mgl32.Vec3{-axisLength, 0, 0},
 		P2: mgl32.Vec3{axisLength, 0, 0},
-		Drawable: drawable.Drawable{
+		Attributes: drawable.Attributes{
 			Color: &color.RGBA{255, 0, 0, 255},
 		},
 	}
 	yAxis = &geom.Line{
 		P1: mgl32.Vec3{0, -axisLength, 0},
 		P2: mgl32.Vec3{0, axisLength, 0},
-		Drawable: drawable.Drawable{
+		Attributes: drawable.Attributes{
 			Color: &color.RGBA{0, 255, 0, 255},
 		},
 	}
 	zAxis = &geom.Line{
 		P1: mgl32.Vec3{0, 0, -axisLength},
 		P2: mgl32.Vec3{0, 0, axisLength},
-		Drawable: drawable.Drawable{
+		Attributes: drawable.Attributes{
 			Color: &color.RGBA{0, 0, 255, 255},
 		},
 	}

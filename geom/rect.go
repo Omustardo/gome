@@ -63,12 +63,12 @@ func initializeRect() {
 
 type Rect struct {
 	entity.Entity
-	drawable.Drawable
+	drawable.Attributes
 }
 
 func (r *Rect) Draw() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(r.Color.R, r.Color.G, r.Color.B, r.Color.A)
+	shader.Basic.SetColor(r.Color)
 	shader.Basic.SetRotationMatrix2D(r.Rotation.Z())
 	shader.Basic.SetScaleMatrix(r.Scale[0], r.Scale[1], r.Scale[2])
 	shader.Basic.SetTranslationMatrix(r.Position.X(), r.Position.Y(), r.Position.Z())
@@ -86,7 +86,7 @@ func (r *Rect) Draw() {
 
 func (r *Rect) DrawFilled() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(r.Color.R, r.Color.G, r.Color.B, r.Color.A)
+	shader.Basic.SetColor(r.Color)
 	shader.Basic.SetRotationMatrix2D(r.Rotation.Z())
 	shader.Basic.SetScaleMatrix(r.Scale[0], r.Scale[1], r.Scale[2])
 	shader.Basic.SetTranslationMatrix(r.Position.X(), r.Position.Y(), r.Position.Z())
@@ -105,7 +105,7 @@ func (r *Rect) DrawFilled() {
 
 func (r *Rect) DrawTextured(texture gl.Texture) {
 	shader.Texture.SetDefaults()
-	shader.Texture.SetColor(r.Color.R, r.Color.G, r.Color.B, r.Color.A)
+	shader.Texture.SetColor(r.Color)
 	shader.Texture.SetRotationMatrix2D(r.Rotation.Z())
 	shader.Texture.SetScaleMatrix(r.Scale[0], r.Scale[1], r.Scale[2])
 	shader.Texture.SetTranslationMatrix(r.Position.X(), r.Position.Y(), r.Position.Z())

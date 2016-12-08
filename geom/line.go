@@ -20,7 +20,7 @@ func initializeLine() {
 
 type Line struct {
 	P1, P2 mgl32.Vec3
-	drawable.Drawable
+	drawable.Attributes
 }
 
 func (l *Line) Center() mgl32.Vec3 {
@@ -45,7 +45,7 @@ func (l *Line) Draw() {
 	itemCount := 2                                                // 2 points
 	gl.VertexAttribPointer(shader.Basic.VertexPositionAttrib, itemSize, gl.FLOAT, false, 0, 0)
 
-	shader.Basic.SetColor(l.Color.R, l.Color.G, l.Color.B, l.Color.A)
+	shader.Basic.SetColor(l.Color)
 	gl.DrawArrays(gl.LINES, 0, itemCount)
 
 	gl.DisableVertexAttribArray(shader.Basic.VertexPositionAttrib)

@@ -107,7 +107,7 @@ func initializeCube() {
 
 type Cube struct {
 	entity.Entity
-	drawable.Drawable
+	drawable.Attributes
 }
 
 func (c *Cube) Draw() {

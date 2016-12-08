@@ -76,7 +76,7 @@ func main() {
 			Scale:    mgl32.Vec3{100, 100},
 			Rotation: mgl32.Vec3{},
 		},
-		Drawable: drawable.Drawable{
+		Attributes: drawable.Attributes{
 			Color: &color.RGBA{200, 25, 75, 255},
 		},
 	}
@@ -102,7 +102,7 @@ func main() {
 				Scale:    mgl32.Vec3{20, 20, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Drawable: drawable.Drawable{
+			Attributes: drawable.Attributes{
 				Color: &color.RGBA{50, 175, 125, 255},
 			},
 		},
@@ -112,7 +112,7 @@ func main() {
 				Scale:    mgl32.Vec3{15, 15, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Drawable: drawable.Drawable{
+			Attributes: drawable.Attributes{
 				Color: &color.RGBA{100, 225, 25, 255},
 			},
 		},
@@ -122,7 +122,7 @@ func main() {
 				Scale:    mgl32.Vec3{35, 35, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Drawable: drawable.Drawable{
+			Attributes: drawable.Attributes{
 				Color: &color.RGBA{255, 125, 50, 255},
 			},
 		},
@@ -134,7 +134,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{100, 100},
 				},
-				Drawable: drawable.Drawable{
+				Attributes: drawable.Attributes{
 					Color: &color.RGBA{75, 25, 225, 255},
 				},
 			},
@@ -149,7 +149,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{80, 55},
 				},
-				Drawable: drawable.Drawable{
+				Attributes: drawable.Attributes{
 					Color: &color.RGBA{25, 100, 225, 255},
 				},
 			},
@@ -164,7 +164,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{256, 256},
 				},
-				Drawable: drawable.Drawable{
+				Attributes: drawable.Attributes{
 					Color: &color.RGBA{200, 25, 50, 255},
 				},
 			},
@@ -181,7 +181,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{128, 128},
 				},
-				Drawable: drawable.Drawable{
+				Attributes: drawable.Attributes{
 					Color: &color.RGBA{100, 100, 150, 255},
 				},
 			},
@@ -210,7 +210,7 @@ func main() {
 			Position: mgl32.Vec3{0, -512},
 			Scale:    mgl32.Vec3{256, 256},
 		},
-		Drawable: drawable.Drawable{
+		Attributes: drawable.Attributes{
 			Color: &color.RGBA{100, 200, 150, 255},
 		},
 	}
@@ -221,7 +221,7 @@ func main() {
 			Scale:    mgl32.Vec3{32, 32, 32},
 			Rotation: mgl32.Vec3{},
 		},
-		Drawable: drawable.Drawable{
+		Attributes: drawable.Attributes{
 			Texture: &tex,
 		},
 	}

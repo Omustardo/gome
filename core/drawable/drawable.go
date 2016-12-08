@@ -6,7 +6,13 @@ import (
 	"github.com/goxjs/gl"
 )
 
-type Drawable struct {
+type Attributes struct {
 	Color   *color.RGBA
 	Texture *gl.Texture
+}
+
+type Drawable interface {
+	// VBO() *gl.Buffer
+	// Attributes() Attributes
+	// Entity() entity.Entity
 }

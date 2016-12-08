@@ -44,12 +44,12 @@ func initializeCircle() {
 
 type Circle struct {
 	entity.Entity
-	drawable.Drawable
+	drawable.Attributes
 }
 
 func (c *Circle) DrawWireframe() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(c.Color.R, c.Color.G, c.Color.B, c.Color.A)
+	shader.Basic.SetColor(c.Color)
 	shader.Basic.SetTranslationMatrix(c.Position.X(), c.Position.Y(), c.Position.Z())
 	shader.Basic.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
 
@@ -66,7 +66,7 @@ func (c *Circle) DrawWireframe() {
 
 func (c *Circle) DrawFilled() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(c.Color.R, c.Color.G, c.Color.B, c.Color.A)
+	shader.Basic.SetColor(c.Color)
 	shader.Basic.SetTranslationMatrix(c.Position.X(), c.Position.Y(), 0)
 	shader.Basic.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
 

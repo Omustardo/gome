@@ -18,7 +18,7 @@ func initializeTriangle() {
 
 type Triangle struct {
 	P1, P2, P3 mgl32.Vec3
-	drawable.Drawable
+	drawable.Attributes
 }
 
 func (t *Triangle) SetCenter(x, y float32) {
@@ -53,7 +53,7 @@ func (t *Triangle) Draw() {
 
 func (t *Triangle) DrawFilled() {
 	shader.Basic.SetDefaults()
-	shader.Basic.SetColor(t.Color.R, t.Color.G, t.Color.B, t.Color.A)
+	shader.Basic.SetColor(t.Color)
 
 	// NOTE: Be careful of using len(vertices). It's NOT an array of floats - it's an array of bytes.
 	vertices := f32.Bytes(binary.LittleEndian,
