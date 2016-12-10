@@ -103,7 +103,7 @@ func setupTextureShader() error {
 
 func (s *texture) SetDefaults() {
 	gl.UseProgram(s.Program)
-	s.SetColor(&color.RGBA{255, 25, 255, 255}) // Default to a bright purple.
+	s.SetColor(&color.NRGBA{255, 25, 255, 255}) // Default to a bright purple.
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
 	s.SetScaleMatrix(1, 1, 1)
@@ -157,7 +157,7 @@ func (s *texture) SetTextureSampler(texture gl.Texture) {
 
 }
 
-func (s *texture) SetColor(color *color.RGBA) {
+func (s *texture) SetColor(color *color.NRGBA) {
 	gl.UseProgram(s.Program)
 	if color == nil {
 		gl.Uniform4f(s.colorUniform, 1, 1, 1, 1)

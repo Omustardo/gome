@@ -7,7 +7,7 @@ import (
 )
 
 type Attributes struct {
-	Color   *color.RGBA
+	Color   *color.NRGBA
 	Texture *gl.Texture
 }
 

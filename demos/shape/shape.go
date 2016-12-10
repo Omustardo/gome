@@ -55,7 +55,7 @@ func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSp
 					Rotation: mgl32.Vec3{0, 0, rand.Float32() * 2 * math.Pi},
 				},
 				Attributes: drawable.Attributes{
-					Color: &color.RGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255},
+					Color: &color.NRGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255},
 				},
 			},
 			Target:           target,
@@ -168,7 +168,7 @@ func NewOrbitingRect(rect geom.Rect, orbitCenter mgl32.Vec2, orbitRadius float32
 				Rotation: mgl32.Vec3{},
 			},
 			Attributes: drawable.Attributes{
-				Color: &color.RGBA{140, 140, 140, 255},
+				Color: &color.NRGBA{140, 140, 140, 255},
 			},
 		},
 		orbitTarget:     orbitTarget,

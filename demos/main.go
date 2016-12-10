@@ -77,7 +77,7 @@ func main() {
 			Rotation: mgl32.Vec3{},
 		},
 		Attributes: drawable.Attributes{
-			Color: &color.RGBA{200, 25, 75, 255},
+			Color: &color.NRGBA{200, 25, 75, 255},
 		},
 	}
 
@@ -103,7 +103,7 @@ func main() {
 				Rotation: mgl32.Vec3{},
 			},
 			Attributes: drawable.Attributes{
-				Color: &color.RGBA{50, 175, 125, 255},
+				Color: &color.NRGBA{50, 175, 125, 255},
 			},
 		},
 		{
@@ -113,7 +113,7 @@ func main() {
 				Rotation: mgl32.Vec3{},
 			},
 			Attributes: drawable.Attributes{
-				Color: &color.RGBA{100, 225, 25, 255},
+				Color: &color.NRGBA{100, 225, 25, 255},
 			},
 		},
 		{
@@ -123,7 +123,7 @@ func main() {
 				Rotation: mgl32.Vec3{},
 			},
 			Attributes: drawable.Attributes{
-				Color: &color.RGBA{255, 125, 50, 255},
+				Color: &color.NRGBA{255, 125, 50, 255},
 			},
 		},
 	}
@@ -135,7 +135,7 @@ func main() {
 					Scale: mgl32.Vec3{100, 100},
 				},
 				Attributes: drawable.Attributes{
-					Color: &color.RGBA{75, 25, 225, 255},
+					Color: &color.NRGBA{75, 25, 225, 255},
 				},
 			},
 			mgl32.Vec2{250, 380}, // Center of the orbit
@@ -150,7 +150,7 @@ func main() {
 					Scale: mgl32.Vec3{80, 55},
 				},
 				Attributes: drawable.Attributes{
-					Color: &color.RGBA{25, 100, 225, 255},
+					Color: &color.NRGBA{25, 100, 225, 255},
 				},
 			},
 			mgl32.Vec2{-400, -30}, // Center of the orbit
@@ -165,7 +165,7 @@ func main() {
 					Scale: mgl32.Vec3{256, 256},
 				},
 				Attributes: drawable.Attributes{
-					Color: &color.RGBA{200, 25, 50, 255},
+					Color: &color.NRGBA{200, 25, 50, 255},
 				},
 			},
 			mgl32.Vec2{-1500, 800}, // Center of the orbit
@@ -182,7 +182,7 @@ func main() {
 					Scale: mgl32.Vec3{128, 128},
 				},
 				Attributes: drawable.Attributes{
-					Color: &color.RGBA{100, 100, 150, 255},
+					Color: &color.NRGBA{100, 100, 150, 255},
 				},
 			},
 			mgl32.Vec2{0, 0}, // Center of the orbit
@@ -211,7 +211,7 @@ func main() {
 			Scale:    mgl32.Vec3{256, 256},
 		},
 		Attributes: drawable.Attributes{
-			Color: &color.RGBA{100, 200, 150, 255},
+			Color: &color.NRGBA{100, 200, 150, 255},
 		},
 	}
 

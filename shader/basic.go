@@ -90,7 +90,7 @@ func setupBasicShader() error {
 
 func (s *basic) SetDefaults() {
 	gl.UseProgram(s.Program)
-	s.SetColor(&color.RGBA{255, 25, 255, 255}) // Default to a bright purple.
+	s.SetColor(&color.NRGBA{255, 25, 255, 255}) // Default to a bright purple.
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
 	s.SetScaleMatrix(1, 1, 1)
@@ -126,7 +126,7 @@ func (s *basic) SetScaleMatrix(x, y, z float32) {
 	gl.UniformMatrix4fv(s.scaleMatrixUniform, scaleMatrix[:])
 }
 
-func (s *basic) SetColor(color *color.RGBA) {
+func (s *basic) SetColor(color *color.NRGBA) {
 	gl.UseProgram(s.Program)
 	if color == nil {
 		gl.Uniform4f(s.colorUniform, 1, 1, 1, 1)
