@@ -23,7 +23,8 @@ their documentation about being able to zoom in/out to certain size percentages 
 * using gl.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer{}) to bind a "null" buffer at the end of each draw call would be a
 safe thing to do to prevent using the wrong buffer at some point - but BindBuffer calls are expensive.
 * gl.UseProgram() is called way too often. Keep track of current shader in my shader package so only need to call 
- UseProgram() when it's necessary.
+ UseProgram() when it's necessary. Similar to using gl.BindBuffer(gl.Buffer{}), it would be safer to use 
+ gl.UseProgram(gl.Program{}), but this adds even moreexpense.
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur

@@ -1,6 +1,6 @@
 package geom
 
-// Loads models into buffers on the GPU. Must be called after glfw.Init()
+// Loads models into buffers on the GPU. glfw.Init() must be called before calling this.
 func Initialize() {
 	initializeCircle()
 	initializeCube()

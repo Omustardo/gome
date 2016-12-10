@@ -14,7 +14,7 @@ var _ Camera = (*TargetCamera)(nil)
 // of the offset. The camera always looks toward a target with the provided Up vector being up.
 type TargetCamera struct {
 	Target entity.Target
-	// targetOffset is where the camera is positioned in relation to the target.
+	// TargetOffset determines where the camera is positioned in relation to the target.
 	TargetOffset mgl32.Vec3
 	// Up is a vector pointing in the same direction as the top of the screen.
 	Up mgl32.Vec3

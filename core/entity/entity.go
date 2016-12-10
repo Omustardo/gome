@@ -27,11 +27,13 @@ func (e *Entity) Center() mgl32.Vec3 {
 func (e *Entity) SetCenter(x, y, z float32) {
 	e.Position[0] = validFloat32(x)
 	e.Position[1] = validFloat32(y)
+	e.Position[2] = validFloat32(z)
 }
 
-func (e *Entity) ModifyCenter(x, y float32) {
+func (e *Entity) ModifyCenter(x, y, z float32) {
 	e.Position[0] += validFloat32(x)
 	e.Position[1] += validFloat32(y)
+	e.Position[2] += validFloat32(z)
 }
 
 // Target has a center. If something only needs access to an entity's position, pass it as a Target.
