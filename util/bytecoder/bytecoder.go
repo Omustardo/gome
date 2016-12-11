@@ -28,7 +28,7 @@ func getByteOrder(byteOrder binary.ByteOrder) bool {
 func Float32(byteOrder binary.ByteOrder, values ...float32) []byte {
 	le := getByteOrder(byteOrder)
 	width := 4
-	b := make([]byte, 4*len(values))
+	b := make([]byte, width*len(values))
 	for i, v := range values {
 		u := math.Float32bits(v)
 		if le {
@@ -49,7 +49,7 @@ func Float32(byteOrder binary.ByteOrder, values ...float32) []byte {
 func Vec2(byteOrder binary.ByteOrder, values ...mgl32.Vec2) []byte {
 	le := getByteOrder(byteOrder)
 	width := 8
-	b := make([]byte, 8*len(values))
+	b := make([]byte, width*len(values))
 	for i, v := range values {
 		x := math.Float32bits(v[0])
 		y := math.Float32bits(v[1])
@@ -71,6 +71,45 @@ func Vec2(byteOrder binary.ByteOrder, values ...mgl32.Vec2) []byte {
 			b[width*i+5] = byte(y >> 16)
 			b[width*i+6] = byte(y >> 8)
 			b[width*i+7] = byte(y >> 0)
+		}
+	}
+	return b
+}
+
+func Vec3(byteOrder binary.ByteOrder, values ...mgl32.Vec3) []byte {
+	le := getByteOrder(byteOrder)
+	width := 12
+	b := make([]byte, width*len(values))
+	for i, v := range values {
+		x := math.Float32bits(v[0])
+		y := math.Float32bits(v[1])
+		z := math.Float32bits(v[2])
+		if le {
+			b[width*i+0] = byte(x >> 0)
+			b[width*i+1] = byte(x >> 8)
+			b[width*i+2] = byte(x >> 16)
+			b[width*i+3] = byte(x >> 24)
+			b[width*i+4] = byte(y >> 0)
+			b[width*i+5] = byte(y >> 8)
+			b[width*i+6] = byte(y >> 16)
+			b[width*i+7] = byte(y >> 24)
+			b[width*i+8] = byte(z >> 0)
+			b[width*i+9] = byte(z >> 8)
+			b[width*i+10] = byte(z >> 16)
+			b[width*i+11] = byte(z >> 24)
+		} else {
+			b[width*i+0] = byte(x >> 24)
+			b[width*i+1] = byte(x >> 16)
+			b[width*i+2] = byte(x >> 8)
+			b[width*i+3] = byte(x >> 0)
+			b[width*i+4] = byte(y >> 24)
+			b[width*i+5] = byte(y >> 16)
+			b[width*i+6] = byte(y >> 8)
+			b[width*i+7] = byte(y >> 0)
+			b[width*i+8] = byte(z >> 24)
+			b[width*i+9] = byte(z >> 16)
+			b[width*i+10] = byte(z >> 8)
+			b[width*i+11] = byte(z >> 0)
 		}
 	}
 	return b
