@@ -54,9 +54,9 @@ func Initialize(width, height int, windowName string) error {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	gl.Enable(gl.CULL_FACE) // NOTE: If triangles appear to be missing, this is probably the cause. The order that vertices are listed matters.
-	//gl.Enable(gl.DEPTH_TEST) // TODO: Enable once everything uses 3D meshes. For now just depend on draw order.
-	//gl.DepthFunc(gl.LESS) // Accept fragment if it's closer to the camera than the former one
+	gl.Enable(gl.CULL_FACE)  // NOTE: If triangles appear to be missing, this is probably the cause. The order that vertices are listed matters.
+	gl.Enable(gl.DEPTH_TEST) // TODO: Enable once everything uses 3D meshes. For now just depend on draw order.
+	gl.DepthFunc(gl.LESS)    // Accept fragment if it's closer to the camera than the former one
 
 	// Set up a callback for when the window is resized. Call it once to properly initialize.
 	framebufferSizeCallback := func(w *glfw.Window, framebufferSizeX, framebufferSizeY int) {

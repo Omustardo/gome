@@ -12,6 +12,7 @@ var (
 	Basic    *basic
 	Parallax *parallax
 	Texture  *texture
+	Model    *model
 )
 
 func Initialize() error {
@@ -19,6 +20,7 @@ func Initialize() error {
 	errs <- setupBasicShader()
 	errs <- setupParallaxShader()
 	errs <- setupTextureShader()
+	errs <- setupModelShader()
 	close(errs)
 	for err := range errs {
 		if err != nil {
@@ -28,6 +30,7 @@ func Initialize() error {
 	Basic.SetDefaults()
 	Parallax.SetDefaults()
 	Texture.SetDefaults()
+	Model.SetDefaults()
 	gl.UseProgram(Basic.Program)
 	return nil
 }

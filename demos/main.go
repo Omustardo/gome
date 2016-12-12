@@ -21,6 +21,7 @@ import (
 	"github.com/omustardo/gome/geom"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/fps"
@@ -227,6 +228,20 @@ func main() {
 	}
 	rotationPerSecond := float32(math.Pi / 4)
 
+	// Load model.
+	mesh, err := asset.LoadDAE("assets/vehicle0.dae")
+	if err != nil {
+		log.Fatal(err)
+	}
+	shipModel := &model.Model{
+		Mesh: mesh,
+		Entity: entity.Entity{
+			Position: mgl32.Vec3{0, 100, 0},
+			Rotation: mgl32.Vec3{},
+			Scale:    mgl32.Vec3{5, 5, 5},
+		},
+	}
+
 	ticker := time.NewTicker(*frameRate)
 	gameTicker := time.NewTicker(*gametickRate)
 	debugLogTicker := time.NewTicker(*debugLogRate)
@@ -244,15 +259,17 @@ func main() {
 		texturedCube.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
 		texturedCube.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
 
+		shipModel.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
+		shipModel.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
+
 		for _, r := range orbitingRects {
 			r.Update()
 		}
 
 		// Run game logic
 		select {
-		case _, ok := <-gameTicker.C: // do stuff with game logic on ticks to minimize expensive calculations.
-			if ok {
-			}
+		case <-gameTicker.C:
+			// do stuff with game logic on ticks to minimize expensive calculations.
 		default:
 		}
 		cam.Update()
@@ -264,7 +281,7 @@ func main() {
 		shader.Basic.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Parallax.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Texture.SetMVPMatrix(pMatrix, mvMatrix)
-		shader.UI.SetMVPMatrix(cam.ProjectionOrthographic(float32(w), float32(h)), mvMatrix)
+		shader.Model.SetMVPMatrix(pMatrix, mvMatrix)
 
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // TODO: Some cool graphical effects result from not clearing the screen.
@@ -291,27 +308,27 @@ func main() {
 		}
 
 		texturedRect.DrawTextured(tex)
-		texturedRect.Draw()
+		texturedRect.DrawWireframe()
 
 		texturedCube.Draw()
 
-		player.Draw()
+		shipModel.Render()
+
+		player.DrawWireframe()
 
 		// Debug logging - limited to once every X seconds to avoid spam.
 		select {
-		case _, ok := <-debugLogTicker.C:
-			if ok {
-				// log.Println("location:", cam.Position())
-				// if mouse.Handler.LeftPressed() {
-				//  log.Println("detected mouse press at", mouse.Handler.Position())
-				// }
-				// log.Println(fps.Handler.FPS(), "fps")
-				// log.Println(fps.Handler.DeltaTime(), "delta time")
-				// log.Println("zoom%:", cam.GetCurrentZoomPercent())
+		case <-debugLogTicker.C:
+			// log.Println("location:", cam.Position())
+			// if mouse.Handler.LeftPressed() {
+			//  log.Println("detected mouse press at", mouse.Handler.Position())
+			// }
+			log.Println(fps.Handler.FPS(), "fps")
+			// log.Println(fps.Handler.DeltaTime(), "delta time")
+			// log.Println("zoom%:", cam.GetCurrentZoomPercent())
 
-				//w, h := view.Window.GetSize()
-				//log.Println("mouse screen->world:", mouse.Handler.Position(), cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h))
-			}
+			//w, h := view.Window.GetSize()
+			//log.Println("mouse screen->world:", mouse.Handler.Position(), cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h))
 		default:
 		}
 

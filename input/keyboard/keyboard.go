@@ -5,10 +5,9 @@ package keyboard
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
-
-	"log"
 
 	"github.com/goxjs/glfw"
 )

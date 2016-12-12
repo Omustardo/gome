@@ -66,7 +66,7 @@ type Rect struct {
 	drawable.Attributes
 }
 
-func (r *Rect) Draw() {
+func (r *Rect) DrawWireframe() {
 	shader.Basic.SetDefaults()
 	shader.Basic.SetColor(r.Color)
 	shader.Basic.SetRotationMatrix2D(r.Rotation.Z())
