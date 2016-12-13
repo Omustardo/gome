@@ -41,7 +41,7 @@ mat4 rotationMatrix(float angle) {
 }
 
 void main() {
-	vec4 worldPosition = vec4(aPosition, 1.0);
+	vec4 worldPosition = vec4(aPosition.xy, -10, 1.0);
 	worldPosition.x *= aScale.x;
 	worldPosition.y *= aScale.y;
 	worldPosition = rotationMatrix(aAngle) * worldPosition;
