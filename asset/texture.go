@@ -46,7 +46,7 @@ func LoadTexture(path string) (gl.Texture, error) {
 	}
 }
 
-// LoadTextureData takes raw image data and puts it into a texture unit on the GPU.
+// LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
 // It's up to the caller to delete the texture buffer using gl.DeleteTexture(texture) when it's no longer needed.
 func LoadTextureData(width, height int, data []uint8) gl.Texture {
 	// gl.Enable(gl.TEXTURE_2D) // some sources says this is needed, but it doesn't seem to be. In fact, it gives an "invalid capability" message in webgl.

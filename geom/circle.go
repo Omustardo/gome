@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/core/entity"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -44,7 +44,7 @@ func initializeCircle() {
 
 type Circle struct {
 	entity.Entity
-	drawable.Attributes
+	model.Mesh
 }
 
 func (c *Circle) DrawWireframe() {

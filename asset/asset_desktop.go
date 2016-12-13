@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-// TODO: Find a better way to do this. Flags outside of main is bad.
+// TODO: Find a better way to do this.Flags outside of main is bad practice.
 // The problem is that loadFile *must* take a relative path to work with http GET requests. For the desktop version,
 // relative path should be fine when distributing the game to end users, but it doesn't work for development.
 // The standard practice in Golang is to use `go run`, but that generates an executable in a temp dir, with no easy way

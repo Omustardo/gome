@@ -1,6 +1,10 @@
 package model
 
 import (
+	"image/color"
+
+	"log"
+
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/shader"
@@ -8,7 +12,17 @@ import (
 
 type Mesh struct {
 	VertexVBO, NormalVBO gl.Buffer
-	TriangleCount        int
+	VBOMode              gl.Enum // like gl.TRIANGLES or gl.LINE_LOOP
+	// ItemCount is the number of items to be drawn.
+	// For a rectangle to be drawn with gl.DrawArrays(gl.Triangles,...) this would be 2.
+	// For a rectangle where only the edges are drawn with gl.LINE_LOOP, this would be 4.
+	ItemCount int
+
+	Color   *color.NRGBA
+	Texture gl.Texture
+
+	//	vboItemCount int
+	//	vboType      *gl.Enum // like gl.UNSIGNED_SHORT
 }
 
 type Model struct {
@@ -30,5 +44,12 @@ func (m *Model) Render() {
 	gl.EnableVertexAttribArray(shader.Model.NormalAttrib)
 	gl.VertexAttribPointer(shader.Model.NormalAttrib, 3, gl.FLOAT, false, 0, 0)
 
-	gl.DrawArrays(gl.TRIANGLES, 0, 3*m.TriangleCount)
+	switch m.VBOMode {
+	case gl.TRIANGLES:
+		gl.DrawArrays(gl.TRIANGLES, 0, 3*m.ItemCount)
+	case gl.LINE_LOOP:
+		gl.DrawArrays(gl.LINE_LOOP, 0, m.ItemCount)
+	default:
+		log.Printf("uknown VBO Mode: %v", m.VBOMode)
+	}
 }

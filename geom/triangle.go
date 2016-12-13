@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/core/drawable"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"golang.org/x/mobile/exp/f32"
 )
@@ -18,7 +18,7 @@ func initializeTriangle() {
 
 type Triangle struct {
 	P1, P2, P3 mgl32.Vec3
-	drawable.Attributes
+	model.Mesh
 }
 
 func (t *Triangle) SetCenter(x, y float32) {

@@ -4,8 +4,8 @@ import (
 	"image/color"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/geom"
+	"github.com/omustardo/gome/model"
 )
 
 const axisLength = 1e12
@@ -16,21 +16,21 @@ func init() {
 	xAxis = &geom.Line{
 		P1: mgl32.Vec3{-axisLength, 0, 0},
 		P2: mgl32.Vec3{axisLength, 0, 0},
-		Attributes: drawable.Attributes{
+		Mesh: model.Mesh{
 			Color: &color.NRGBA{255, 0, 0, 255},
 		},
 	}
 	yAxis = &geom.Line{
 		P1: mgl32.Vec3{0, -axisLength, 0},
 		P2: mgl32.Vec3{0, axisLength, 0},
-		Attributes: drawable.Attributes{
+		Mesh: model.Mesh{
 			Color: &color.NRGBA{0, 255, 0, 255},
 		},
 	}
 	zAxis = &geom.Line{
 		P1: mgl32.Vec3{0, 0, -axisLength},
 		P2: mgl32.Vec3{0, 0, axisLength},
-		Attributes: drawable.Attributes{
+		Mesh: model.Mesh{
 			Color: &color.NRGBA{0, 0, 255, 255},
 		},
 	}

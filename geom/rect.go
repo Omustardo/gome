@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/core/entity"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -63,7 +63,7 @@ func initializeRect() {
 
 type Rect struct {
 	entity.Entity
-	drawable.Attributes
+	model.Mesh
 }
 
 func (r *Rect) DrawWireframe() {

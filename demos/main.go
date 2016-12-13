@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"image/color"
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"time"
-
-	"image/color"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
@@ -15,7 +16,6 @@ import (
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
-	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/demos/shape"
 	"github.com/omustardo/gome/geom"
@@ -77,7 +77,7 @@ func main() {
 			Scale:    mgl32.Vec3{100, 100},
 			Rotation: mgl32.Vec3{},
 		},
-		Attributes: drawable.Attributes{
+		Mesh: model.Mesh{
 			Color: &color.NRGBA{200, 25, 75, 255},
 		},
 	}
@@ -103,7 +103,7 @@ func main() {
 				Scale:    mgl32.Vec3{20, 20, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Attributes: drawable.Attributes{
+			Mesh: model.Mesh{
 				Color: &color.NRGBA{50, 175, 125, 255},
 			},
 		},
@@ -113,7 +113,7 @@ func main() {
 				Scale:    mgl32.Vec3{15, 15, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Attributes: drawable.Attributes{
+			Mesh: model.Mesh{
 				Color: &color.NRGBA{100, 225, 25, 255},
 			},
 		},
@@ -123,7 +123,7 @@ func main() {
 				Scale:    mgl32.Vec3{35, 35, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Attributes: drawable.Attributes{
+			Mesh: model.Mesh{
 				Color: &color.NRGBA{255, 125, 50, 255},
 			},
 		},
@@ -135,7 +135,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{100, 100},
 				},
-				Attributes: drawable.Attributes{
+				Mesh: model.Mesh{
 					Color: &color.NRGBA{75, 25, 225, 255},
 				},
 			},
@@ -150,7 +150,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{80, 55},
 				},
-				Attributes: drawable.Attributes{
+				Mesh: model.Mesh{
 					Color: &color.NRGBA{25, 100, 225, 255},
 				},
 			},
@@ -165,7 +165,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{256, 256},
 				},
-				Attributes: drawable.Attributes{
+				Mesh: model.Mesh{
 					Color: &color.NRGBA{200, 25, 50, 255},
 				},
 			},
@@ -182,7 +182,7 @@ func main() {
 				Entity: entity.Entity{
 					Scale: mgl32.Vec3{128, 128},
 				},
-				Attributes: drawable.Attributes{
+				Mesh: model.Mesh{
 					Color: &color.NRGBA{100, 100, 150, 255},
 				},
 			},
@@ -211,7 +211,7 @@ func main() {
 			Position: mgl32.Vec3{0, -512},
 			Scale:    mgl32.Vec3{256, 256},
 		},
-		Attributes: drawable.Attributes{
+		Mesh: model.Mesh{
 			Color: &color.NRGBA{100, 200, 150, 255},
 		},
 	}
@@ -222,8 +222,8 @@ func main() {
 			Scale:    mgl32.Vec3{32, 32, 32},
 			Rotation: mgl32.Vec3{},
 		},
-		Attributes: drawable.Attributes{
-			Texture: &tex,
+		Mesh: model.Mesh{
+			Texture: tex,
 		},
 	}
 	rotationPerSecond := float32(math.Pi / 4)
@@ -358,7 +358,7 @@ func ApplyInputs(player *geom.Rect, cam camera.Camera) {
 
 	w, h := view.Window.GetSize()
 	if keyboard.Handler.JustPressed(glfw.KeySpace) {
-		// util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
+		util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
 	}
 	if mouse.Handler.LeftPressed() {
 		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())

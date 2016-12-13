@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/core/entity"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -107,7 +107,7 @@ func initializeCube() {
 
 type Cube struct {
 	entity.Entity
-	drawable.Attributes
+	model.Mesh
 }
 
 func (c *Cube) Draw() {
@@ -115,7 +115,7 @@ func (c *Cube) Draw() {
 	shader.Texture.SetRotationMatrix(c.Rotation.X(), c.Rotation.Y(), c.Rotation.Z())
 	shader.Texture.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
 	shader.Texture.SetTranslationMatrix(c.Position.X(), c.Position.Y(), c.Position.Z())
-	shader.Texture.SetTextureSampler(*c.Texture)
+	shader.Texture.SetTextureSampler(c.Texture)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
 	gl.VertexAttribPointer(shader.Texture.TextureCoordAttrib, 2, gl.FLOAT, false, 0, 0)

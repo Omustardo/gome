@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/core/drawable"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -20,7 +20,7 @@ func initializeLine() {
 
 type Line struct {
 	P1, P2 mgl32.Vec3
-	drawable.Attributes
+	model.Mesh
 }
 
 func (l *Line) Center() mgl32.Vec3 {

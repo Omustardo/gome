@@ -11,9 +11,9 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/camera"
-	"github.com/omustardo/gome/core/drawable"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/geom"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/bytecoder"
@@ -54,7 +54,7 @@ func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSp
 					Scale:    mgl32.Vec3{rand.Float32()*(maxWidth-minWidth) + minWidth, rand.Float32()*(maxWidth-minWidth) + minWidth, 0},
 					Rotation: mgl32.Vec3{0, 0, rand.Float32() * 2 * math.Pi},
 				},
-				Attributes: drawable.Attributes{
+				Mesh: model.Mesh{
 					Color: &color.NRGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255},
 				},
 			},
@@ -167,7 +167,7 @@ func NewOrbitingRect(rect geom.Rect, orbitCenter mgl32.Vec2, orbitRadius float32
 				Scale:    mgl32.Vec3{orbitRadius, orbitRadius, 0},
 				Rotation: mgl32.Vec3{},
 			},
-			Attributes: drawable.Attributes{
+			Mesh: model.Mesh{
 				Color: &color.NRGBA{140, 140, 140, 255},
 			},
 		},
