@@ -77,6 +77,9 @@ func Initialize(width, height int, windowName string) error {
 	window.SetFramebufferSizeCallback(framebufferSizeCallback)
 
 	Window = window
+	if err := gl.GetError(); err != 0 {
+		return fmt.Errorf("gl error: %v", err)
+	}
 	return nil
 }
 

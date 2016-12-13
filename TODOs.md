@@ -30,6 +30,7 @@ safe thing to do to prevent using the wrong buffer at some point - but BindBuffe
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur
 * Resizing screen shouldn't cause everything to be black.
 * Anisotropic filtering
+* When moving, little objects like stars appear smaller/darker and brighten when not moving. Unsure what is causing this.
 
 == Thread Safety
 * Mouse/keyboard handler reads and writes.
@@ -39,6 +40,7 @@ safe thing to do to prevent using the wrong buffer at some point - but BindBuffe
 * How to cache so the whole client doesn't need to be re-downloaded each time. Keep in mind, a new version of the client
 will require at least a partial update.
   * This gzip utility may be handy: https://github.com/NYTimes/gziphandler
+* Ideally the client will change very infrequently, although cached assets may need to be updated. 
 
 == Goxjs
 * support WebGL Extensions, like anisotropic filtering.

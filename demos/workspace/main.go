@@ -17,7 +17,7 @@ import (
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
 	"github.com/omustardo/gome/core/entity"
-	"github.com/omustardo/gome/demos/shape"
+	"github.com/omustardo/gome/demos/workspace/shape"
 	"github.com/omustardo/gome/geom"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
@@ -36,6 +36,10 @@ var (
 	frameRate    = flag.Duration("framerate", time.Second/60, `Cap on framerate. Provide with units, like "16.66ms"`)
 	gametickRate = flag.Duration("gametick_rate", time.Second/3, `How often to calculate major game actions. Provide with units, like "200ms"`)
 	debugLogRate = flag.Duration("debug_log_rate", time.Second, `How often to do periodic debug logging. Provide with units, like "5s"`)
+
+	// Explicitly listing the base dir is a hack. It's needed because `go run` produces a binary in a tmp folder so we can't
+	// use relative asset paths. More explanation in omustardo\gome\asset\asset.go
+	baseDir = flag.String("base_dir", `C:\workspace\Go\src\github.com\omustardo\gome\demos\workspace`, "All file paths should be specified relative to this root.")
 )
 
 func init() {
@@ -46,6 +50,7 @@ func init() {
 
 func main() {
 	flag.Parse()
+	asset.Initialize(*baseDir)
 
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
 	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
@@ -261,6 +266,10 @@ func main() {
 
 		shipModel.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
 		shipModel.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
+
+		miscCircles[0].Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
+		miscCircles[0].Rotation[1] += 0.8 * rotationPerSecond * float32((*frameRate).Seconds())
+		miscCircles[0].Rotation[2] += 1.3 * rotationPerSecond * float32((*frameRate).Seconds())
 
 		for _, r := range orbitingRects {
 			r.Update()

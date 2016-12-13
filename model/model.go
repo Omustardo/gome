@@ -11,17 +11,23 @@ import (
 )
 
 type Mesh struct {
+	// VBO's are references to buffers on the GPU.
 	VertexVBO, NormalVBO gl.Buffer
-	VBOMode              gl.Enum // like gl.TRIANGLES or gl.LINE_LOOP
+
+	// VBOMode is the gl Mode passed to a Draw call.
+	// Most commonly, it is gl.TRIANGLES. See https://en.wikibooks.org/wiki/OpenGL_Programming/GLStart/Tut3
+	VBOMode gl.Enum
+
 	// ItemCount is the number of items to be drawn.
 	// For a rectangle to be drawn with gl.DrawArrays(gl.Triangles,...) this would be 2.
 	// For a rectangle where only the edges are drawn with gl.LINE_LOOP, this would be 4.
 	ItemCount int
 
-	Color   *color.NRGBA
+	// Color is 32-bit non-premultiplied RGBA. It is optional.
+	Color *color.NRGBA
+
 	Texture gl.Texture
 
-	//	vboItemCount int
 	//	vboType      *gl.Enum // like gl.UNSIGNED_SHORT
 }
 

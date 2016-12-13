@@ -51,6 +51,7 @@ func (c *Circle) DrawWireframe() {
 	shader.Basic.SetDefaults()
 	shader.Basic.SetColor(c.Color)
 	shader.Basic.SetTranslationMatrix(c.Position.X(), c.Position.Y(), c.Position.Z())
+	shader.Basic.SetRotationMatrix(c.Rotation.X(), c.Rotation.Y(), c.Rotation.Z())
 	shader.Basic.SetScaleMatrix(c.Scale.X(), c.Scale.Y(), c.Scale.Z())
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, circleLineLoopBuffer)
