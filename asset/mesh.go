@@ -2,31 +2,30 @@ package asset
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io"
-
-	"encoding/binary"
 
 	"github.com/GlenKelley/go-collada"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/model"
+	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
-// LoadObj creates a mesh from a local obj file.
+// LoadOBJ creates a mesh from an obj file.
 // Based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4
 // and https://en.wikipedia.org/wiki/Wavefront_.obj_file
 // and http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
-func LoadOBJ(path string) (model.Mesh, error) {
+func LoadOBJ(path string) (mesh.Mesh, error) {
 	fileData, err := loadFile(path)
 	if err != nil {
-		return model.Mesh{}, err
+		return mesh.Mesh{}, err
 	}
 	return loadOBJData(fileData)
 }
 
-func loadOBJData(data []byte) (model.Mesh, error) {
+func loadOBJData(data []byte) (mesh.Mesh, error) {
 	reader := bytes.NewBuffer(data)
 
 	var (
@@ -40,7 +39,7 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 		// Scan the type field.
 		count, err := fmt.Fscanf(reader, "%s", &lineType)
 		if count != 1 {
-			return model.Mesh{}, fmt.Errorf("invalid obj format: err reading line type: %v", err)
+			return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading line type: %v", err)
 		}
 
 		// Check if it's the end of the file
@@ -49,7 +48,7 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 			if err == io.EOF {
 				break
 			}
-			return model.Mesh{}, err
+			return mesh.Mesh{}, err
 		}
 
 		switch lineType {
@@ -58,10 +57,10 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 			vec := mgl32.Vec3{}
 			count, err := fmt.Fscanf(reader, "%f %f %f\n", &vec[0], &vec[1], &vec[2])
 			if err != nil {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: err reading texture vertices: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading texture vertices: %v", err)
 			}
 			if count != 3 {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: got %v values for normals. Expected 3", count)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for normals. Expected 3", count)
 			}
 			verts = append(verts, vec)
 
@@ -70,10 +69,10 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 			vec := mgl32.Vec3{}
 			count, err := fmt.Fscanf(reader, "%f %f %f\n", &vec[0], &vec[1], &vec[2])
 			if err != nil {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: err reading normals: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading normals: %v", err)
 			}
 			if count != 3 {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: got %v values for normals. Expected 3", count)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for normals. Expected 3", count)
 			}
 			normals = append(normals, vec)
 
@@ -82,10 +81,10 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 			vec := mgl32.Vec2{}
 			count, err := fmt.Fscanf(reader, "%f %f\n", &vec[0], &vec[1])
 			if err != nil {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: err reading texture vertices: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading texture vertices: %v", err)
 			}
 			if count != 2 {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: got %v values for texture vertices. Expected 2", count)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for texture vertices. Expected 2", count)
 			}
 			uvs = append(uvs, vec)
 
@@ -96,10 +95,10 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 			uv := make([]float32, 3)
 			count, err := fmt.Fscanf(reader, "%f/%f/%f %f/%f/%f %f/%f/%f\n", &vec[0], &uv[0], &norm[0], &vec[1], &uv[1], &norm[1], &vec[2], &uv[2], &norm[2])
 			if err != nil {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: err reading indices: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading indices: %v", err)
 			}
 			if count != 9 {
-				return model.Mesh{}, fmt.Errorf("invalid obj format: got %v values for norm,vec,uv. Expected 9", count)
+				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for norm,vec,uv. Expected 9", count)
 			}
 			normalIndices = append(normalIndices, norm[0], norm[1], norm[2])
 			vertIndices = append(vertIndices, vec[0], vec[1], vec[2])
@@ -119,33 +118,29 @@ func loadOBJData(data []byte) (model.Mesh, error) {
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normals...), gl.STATIC_DRAW)
 
 	if glError := gl.GetError(); glError != 0 {
-		return model.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
+		return mesh.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
 	}
 
 	// TODO: Index and texture buffers are currently unused.
 
-	return model.Mesh{
-		VBOMode:   gl.TRIANGLES,
-		VertexVBO: vertexVBO,
-		NormalVBO: normalVBO,
-		ItemCount: len(verts) / 9, // 3 vertices per point, 3 points per triangle
-	}, nil
+	itemCount := len(verts) / 9 // 3 vertices per point, 3 points per triangle
+	return mesh.NewMesh(vertexVBO, gl.Buffer{}, normalVBO, gl.TRIANGLES, itemCount, nil, gl.Texture{}, gl.Buffer{}), nil
 }
 
-func LoadDAE(path string) (model.Mesh, error) {
+func LoadDAE(path string) (mesh.Mesh, error) {
 	data, err := loadFile(path)
 	if err != nil {
-		return model.Mesh{}, err
+		return mesh.Mesh{}, err
 	}
 	return loadDAEData(data)
 }
 
-func loadDAEData(data []byte) (model.Mesh, error) {
+func loadDAEData(data []byte) (mesh.Mesh, error) {
 	reader := bytes.NewBuffer(data)
 
 	doc, err := collada.LoadDocumentFromReader(reader)
 	if err != nil {
-		return model.Mesh{}, err
+		return mesh.Mesh{}, err
 	}
 
 	var m_TriangleCount int
@@ -214,13 +209,8 @@ func loadDAEData(data []byte) (model.Mesh, error) {
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, normals...), gl.STATIC_DRAW)
 
 	if glError := gl.GetError(); glError != 0 {
-		return model.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
+		return mesh.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
 	}
 
-	return model.Mesh{
-		VBOMode:   gl.TRIANGLES,
-		VertexVBO: vertexVBO,
-		NormalVBO: normalVBO,
-		ItemCount: m_TriangleCount,
-	}, nil
+	return mesh.NewMesh(vertexVBO, gl.Buffer{}, normalVBO, gl.TRIANGLES, 3*m_TriangleCount, nil, gl.Texture{}, gl.Buffer{}), nil
 }

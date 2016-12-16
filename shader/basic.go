@@ -130,6 +130,7 @@ func (s *basic) SetColor(color *color.NRGBA) {
 	gl.UseProgram(s.Program)
 	if color == nil {
 		gl.Uniform4f(s.colorUniform, 1, 1, 1, 1)
+		return
 	}
 	gl.Uniform4f(s.colorUniform, float32(color.R)/255.0, float32(color.G)/255.0, float32(color.B)/255.0, float32(color.A)/255.0)
 }

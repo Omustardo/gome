@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"image/color"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/gl/glutil"
@@ -13,8 +15,11 @@ const (
 	modelVertexSource = `//#version 120 // OpenGL 2.1.
 //#version 100 // WebGL.
 
+#define TRUE 1
+
 attribute vec3 aVertexPosition;
 attribute vec3 aNormal;
+attribute vec2 aTextureCoord;
 
 uniform mat4 uTranslationMatrix;
 uniform mat4 uRotationMatrix;
@@ -25,14 +30,16 @@ uniform mat4 uPMatrix;
 uniform mat4 uNormalMatrix;
 
 varying vec3 vLighting;
+varying vec2 vTextureCoord;
 
 void main() {
+	vTextureCoord = aTextureCoord;
+
 	// Position
 	vec4 worldPosition = uTranslationMatrix * uRotationMatrix * uScaleMatrix * vec4(aVertexPosition, 1.0);
 	gl_Position = uPMatrix * uMVMatrix * worldPosition;
 
 	// Lighting
-	vec3 ambientLight = vec3(0.3, 0.3, 0.3);
 	vec3 directionalLight = vec3(0.5, 0.5, 0.5); // Color of the directional light.
 	vec3 directionalVector = vec3(0, 0, 1); // Light goes from negative to positive Z.
 
@@ -40,7 +47,7 @@ void main() {
 	vec4 transformedNormal = uNormalMatrix * worldNormal; // Need to adjust normals a bit more. See: http://web.archive.org/web/20120228095346/http://www.arcsynthesis.org/gltut/Illumination/Tut09%20Normal%20Transformation.html
 
 	float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-	vLighting = ambientLight + (directionalLight * directional);
+	vLighting = directionalLight * directional;
 }
 `
 	modelFragmentSource = `//#version 120 // OpenGL 2.1.
@@ -50,10 +57,16 @@ void main() {
 precision lowp float;
 #endif
 
+uniform sampler2D uSampler;
+uniform vec4 uColor;
+uniform vec3 uAmbientLight;
+
 varying vec3 vLighting;
+varying vec2 vTextureCoord;
 
 void main(void) {
-	gl_FragColor = vec4(vLighting, 1.0);
+	// gl_FragColor = vec4(uAmbientLight + vLighting, 1.0) * uColor;
+	gl_FragColor = texture2D(uSampler, vTextureCoord) * vec4(uAmbientLight + vLighting, 1.0) * uColor;
 }
 `
 )
@@ -69,8 +82,14 @@ type model struct {
 	pMatrixUniform      gl.Uniform
 	normalMatrixUniform gl.Uniform
 
+	colorUniform        gl.Uniform
+	ambientLightUniform gl.Uniform
+
 	VertexPositionAttrib gl.Attrib
 	NormalAttrib         gl.Attrib
+
+	samplerUniform     gl.Uniform
+	TextureCoordAttrib gl.Attrib
 }
 
 func setupModelShader() error {
@@ -101,17 +120,60 @@ func setupModelShader() error {
 		rotationMatrixUniform:    gl.GetUniformLocation(program, "uRotationMatrix"),
 		scaleMatrixUniform:       gl.GetUniformLocation(program, "uScaleMatrix"),
 
+		colorUniform:        gl.GetUniformLocation(program, "uColor"),
+		ambientLightUniform: gl.GetUniformLocation(program, "uAmbientLight"),
+
 		VertexPositionAttrib: gl.GetAttribLocation(program, "aVertexPosition"),
 		NormalAttrib:         gl.GetAttribLocation(program, "aNormal"),
+
+		samplerUniform:     gl.GetUniformLocation(program, "uSampler"),
+		TextureCoordAttrib: gl.GetAttribLocation(program, "aTextureCoord"),
 	}
 	return nil
 }
 
 func (s *model) SetDefaults() {
 	gl.UseProgram(s.Program)
+	s.SetColor(nil)
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
 	s.SetScaleMatrix(1, 1, 1)
+}
+
+func (s *model) SetColor(color *color.NRGBA) {
+	gl.UseProgram(s.Program)
+	if color == nil {
+		gl.Uniform4f(s.colorUniform, 1, 1, 1, 1)
+		return
+	}
+	gl.Uniform4f(s.colorUniform, float32(color.R)/255.0, float32(color.G)/255.0, float32(color.B)/255.0, float32(color.A)/255.0)
+}
+
+// Alpha value is ignored since it doesn't make sense. Also why is there no color.RGB?
+func (s *model) SetAmbientLight(color *color.NRGBA) {
+	gl.UseProgram(s.Program)
+	if color == nil {
+		gl.Uniform3f(s.ambientLightUniform, 0, 0, 0)
+		return
+	}
+	gl.Uniform3f(s.ambientLightUniform, float32(color.R)/255.0, float32(color.G)/255.0, float32(color.B)/255.0)
+}
+
+func (s *model) SetTexture(texture gl.Texture) {
+	gl.ActiveTexture(gl.TEXTURE0) // Determines where the BindTexture calls get bound. Necessary if using multiple textures at once. Good habit to get into using regardless.
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.Uniform1i(s.samplerUniform, 0) // Unless you are using multiple textures, the second parameter to glUniform1i should always be 0. http://stackoverflow.com/questions/14022274/hardcoding-glsl-texture-sampler2d
+
+	// If using multiple textures:
+	//// Attach Texture 0
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, _texture0);
+	//glUniform1i(_uSampler0, 0);
+	//
+	//// Attach Texture 1
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, _texture1);
+	//glUniform1i(_uSampler1, 1);
 }
 
 func (s *model) SetMVPMatrix(pMatrix, mvMatrix mgl32.Mat4) {

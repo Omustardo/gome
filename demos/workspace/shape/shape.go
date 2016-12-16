@@ -12,8 +12,8 @@ import (
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/core/entity"
-	"github.com/omustardo/gome/geom"
 	"github.com/omustardo/gome/model"
+	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/bytecoder"
@@ -34,7 +34,7 @@ type Shape interface {
 }
 
 type ParallaxRect struct {
-	geom.Rect
+	model.Model
 	Target camera.Camera
 	// Essentially, how this object moves in comparison to the camera.
 	// 1 is the same speed. 0.2 is 20% of camera speed.
@@ -48,14 +48,12 @@ func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSp
 	shapes := make([]ParallaxRect, count)
 	for i := 0; i < count; i++ {
 		shapes[i] = ParallaxRect{
-			Rect: geom.Rect{
+			Model: model.Model{
+				Mesh: mesh.NewRect(&color.NRGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255}, gl.Texture{}),
 				Entity: entity.Entity{
 					Position: mgl32.Vec3{rand.Float32()*20000 - 10000, rand.Float32()*20000 - 10000, 0},
 					Scale:    mgl32.Vec3{rand.Float32()*(maxWidth-minWidth) + minWidth, rand.Float32()*(maxWidth-minWidth) + minWidth, 0},
 					Rotation: mgl32.Vec3{0, 0, rand.Float32() * 2 * math.Pi},
-				},
-				Mesh: model.Mesh{
-					Color: &color.NRGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255},
 				},
 			},
 			Target:           target,
@@ -86,7 +84,8 @@ func GetParallaxBuffers(arr []ParallaxRect) (parallaxPositionBuffer, parallaxTra
 			transRatioData = append(transRatioData, rect.TranslationRatio)
 			angleData = append(angleData, rect.Rotation.Z())
 			scaleData = append(scaleData, rect.Scale.X(), rect.Scale.Y())
-			colorData = append(colorData, float32(rect.Color.R)/255, float32(rect.Color.G)/255, float32(rect.Color.B)/255, float32(rect.Color.A)/255)
+			r, b, g, a := rect.Color().RGBA()
+			colorData = append(colorData, float32(r)/255, float32(g)/255, float32(b)/255, float32(a)/255)
 		}
 	}
 	parallaxPositionBuffer = gl.CreateBuffer()
@@ -145,66 +144,64 @@ func DrawParallaxBuffers(numObjects int, camPos mgl32.Vec3, parallaxPositionBuff
 	gl.DrawArrays(gl.TRIANGLES, 0, numObjects)
 }
 
-type OrbitingRect struct {
-	geom.Rect
-	// milliseconds to go entirely around the orbit. i.e. one year for the earth.
-	// Goes counterclockwise by default. Set negative to go clockwise.
-	revolutionSpeed int64
-	orbit           geom.Circle
-	// Makes the center of the orbit an object that can move. If nil, just uses the orbit's static center.
-	orbitTarget entity.Target
-	// rotateSpeed is the milliseconds to do one full rotation. i.e. one day for the earth.
-	// Goes counterclockwise by default. Set negative to go clockwise. Use 0 to not rotate.
-	rotateSpeed int64
-}
-
-func NewOrbitingRect(rect geom.Rect, orbitCenter mgl32.Vec2, orbitRadius float32, orbitTarget entity.Target, revolutionSpeed, rotateSpeed int64) *OrbitingRect {
-	r := &OrbitingRect{
-		Rect: rect,
-		orbit: geom.Circle{
-			Entity: entity.Entity{
-				Position: orbitCenter.Vec3(0),
-				Scale:    mgl32.Vec3{orbitRadius, orbitRadius, 0},
-				Rotation: mgl32.Vec3{},
-			},
-			Mesh: model.Mesh{
-				Color: &color.NRGBA{140, 140, 140, 255},
-			},
-		},
-		orbitTarget:     orbitTarget,
-		revolutionSpeed: revolutionSpeed,
-		rotateSpeed:     rotateSpeed,
-	}
-	r.Update()
-	return r
-}
-
-func (r *OrbitingRect) Update() {
-	if r.orbitTarget != nil {
-		r.orbit.Position = r.orbitTarget.Center()
-	}
-	now := util.GetTimeMillis()
-	percentRevolution := float32(now%r.revolutionSpeed) / float32(r.revolutionSpeed)
-	rads := percentRevolution * 2 * math.Pi
-	offset := mgl32.Vec3{float32(math.Cos(float64(rads))), float32(math.Sin(float64(rads))), 0}.Mul(r.orbit.Scale[0]) // TODO: use multiple scale dimensions (essentially the radius) to have elliptical orbits
-	x, y, _ := r.orbit.Center().Add(offset).Elem()
-	r.SetCenter(x, y, 0)
-
-	// Elliptical orbit calculation: http://math.stackexchange.com/questions/22064/calculating-a-point-that-lies-on-an-ellipse-given-an-angle
-	//a, b := float64(r.orbit.Scale[0]), float64(r.orbit.Scale[1])
-	//x := a * b / math.Sqrt(b*b+a*a*math.Tan(rads)*math.Tan(rads))
-	//y := a * b / math.Sqrt(a*a+b*b/math.Tan(rads)*math.Tan(rads))
-	//if -math.Pi/2 <= rads || rads >= math.Pi/2 {
-	//	x = -x
-	//	y = -y
-	//}
-
-	if r.rotateSpeed != 0 {
-		percentRotation := float32(now%r.rotateSpeed) / float32(r.rotateSpeed)
-		r.Rotation[2] = percentRotation * 2 * math.Pi
-	}
-}
-
-func (r *OrbitingRect) DrawOrbit() {
-	r.orbit.DrawWireframe()
-}
+//type OrbitingRect struct {
+//	mesh.Rect
+//	// milliseconds to go entirely around the orbit. i.e. one year for the earth.
+//	// Goes counterclockwise by default. Set negative to go clockwise.
+//	revolutionSpeed int64
+//	orbit           geom.Circle
+//	// Makes the center of the orbit an object that can move. If nil, just uses the orbit's static center.
+//	orbitTarget entity.Target
+//	// rotateSpeed is the milliseconds to do one full rotation. i.e. one day for the earth.
+//	// Goes counterclockwise by default. Set negative to go clockwise. Use 0 to not rotate.
+//	rotateSpeed int64
+//}
+//
+//func NewOrbitingRect(color *color.NRGBA, orbitCenter mgl32.Vec2, orbitRadius float32, orbitTarget entity.Target, revolutionSpeed, rotateSpeed int64) *OrbitingRect {
+//	r := &OrbitingRect{
+//		Rect: mesh.NewRect(color),
+//		orbit: model.Model{
+//			Mesh: mesh.NewCircle(&color.NRGBA{140, 140, 140, 255}),
+//			Entity: entity.Entity{
+//				Position: orbitCenter.Vec3(0),
+//				Scale:    mgl32.Vec3{orbitRadius, orbitRadius, 0},
+//				Rotation: mgl32.Vec3{},
+//			},
+//		},
+//		orbitTarget:     orbitTarget,
+//		revolutionSpeed: revolutionSpeed,
+//		rotateSpeed:     rotateSpeed,
+//	}
+//	r.Update()
+//	return r
+//}
+//
+//func (r *OrbitingRect) Update() {
+//	if r.orbitTarget != nil {
+//		r.orbit.Position = r.orbitTarget.Center()
+//	}
+//	now := util.GetTimeMillis()
+//	percentRevolution := float32(now%r.revolutionSpeed) / float32(r.revolutionSpeed)
+//	rads := percentRevolution * 2 * math.Pi
+//	offset := mgl32.Vec3{float32(math.Cos(float64(rads))), float32(math.Sin(float64(rads))), 0}.Mul(r.orbit.Scale[0]) // TODO: use multiple scale dimensions (essentially the radius) to have elliptical orbits
+//	x, y, _ := r.orbit.Center().Add(offset).Elem()
+//	r.SetCenter(x, y, 0)
+//
+//	// Elliptical orbit calculation: http://math.stackexchange.com/questions/22064/calculating-a-point-that-lies-on-an-ellipse-given-an-angle
+//	//a, b := float64(r.orbit.Scale[0]), float64(r.orbit.Scale[1])
+//	//x := a * b / math.Sqrt(b*b+a*a*math.Tan(rads)*math.Tan(rads))
+//	//y := a * b / math.Sqrt(a*a+b*b/math.Tan(rads)*math.Tan(rads))
+//	//if -math.Pi/2 <= rads || rads >= math.Pi/2 {
+//	//	x = -x
+//	//	y = -y
+//	//}
+//
+//	if r.rotateSpeed != 0 {
+//		percentRotation := float32(now%r.rotateSpeed) / float32(r.rotateSpeed)
+//		r.Rotation[2] = percentRotation * 2 * math.Pi
+//	}
+//}
+//
+//func (r *OrbitingRect) DrawOrbit() {
+//	r.orbit.DrawWireframe()
+//}

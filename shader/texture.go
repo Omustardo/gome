@@ -154,7 +154,6 @@ func (s *texture) SetTextureSampler(texture gl.Texture) {
 	//glActiveTexture(GL_TEXTURE1);
 	//glBindTexture(GL_TEXTURE_2D, _texture1);
 	//glUniform1i(_uSampler1, 1);
-
 }
 
 func (s *texture) SetColor(color *color.NRGBA) {
