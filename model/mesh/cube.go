@@ -148,8 +148,6 @@ func NewCube(color *color.NRGBA, texture gl.Texture) Mesh {
 	c := cube
 	c.Color = color
 	c.texture = texture
-	if !c.texture.Valid() {
-		c.texture = EmptyTexture
-	}
+	SetValidDefaults(&c)
 	return c
 }

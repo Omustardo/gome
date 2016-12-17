@@ -8,26 +8,28 @@ import (
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
-var Line, rect, cube, circle, wireframeRect Mesh // TODO: Sphere. Consider removing WireframeRect
+var (
+	rect, wireframeRect     Mesh
+	circle, wireframeCircle Mesh
+	cube                    Mesh
+	// TODO: Sphere, wireframeCube
+)
 
 // Loads models into buffers on the GPU. glfw.Init() must be called before calling this.
 func Initialize() {
 	initializeEmptyTexture()
 	initializeEmptyTextureCoords()
 	initializeEmptyNormals()
-	initializeIndices()
 
 	rect = initializeRect()
 	cube = initializeCube()
 	circle = initializeCircle()
+	wireframeCircle = initializeWireframeCircle()
 	wireframeRect = initializeWireframeRect()
 	// initializeTriangle()
 }
 
 type Mesh struct {
-	// usesElementArray determines whether rendering should use DrawElements, rather than the basic DrawArrays.
-	usesElementArray bool
-
 	// VBO's are references to buffers on the GPU.
 	vertexVBO     gl.Buffer
 	vertexIndices gl.Buffer
@@ -68,7 +70,7 @@ func NewMesh(vertexVBO, vertexIndices, normalVBO gl.Buffer, vboMode gl.Enum, ite
 	if !normalVBO.Valid() {
 		normalVBO = EmptyNormals
 	}
-	return Mesh{
+	m := Mesh{
 		vertexVBO:     vertexVBO,
 		vertexIndices: vertexIndices,
 		normalVBO:     normalVBO,
@@ -78,11 +80,10 @@ func NewMesh(vertexVBO, vertexIndices, normalVBO gl.Buffer, vboMode gl.Enum, ite
 		texture:       texture,
 		textureCoords: textureCoords,
 	}
+	SetValidDefaults(&m)
+	return m
 }
 
-func (m *Mesh) UsesElementArray() bool {
-	return m.usesElementArray
-}
 func (m *Mesh) VertexVBO() gl.Buffer {
 	return m.vertexVBO
 }
@@ -105,10 +106,25 @@ func (m *Mesh) TextureCoords() gl.Buffer {
 	return m.textureCoords
 }
 
+// SetValidDefaults does its best to set valid defaults for buffers that haven't been initialized.
+// For example, if the loaded mesh doesn't have a texture and texture coordinates, this sets a default blank
+// texture and coordinates corresponding to that texture.
+// The purpose of these defaults is so the same shader can be used regardless of a few missing fields.
+func SetValidDefaults(m *Mesh) {
+	if !m.texture.Valid() {
+		m.texture = EmptyTexture
+	}
+	if !m.textureCoords.Valid() {
+		m.textureCoords = EmptyTextureCoords
+	}
+	if !m.normalVBO.Valid() {
+		m.normalVBO = EmptyNormals
+	}
+}
+
 const (
-	emptyTextureCoordsSize = 1024 * 1024
-	emptyNormalsSize       = 1024 * 1024
-	emptyIndicesSize       = 1024 * 1024
+	emptyTextureCoordsSize = 1024 * 1024 * 2 // 2 texture coordinates per vertex
+	emptyNormalsSize       = 1024 * 1024 * 3 // vec3 normal per vertex
 )
 
 var (
@@ -128,8 +144,6 @@ var (
 	// EmptyNormals contains emptyNormalsSize floats of zeros. This is used as a default for meshes that don't have
 	// normals defined.
 	EmptyNormals gl.Buffer
-
-	EmptyIndices gl.Buffer
 )
 
 func initializeEmptyTexture() {
@@ -162,11 +176,4 @@ func initializeEmptyNormals() {
 	EmptyNormals = gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyNormals)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, normals...), gl.STATIC_DRAW)
-}
-
-func initializeIndices() {
-	indices := make([]float32, emptyIndicesSize) // large array of 0 values
-	EmptyIndices = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyNormals)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, indices...), gl.STATIC_DRAW)
 }

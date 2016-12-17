@@ -50,7 +50,7 @@ func Initialize(width, height int, windowName string) error {
 
 	glfw.SwapInterval(1) // Vsync.
 
-	gl.ClearColor(0, 0, 0, 1) // Background Color
+	gl.ClearColor(0.1, 0.1, 0.1, 1) // Background Color
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 
 	gl.Enable(gl.BLEND)

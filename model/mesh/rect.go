@@ -13,15 +13,14 @@ func NewRect(color *color.NRGBA, texture gl.Texture) Mesh {
 	r := rect
 	r.Color = color
 	r.texture = texture
-	if !r.texture.Valid() {
-		r.texture = EmptyTexture
-	}
+	SetValidDefaults(&r)
 	return r
 }
 
 func NewRectOutline(color *color.NRGBA) Mesh {
 	r := wireframeRect
 	r.Color = color
+	SetValidDefaults(&r)
 	return r
 }
 

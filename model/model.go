@@ -16,6 +16,13 @@ type Model struct {
 }
 
 func (m *Model) Render() {
+
+	// TODO: Consider not using this. It's an inexpensive call, but doing it for every model every frame is a bit much.
+	// SetValidDefaults makes sure that all of the buffers are set, and sets them to the default "Empty" buffers if not.
+	// The only reason this would be needed is if the functions to create meshes forgot to call it before returning, or
+	// if users are directly messing with mesh internals, which they shouldn't be able to do with everything being private.
+	mesh.SetValidDefaults(&m.Mesh)
+
 	// TODO: Consider a "modelviewer" feature - let meshes have their own Render() method where they are rendered within a unit cube centered at the origin with no lighting or other world effects.
 	shader.Model.SetDefaults()
 	shader.Model.SetTranslationMatrix(m.Position.X(), m.Position.Y(), m.Position.Z())
