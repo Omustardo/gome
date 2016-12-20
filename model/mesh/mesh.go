@@ -46,6 +46,8 @@ type Mesh struct {
 	itemCount int
 
 	// Color is 32-bit non-premultiplied RGBA. It is optional.
+	// Note that the color.Color interface's Color() function returns weird values (between 0 and 0xFFFF for avoiding overflow).
+	// I recommend just accessing the RGBA fields directly.
 	Color *color.NRGBA
 
 	texture       gl.Texture

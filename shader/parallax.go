@@ -19,9 +19,9 @@ attribute vec2 aTranslation;
 attribute float aTranslationRatio; // Parallax objects move a percentage of the camera's position.
 attribute float aAngle; // in radians
 attribute vec2 aScale;
-attribute vec4 uColor;
+attribute vec3 uColor;
 
-varying vec4 vColor; // varying lets it get passed to the fragment shader.
+varying vec3 vColor; // varying lets it get passed to the fragment shader.
 
 uniform vec2 uCameraPosition;
 uniform mat4 uMVMatrix; // Model-View (transforms the input vertex to the camera's view of the world)
@@ -58,9 +58,9 @@ void main() {
 #ifdef GL_ES
 precision highp float; // set floating point precision. Required for WebGL.
 #endif
-varying vec4 vColor;
+varying vec3 vColor;
 void main() {
-	gl_FragColor = vColor;
+	gl_FragColor = vec4(vColor, 1.0);
 }
 `
 )

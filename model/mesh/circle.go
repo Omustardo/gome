@@ -36,9 +36,6 @@ func initializeWireframeCircle() Mesh {
 	vertexVBO := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
 	gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
-
-	// item count is numSegments+2 because it's the total number of vertices in the fan:
-	// one for the center, and one for each point on the circle, and then a single duplicate to close the circle.
 	return NewMesh(vertexVBO, gl.Buffer{}, gl.Buffer{}, gl.LINE_LOOP, numCircleSegments, nil, gl.Texture{}, gl.Buffer{})
 }
 

@@ -9,17 +9,17 @@ import (
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
-func NewRect(color *color.NRGBA, texture gl.Texture) Mesh {
+func NewRect(c *color.NRGBA, texture gl.Texture) Mesh {
 	r := rect
-	r.Color = color
+	r.Color = c
 	r.texture = texture
 	SetValidDefaults(&r)
 	return r
 }
 
-func NewRectOutline(color *color.NRGBA) Mesh {
+func NewRectOutline(c *color.NRGBA) Mesh {
 	r := wireframeRect
-	r.Color = color
+	r.Color = c
 	SetValidDefaults(&r)
 	return r
 }

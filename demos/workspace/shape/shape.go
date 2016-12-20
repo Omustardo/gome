@@ -84,8 +84,7 @@ func GetParallaxBuffers(arr []ParallaxRect) (parallaxPositionBuffer, parallaxTra
 			transRatioData = append(transRatioData, rect.TranslationRatio)
 			angleData = append(angleData, rect.Rotation.Z())
 			scaleData = append(scaleData, rect.Scale.X(), rect.Scale.Y())
-			r, b, g, a := rect.Color.RGBA()
-			colorData = append(colorData, float32(r)/255, float32(g)/255, float32(b)/255, float32(a)/255)
+			colorData = append(colorData, float32(rect.Color.R)/255, float32(rect.Color.G)/255, float32(rect.Color.B)/255)
 		}
 	}
 	parallaxPositionBuffer = gl.CreateBuffer()
@@ -137,7 +136,7 @@ func DrawParallaxBuffers(numObjects int, camPos mgl32.Vec3, parallaxPositionBuff
 	gl.EnableVertexAttribArray(shader.Parallax.ScaleAttrib)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, parallaxColorBuffer)
-	gl.VertexAttribPointer(shader.Parallax.ColorAttrib, 4, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointer(shader.Parallax.ColorAttrib, 3, gl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(shader.Parallax.ColorAttrib)
 
 	shader.Parallax.SetCameraPosition(camPos)

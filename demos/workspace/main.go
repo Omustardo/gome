@@ -190,12 +190,12 @@ func main() {
 	)
 
 	// Generate parallax rectangles.
-	//parallaxObjects := shape.GenParallaxRects(cam, 5000, 8, 5, 0.1, 0.2)                                // Near
-	//parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 3000, 5, 3.5, 0.35, 0.5)...)  // Med
-	//parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 2000, 2, 0.5, 0.75, 0.85)...) // Far
-	//parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 1000, 1, 0.1, 0.9, 0.95)...)  // Distant
-	//// Put the parallax info in buffers on the GPU. TODO: Consider using a single interleaved buffer. Stride and offset are annoying though, and I don't think a few extra buffers matter.
-	//parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer, parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer := shape.GetParallaxBuffers(parallaxObjects)
+	parallaxObjects := shape.GenParallaxRects(cam, 5000, 8, 5, 0.1, 0.2)                                // Near
+	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 3000, 5, 3.5, 0.35, 0.5)...)  // Med
+	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 2000, 2, 0.5, 0.75, 0.85)...) // Far
+	parallaxObjects = append(parallaxObjects, shape.GenParallaxRects(cam, 1000, 1, 0.1, 0.9, 0.95)...)  // Distant
+	// Put the parallax info in buffers on the GPU. TODO: Consider using a single interleaved buffer. Stride and offset are annoying though, and I don't think a few extra buffers matter.
+	parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer, parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer := shape.GetParallaxBuffers(parallaxObjects)
 
 	texturedRect := model.Model{
 		Mesh: mesh.NewRect(nil, tex),
@@ -286,9 +286,9 @@ func main() {
 		//	r.DrawFilled()
 		//}
 		// New batched method:
-		//shape.DrawParallaxBuffers(6*len(parallaxObjects) /* vertices in total */, cam.Position(),
-		//	parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer,
-		//	parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer)
+		shape.DrawParallaxBuffers(6*len(parallaxObjects) /* vertices in total */, cam.Position(),
+			parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer,
+			parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer)
 
 		for _, r := range orbitingRects {
 			r.DrawOrbit()
