@@ -66,6 +66,8 @@ func main() {
 	if err := gl.GetError(); err != 0 {
 		log.Fatalf("gl error: %v", err)
 	}
+	shader.Model.SetAmbientLight(&color.NRGBA{255, 255, 255, 0}) // 2D objects look good in max lighting.
+	// shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down.
 
 	// Initialize singletons.
 	mouse.Initialize(view.Window)

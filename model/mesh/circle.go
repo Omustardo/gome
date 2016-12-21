@@ -39,17 +39,17 @@ func initializeWireframeCircle() Mesh {
 	return NewMesh(vertexVBO, gl.Buffer{}, gl.Buffer{}, gl.LINE_LOOP, numCircleSegments, nil, gl.Texture{}, gl.Buffer{})
 }
 
-func NewCircle(color *color.NRGBA, texture gl.Texture) Mesh {
+func NewCircle(col *color.NRGBA, texture gl.Texture) Mesh {
 	c := circle
-	c.Color = color
+	c.Color = col
 	c.texture = texture
 	SetValidDefaults(&c)
 	return c
 }
 
-func NewCircleOutline(color *color.NRGBA) Mesh {
+func NewCircleOutline(col *color.NRGBA) Mesh {
 	c := wireframeCircle
-	c.Color = color
+	c.Color = col
 	SetValidDefaults(&c)
 	return c
 }

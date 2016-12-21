@@ -54,7 +54,6 @@ type basic struct {
 	colorUniform    gl.Uniform
 
 	VertexPositionAttrib gl.Attrib
-	ParallaxRatioAttrib  gl.Attrib
 }
 
 func setupBasicShader() error {

@@ -1,8 +1,6 @@
 package model
 
 import (
-	"image/color"
-
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/model/mesh"
@@ -10,12 +8,21 @@ import (
 )
 
 type Model struct {
+	// Tag is a human readable string for debugging.
+	// NOTE: If this field starts being used for anything but human use, something is wrong.
 	Tag string
+
+	// Hidden determines whether the model will be rendered or not. False by default.
+	Hidden bool
+
 	mesh.Mesh
 	entity.Entity
 }
 
 func (m *Model) Render() {
+	if m.Hidden {
+		return
+	}
 
 	// TODO: Consider not using this. It's an inexpensive call, but doing it for every model every frame is a bit much.
 	// SetValidDefaults makes sure that all of the buffers are set, and sets them to the default "Empty" buffers if not.
@@ -29,7 +36,6 @@ func (m *Model) Render() {
 	shader.Model.SetRotationMatrix(m.Rotation.X(), m.Rotation.Y(), m.Rotation.Z())
 	shader.Model.SetScaleMatrix(m.Scale.X(), m.Scale.Y(), m.Scale.Z())
 	shader.Model.SetColor(m.Mesh.Color)
-	shader.Model.SetAmbientLight(&color.NRGBA{255, 255, 255, 0}) // &color.NRGBA{60, 60, 60, 0})
 	shader.Model.SetTexture(m.Mesh.Texture())
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.Mesh.VertexVBO())

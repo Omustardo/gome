@@ -144,9 +144,9 @@ func initializeCube() Mesh {
 	return NewMesh(vertexVBO, indexBuffer, normalVBO, gl.TRIANGLES, 36, nil, EmptyTexture, textureCoordBuffer)
 }
 
-func NewCube(color *color.NRGBA, texture gl.Texture) Mesh {
+func NewCube(col *color.NRGBA, texture gl.Texture) Mesh {
 	c := cube
-	c.Color = color
+	c.Color = col
 	c.texture = texture
 	SetValidDefaults(&c)
 	return c
