@@ -8,6 +8,12 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+var Default = Entity{
+	Position: mgl32.Vec3{0, 0, 0},
+	Scale:    mgl32.Vec3{1, 1, 1},
+	Rotation: mgl32.Vec3{0, 0, 0},
+}
+
 type Entity struct {
 	// Center coordinates of the entity.
 	Position mgl32.Vec3

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"log"
+
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/model/mesh"
@@ -20,7 +22,15 @@ type Model struct {
 }
 
 func (m *Model) Render() {
+	if m == nil {
+		log.Panic("Attempted to draw a nil model") // TODO: Not fatal error with better logging
+		return
+	}
 	if m.Hidden {
+		return
+	}
+	if m.Scale.X() == 0 && m.Scale.Y() == 0 && m.Scale.Z() == 0 {
+		log.Println("Attempted to draw a model with scale [0,0,0]")
 		return
 	}
 

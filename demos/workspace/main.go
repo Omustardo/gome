@@ -21,10 +21,10 @@ import (
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
 	"github.com/omustardo/gome/model"
-	"github.com/omustardo/gome/model/line"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
+	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
 )
@@ -77,7 +77,7 @@ func main() {
 	// Load standard meshes (cubes, rectangles, etc). These depend on OpenGL buffers, which depend on having an OpenGL
 	// context. They must be called sometime after glfw is initialized to work.
 	mesh.Initialize()
-	line.Initialize()
+	axis.Initialize()
 
 	// =========== Done with common initializations. From here on it's specific to this demo. TODO: Move above stuff into a nice wrapper. Split anything that doesn't depend on OpenGL/main thread into a goroutine.
 
@@ -268,14 +268,12 @@ func main() {
 		mvMatrix := cam.ModelView()
 		w, h := view.Window.GetSize()
 		pMatrix := cam.ProjectionPerspective(float32(w), float32(h))
-		shader.Basic.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Parallax.SetMVPMatrix(pMatrix, mvMatrix)
-		shader.Texture.SetMVPMatrix(pMatrix, mvMatrix)
 		shader.Model.SetMVPMatrix(pMatrix, mvMatrix)
 
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // TODO: Some cool graphical effects result from not clearing the screen.
-		util.DrawXYZAxes()
+		axis.DrawXYZAxes()
 		for _, c := range miscCircles {
 			c.Render()
 		}

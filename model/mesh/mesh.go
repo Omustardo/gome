@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	line                    Mesh
 	rect, wireframeRect     Mesh
 	circle, wireframeCircle Mesh
 	cube                    Mesh
@@ -21,6 +22,7 @@ func Initialize() {
 	initializeEmptyTextureCoords()
 	initializeEmptyNormals()
 
+	line = initializeLine()
 	rect = initializeRect()
 	cube = initializeCube()
 	circle = initializeCircle()
@@ -179,3 +181,6 @@ func initializeEmptyNormals() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyNormals)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, normals...), gl.STATIC_DRAW)
 }
+
+// DestroyFunc is used to clear the buffers used by a mesh. Generally their call should be deferred.
+type DestroyFunc func()
