@@ -12,11 +12,7 @@ import (
 )
 
 const (
-	modelVertexSource = `//#version 120 // OpenGL 2.1.
-//#version 100 // WebGL.
-
-#define TRUE 1
-
+	modelVertexSource = `
 attribute vec3 aVertexPosition;
 attribute vec3 aNormal;
 attribute vec2 aTextureCoord;
@@ -50,9 +46,7 @@ void main() {
 	vLighting = directionalLight * directional;
 }
 `
-	modelFragmentSource = `//#version 120 // OpenGL 2.1.
-//#version 100 // WebGL.
-
+	modelFragmentSource = `
 #ifdef GL_ES
 precision lowp float;
 #endif

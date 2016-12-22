@@ -1,11 +1,12 @@
 package util
 
 import (
+	"fmt"
 	"image"
+	"math/rand"
 	"time"
 
-	"fmt"
-	"math/rand"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 // Why is this not in the standard time library? Am I missing something?
@@ -25,7 +26,7 @@ func FlipImageVertically(img image.Image) error {
 				trueim.Set(col, height-1-row, temp)
 			}
 		}
-	case *image.NRGBA: // What is NRGBA? It seems to act exactly like RGBA.
+	case *image.NRGBA:
 		for row := 0; row < height/2; row++ {
 			for col := 0; col < width; col++ {
 				temp := img.At(col, row)
@@ -41,4 +42,8 @@ func FlipImageVertically(img image.Image) error {
 
 func RandUint8() uint8 {
 	return uint8(rand.Uint32() % 256)
+}
+
+func RandVec3() mgl32.Vec3 {
+	return mgl32.Vec3{rand.Float32(), rand.Float32(), rand.Float32()}
 }

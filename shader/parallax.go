@@ -11,9 +11,6 @@ import (
 
 const (
 	parallaxVertexSource = `
-//#version 120 // OpenGL 2.1.
-//#version 100 // WebGL.
-
 attribute vec3 aPosition; // Rectangle vertices. These are the same for every rectangle.. bad.
 attribute vec2 aTranslation;
 attribute float aTranslationRatio; // Parallax objects move a percentage of the camera's position.
@@ -53,8 +50,6 @@ void main() {
 }
 `
 	parallaxFragmentSource = `
-//#version 120 // OpenGL 2.1.
-//#version 100 // WebGL.
 #ifdef GL_ES
 precision highp float; // set floating point precision. Required for WebGL.
 #endif

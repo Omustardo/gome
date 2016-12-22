@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 
+	"strings"
+
 	"github.com/GlenKelley/go-collada"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
@@ -22,11 +24,15 @@ func LoadOBJ(path string) (mesh.Mesh, error) {
 	if err != nil {
 		return mesh.Mesh{}, err
 	}
-	return loadOBJData(fileData)
+	out, err := loadOBJData(fileData)
+	if err != nil {
+		return mesh.Mesh{}, fmt.Errorf("Error loading %s: %v", path, err)
+	}
+	return out, nil
 }
 
 func loadOBJData(data []byte) (mesh.Mesh, error) {
-	reader := bytes.NewBuffer(data)
+	lines := strings.Split(string(data), "\n")
 
 	var (
 		verts, normals                        []mgl32.Vec3
@@ -34,12 +40,19 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		normalIndices, vertIndices, uvIndices []float32
 	)
 
-	var lineType string
-	for {
+	for lineNum, line := range lines {
+		lineNum++ // numbering is for debug printing, and humans think of files as starting with line 1.
+
+		line = strings.TrimSpace(line)
+		if len(line) == 0 {
+			continue
+		}
+
 		// Scan the type field.
-		count, err := fmt.Fscanf(reader, "%s", &lineType)
+		var lineType string
+		count, err := fmt.Sscanf(line, "%s", &lineType)
 		if count != 1 {
-			return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading line type: %v", err)
+			return mesh.Mesh{}, fmt.Errorf("at line #%d, unable to get line type: %v", lineNum, err)
 		}
 
 		// Check if it's the end of the file
@@ -55,36 +68,36 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		// VERTICES.
 		case "v":
 			vec := mgl32.Vec3{}
-			count, err := fmt.Fscanf(reader, "%f %f %f\n", &vec[0], &vec[1], &vec[2])
+			count, err := fmt.Sscanf(line, "%s %f %f %f", &lineType, &vec[0], &vec[1], &vec[2])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading texture vertices: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading vertices: %v", lineNum, err)
 			}
-			if count != 3 {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for normals. Expected 3", count)
+			if count != 4 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for vertices. Expected 3", lineNum, count-1)
 			}
 			verts = append(verts, vec)
 
 		// NORMALS.
 		case "vn":
 			vec := mgl32.Vec3{}
-			count, err := fmt.Fscanf(reader, "%f %f %f\n", &vec[0], &vec[1], &vec[2])
+			count, err := fmt.Sscanf(line, "%s %f %f %f", &lineType, &vec[0], &vec[1], &vec[2])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading normals: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading normals: %v", lineNum, err)
 			}
-			if count != 3 {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for normals. Expected 3", count)
+			if count != 4 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for normals. Expected 3", lineNum, count-1)
 			}
 			normals = append(normals, vec)
 
 		// TEXTURE VERTICES.
 		case "vt":
 			vec := mgl32.Vec2{}
-			count, err := fmt.Fscanf(reader, "%f %f\n", &vec[0], &vec[1])
+			count, err := fmt.Sscanf(line, "%s %f %f", &lineType, &vec[0], &vec[1])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading texture vertices: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading texture vertices: %v", lineNum, err)
 			}
-			if count != 2 {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for texture vertices. Expected 2", count)
+			if count != 3 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %v values for texture vertices. Expected 2", lineNum, count-1)
 			}
 			uvs = append(uvs, vec)
 
@@ -93,19 +106,22 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			norm := make([]float32, 3)
 			vec := make([]float32, 3)
 			uv := make([]float32, 3)
-			count, err := fmt.Fscanf(reader, "%f/%f/%f %f/%f/%f %f/%f/%f\n", &vec[0], &uv[0], &norm[0], &vec[1], &uv[1], &norm[1], &vec[2], &uv[2], &norm[2])
+			count, err := fmt.Sscanf(line, "%s %f/%f/%f %f/%f/%f %f/%f/%f", &lineType, &vec[0], &uv[0], &norm[0], &vec[1], &uv[1], &norm[1], &vec[2], &uv[2], &norm[2])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: err reading indices: %v", err)
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading indices: %v", lineNum, err)
 			}
-			if count != 9 {
-				return mesh.Mesh{}, fmt.Errorf("invalid obj format: got %v values for norm,vec,uv. Expected 9", count)
+			if count != 10 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for norm,vec,uv. Expected 9", lineNum, count-1)
 			}
 			normalIndices = append(normalIndices, norm[0], norm[1], norm[2])
 			vertIndices = append(vertIndices, vec[0], vec[1], vec[2])
 			uvIndices = append(uvIndices, uv[0], uv[1], uv[2])
 
+		// COMMENT
+		case "#":
+			// Do nothing
 		default:
-			// Do nothing - ignore unknown fields
+			// Do nothing - ignore unknown fields (
 		}
 	}
 
