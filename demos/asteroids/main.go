@@ -76,8 +76,11 @@ func main() {
 		log.Fatalf("Unable to load ship model: %v", err)
 	}
 	playerShip := &model.Model{
-		Mesh:   shipMesh,
-		Entity: entity.Default,
+		Mesh: shipMesh,
+		//Entity: entity.Default,
+		Entity: entity.Entity{
+			Scale: mgl32.Vec3{20, 20, 20},
+		},
 	}
 	cam := &camera.TargetCamera{
 		Target:       playerShip,

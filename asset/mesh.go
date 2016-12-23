@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"io"
 
 	"strings"
 
@@ -51,53 +50,49 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		// Scan the type field.
 		var lineType string
 		count, err := fmt.Sscanf(line, "%s", &lineType)
+		if err != nil {
+			return mesh.Mesh{}, err
+		}
 		if count != 1 {
 			return mesh.Mesh{}, fmt.Errorf("at line #%d, unable to get line type: %v", lineNum, err)
 		}
-
-		// Check if it's the end of the file
-		// and break out of the loop.
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return mesh.Mesh{}, err
-		}
+		// Trim off the text that has been read.
+		line = strings.TrimSpace(line[len(lineType):])
 
 		switch lineType {
 		// VERTICES.
 		case "v":
 			vec := mgl32.Vec3{}
-			count, err := fmt.Sscanf(line, "%s %f %f %f", &lineType, &vec[0], &vec[1], &vec[2])
+			count, err := fmt.Sscanf(line, "%f %f %f", &vec[0], &vec[1], &vec[2])
 			if err != nil {
 				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading vertices: %v", lineNum, err)
 			}
-			if count != 4 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for vertices. Expected 3", lineNum, count-1)
+			if count != 3 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for vertices. Expected 3", lineNum, count)
 			}
 			verts = append(verts, vec)
 
 		// NORMALS.
 		case "vn":
 			vec := mgl32.Vec3{}
-			count, err := fmt.Sscanf(line, "%s %f %f %f", &lineType, &vec[0], &vec[1], &vec[2])
+			count, err := fmt.Sscanf(line, "%f %f %f", &vec[0], &vec[1], &vec[2])
 			if err != nil {
 				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading normals: %v", lineNum, err)
 			}
-			if count != 4 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for normals. Expected 3", lineNum, count-1)
+			if count != 3 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for normals. Expected 3", lineNum, count)
 			}
 			normals = append(normals, vec)
 
 		// TEXTURE VERTICES.
 		case "vt":
 			vec := mgl32.Vec2{}
-			count, err := fmt.Sscanf(line, "%s %f %f", &lineType, &vec[0], &vec[1])
+			count, err := fmt.Sscanf(line, "%f %f", &vec[0], &vec[1])
 			if err != nil {
 				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading texture vertices: %v", lineNum, err)
 			}
-			if count != 3 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %v values for texture vertices. Expected 2", lineNum, count-1)
+			if count != 2 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %v values for texture vertices. Expected 2", lineNum, count)
 			}
 			uvs = append(uvs, vec)
 
@@ -106,12 +101,12 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			norm := make([]float32, 3)
 			vec := make([]float32, 3)
 			uv := make([]float32, 3)
-			count, err := fmt.Sscanf(line, "%s %f/%f/%f %f/%f/%f %f/%f/%f", &lineType, &vec[0], &uv[0], &norm[0], &vec[1], &uv[1], &norm[1], &vec[2], &uv[2], &norm[2])
+			count, err := fmt.Sscanf(line, "%f/%f/%f %f/%f/%f %f/%f/%f", &vec[0], &uv[0], &norm[0], &vec[1], &uv[1], &norm[1], &vec[2], &uv[2], &norm[2])
 			if err != nil {
 				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading indices: %v", lineNum, err)
 			}
-			if count != 10 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for norm,vec,uv. Expected 9", lineNum, count-1)
+			if count != 9 {
+				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for norm,vec,uv. Expected 9", lineNum, count)
 			}
 			normalIndices = append(normalIndices, norm[0], norm[1], norm[2])
 			vertIndices = append(vertIndices, vec[0], vec[1], vec[2])
@@ -133,6 +128,10 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normals...), gl.STATIC_DRAW)
 
+	vertexIndexBuffer := gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, vertexIndexBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, vertIndices...), gl.STATIC_DRAW)
+
 	if glError := gl.GetError(); glError != 0 {
 		return mesh.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
 	}
@@ -141,6 +140,9 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 
 	itemCount := len(verts) / 9 // 3 vertices per point, 3 points per triangle
 	return mesh.NewMesh(vertexVBO, gl.Buffer{}, normalVBO, gl.TRIANGLES, itemCount, nil, gl.Texture{}, gl.Buffer{}), nil
+
+	//itemCount := len(vertIndices)
+	//return mesh.NewMesh(vertexVBO, vertexIndexBuffer, normalVBO, gl.TRIANGLES, itemCount, nil, gl.Texture{}, gl.Buffer{}), nil
 }
 
 func LoadDAE(path string) (mesh.Mesh, error) {
