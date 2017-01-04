@@ -49,8 +49,8 @@ func initializeCube() Mesh {
 		lower, upper, upper,
 		lower, upper, lower,
 	)
-	vertexVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)                // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
+	vertexBuffer := gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)             // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
 	gl.BufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW) // store values in buffer
 
 	indexBuffer := gl.CreateBuffer()
@@ -101,8 +101,8 @@ func initializeCube() Mesh {
 		-1.0, 0.0, 0.0,
 		-1.0, 0.0, 0.0,
 	)
-	normalVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)               // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
+	normalBuffer := gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, normalBuffer)            // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
 	gl.BufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW) // store values in buffer
 
 	textureCoordBuffer := gl.CreateBuffer()
@@ -141,7 +141,7 @@ func initializeCube() Mesh {
 	)
 	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
 
-	return NewMesh(vertexVBO, indexBuffer, normalVBO, gl.TRIANGLES, 36, nil, EmptyTexture, textureCoordBuffer)
+	return NewMesh(vertexBuffer, indexBuffer, normalBuffer, gl.TRIANGLES, 36, nil, EmptyTexture, textureCoordBuffer)
 }
 
 func NewCube(col *color.NRGBA, texture gl.Texture) Mesh {

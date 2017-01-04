@@ -62,7 +62,7 @@ func (m *Model) Render() {
 
 	if m.VertexIndices().Valid() {
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.Mesh.VertexIndices())
-		gl.DrawElements(m.VBOMode(), m.ItemCount(), gl.UNSIGNED_SHORT, 0)
+		gl.DrawElements(m.VBOMode(), m.ItemCount(), gl.UNSIGNED_INT, 0)
 	} else {
 		gl.DrawArrays(m.VBOMode(), 0, m.ItemCount())
 	}

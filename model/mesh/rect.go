@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"image/color"
 
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -39,7 +38,7 @@ func initializeRect() Mesh {
 	indexBuffer := gl.CreateBuffer()
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, 0, 1, 2, 0, 2, 3), gl.STATIC_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint32(binary.LittleEndian, 0, 1, 2, 0, 2, 3), gl.STATIC_DRAW)
 
 	textureCoordBuffer := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
@@ -51,14 +50,12 @@ func initializeRect() Mesh {
 	)
 	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
 
-	// Normals for a unit square simple extend in the directions of the corners.
-	unitLength := mgl32.Vec2{1, 1}.Normalize().Len()
-	lower, upper = -unitLength, unitLength
+	// Normals for a 2D object extend perpendicular to the plane it lives on.
 	normals := bytecoder.Float32(binary.LittleEndian,
-		lower, upper, 0,
-		lower, lower, 0,
-		upper, lower, 0,
-		upper, upper, 0,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
 	)
 	normalVBO := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)

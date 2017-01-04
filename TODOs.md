@@ -26,6 +26,7 @@ safe thing to do to prevent using the wrong buffer at some point - but BindBuffe
  UseProgram() when it's necessary. Similar to using gl.BindBuffer(gl.Buffer{}), it would be safer to use 
  gl.UseProgram(gl.Program{}), but this adds even moreexpense.
 * Can we precompile shaders?
+* Add handling, especially on the server side, for signals, like SIGTERM: https://gobyexample.com/signals
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur

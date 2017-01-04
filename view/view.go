@@ -58,6 +58,7 @@ func Initialize(width, height int, windowName string) error {
 
 	// If a triangle is "facing away" from the camera, then don't draw it. https://www.opengl.org/wiki/Face_Culling
 	// NOTE: If triangles appear to be missing, this is probably the cause. The order that vertices are listed matters.
+	gl.FrontFace(gl.CCW) // This should be the default, but set it to be safe. https://www.opengl.org/sdk/docs/man/html/glFrontFace.xhtml
 	gl.Enable(gl.CULL_FACE)
 	gl.CullFace(gl.BACK)
 

@@ -18,14 +18,14 @@ func NewLine(p1, p2 mgl32.Vec3, col *color.NRGBA) (Mesh, DestroyFunc) {
 	l := line
 	l.Color = col
 
-	vertexVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
+	vertexBuffer := gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian,
 		p1.X(), p1.Y(), p1.Z(),
 		p2.X(), p2.Y(), p2.Z(),
 	), gl.STATIC_DRAW)
-	l.vertexVBO = vertexVBO
+	l.vertices = vertexBuffer
 
 	SetValidDefaults(&l)
-	return l, func() { gl.DeleteBuffer(vertexVBO) }
+	return l, func() { gl.DeleteBuffer(vertexBuffer) }
 }

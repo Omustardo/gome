@@ -20,7 +20,7 @@ var (
 func Initialize() {
 	initializeEmptyTexture()
 	initializeEmptyTextureCoords()
-	initializeEmptyNormals()
+	initializeEmptyBuffer()
 
 	line = initializeLine()
 	rect = initializeRect()
@@ -32,11 +32,11 @@ func Initialize() {
 }
 
 type Mesh struct {
-	// VBO's are references to buffers on the GPU.
-	vertexVBO     gl.Buffer
+	// References to buffers on the GPU.
+	vertices      gl.Buffer
 	vertexIndices gl.Buffer
 
-	normalVBO gl.Buffer
+	normals gl.Buffer
 
 	// VBOMode is the gl Mode passed to a Draw call.
 	// Most commonly, it is gl.TRIANGLES. See https://en.wikibooks.org/wiki/OpenGL_Programming/GLStart/Tut3
@@ -47,37 +47,33 @@ type Mesh struct {
 	// For a rectangle where only the edges are drawn with gl.LINE_LOOP, this would be 4.
 	itemCount int
 
-	// Color is 32-bit non-premultiplied RGBA. It is optional.
+	// Color is 32-bit non-premultiplied RGBA. It is optional, but leaving it unset is the same as setting it to (1,1,1,1).
 	// Note that the color.Color interface's Color() function returns weird values (between 0 and 0xFFFF for avoiding overflow).
 	// I recommend just accessing the RGBA fields directly.
 	Color *color.NRGBA
 
 	texture       gl.Texture
 	textureCoords gl.Buffer
-
-	//	vboType      *gl.Enum // like gl.UNSIGNED_SHORT
-	//
 }
 
 // NewMesh combines the input buffers and rendering information into a Mesh struct.
 // Using this method requires loading OpenGL buffers yourself. It's not recommended for general use.
 // Most standard use of meshes can be done via the standard ones (i.e. NewCube(), NewSphere(), NewRect())
 // or by loading an object file via the `asset` package.
-// TODO: Consider returning an error if vertex or normal VBO's are invalid (or any other invalid items are in the input)
-func NewMesh(vertexVBO, vertexIndices, normalVBO gl.Buffer, vboMode gl.Enum, itemCount int, color *color.NRGBA, texture gl.Texture, textureCoords gl.Buffer) Mesh {
+func NewMesh(vertices, vertexIndices, normals gl.Buffer, vboMode gl.Enum, itemCount int, color *color.NRGBA, texture gl.Texture, textureCoords gl.Buffer) Mesh {
 	if !texture.Valid() {
 		texture = EmptyTexture
 	}
 	if !textureCoords.Valid() {
 		textureCoords = EmptyTextureCoords
 	}
-	if !normalVBO.Valid() {
-		normalVBO = EmptyNormals
+	if !normals.Valid() {
+		normals = EmptyNormals
 	}
 	m := Mesh{
-		vertexVBO:     vertexVBO,
+		vertices:      vertices,
 		vertexIndices: vertexIndices,
-		normalVBO:     normalVBO,
+		normals:       normals,
 		vboMode:       vboMode,
 		itemCount:     itemCount,
 		Color:         color,
@@ -89,13 +85,13 @@ func NewMesh(vertexVBO, vertexIndices, normalVBO gl.Buffer, vboMode gl.Enum, ite
 }
 
 func (m *Mesh) VertexVBO() gl.Buffer {
-	return m.vertexVBO
+	return m.vertices
 }
 func (m *Mesh) VertexIndices() gl.Buffer {
 	return m.vertexIndices
 }
 func (m *Mesh) NormalVBO() gl.Buffer {
-	return m.normalVBO
+	return m.normals
 }
 func (m *Mesh) VBOMode() gl.Enum {
 	return m.vboMode
@@ -121,14 +117,13 @@ func SetValidDefaults(m *Mesh) {
 	if !m.textureCoords.Valid() {
 		m.textureCoords = EmptyTextureCoords
 	}
-	if !m.normalVBO.Valid() {
-		m.normalVBO = EmptyNormals
+	if !m.normals.Valid() {
+		m.normals = EmptyNormals
 	}
 }
 
 const (
-	emptyTextureCoordsSize = 1024 * 1024 * 2 // 2 texture coordinates per vertex
-	emptyNormalsSize       = 1024 * 1024 * 3 // vec3 normal per vertex
+	emptyBufferSize = 1024 * 1024 * 3
 )
 
 var (
@@ -140,13 +135,13 @@ var (
 	// It is referenced by EmptyTextureCoords and is meant to be used as in meshes that don't contain another texture.
 	EmptyTexture gl.Texture
 
-	// EmptyTextureCoords contains emptyTextureCoordsSize floats worth of texture coordinates, all pointing to the single
-	// texel in EmptyTexture. This allows it to be used as a stand in / default texture mapping for objects that don't
-	// have a texture of their own.
+	// EmptyTextureCoords is a buffer on the GPU containing many 1's. These are all texture coordinates, pointing to the
+	// single texel in EmptyTexture. This allows it to be used as a stand in / default texture mapping for objects that
+	// don't have a texture of their own.
 	EmptyTextureCoords gl.Buffer
 
-	// EmptyNormals contains emptyNormalsSize floats of zeros. This is used as a default for meshes that don't have
-	// normals defined.
+	// EmptyNormals is a buffer on the GPU containing many zeros. This is used as a default for meshes that don't have the
+	// relevant values defined, but still need to use a buffer since the shader requires having some values.
 	EmptyNormals gl.Buffer
 )
 
@@ -164,22 +159,22 @@ func initializeEmptyTexture() {
 }
 
 func initializeEmptyTextureCoords() {
-	coords := make([]float32, emptyTextureCoordsSize) // large array of 1 values
+	coords := make([]float32, emptyBufferSize) // large array of 1 values
 	for i := range coords {
-		coords[i] = 1.0
+		coords[i] = 1.0 // @@@@@@@@@@ why use 1 rather than 0? Thinking it should be 0.
 	}
-	textureCoordinates := bytecoder.Float32(binary.LittleEndian, coords...)
+	textureCoordinates := bytecoder.Float32(binary.LittleEndian, coords...) // @@@@@@@@@@@@@@@@ TODO: Can this buffer be removed and just use EmptyBuffer instead?
 
 	EmptyTextureCoords = gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyTextureCoords)
 	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
 }
 
-func initializeEmptyNormals() {
-	normals := make([]float32, emptyNormalsSize) // large array of 0 values
+func initializeEmptyBuffer() {
+	data := make([]float32, emptyBufferSize) // large array of 0 values
 	EmptyNormals = gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyNormals)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, normals...), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, data...), gl.STATIC_DRAW)
 }
 
 // DestroyFunc is used to clear the buffers used by a mesh. Generally their call should be deferred.
