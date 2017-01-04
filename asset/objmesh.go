@@ -39,7 +39,7 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 
 	// Indices are used by the OBJ file format to declare full triangles via the 'f'ace tag.
 	// Except for the basic vertex indices, the read in indices are converted back to the values that they reference.
-	var vertIndices, textureCoordIndices, normalIndices []uint32
+	var vertIndices, textureCoordIndices, normalIndices []uint16
 
 	for lineNum, line := range lines {
 		lineNum++ // numbering is for debug printing, and humans think of files as starting with line 1.
@@ -102,7 +102,7 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		case "f":
 			// Input expected to be integer indices that refer to data read into the 'v','vt', and 'vn' fields (1 based indexing).
 			// Subtract 1 as they are read in to match standard 0 based indexing.
-			var vec, uv, norm [3]uint32
+			var vec, uv, norm [3]uint16
 
 			var count, expectedCount int
 			switch {
@@ -162,7 +162,7 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 	if len(vertIndices) > 0 {
 		vertexIndexBuffer = gl.CreateBuffer()
 		gl.BindBuffer(gl.ARRAY_BUFFER, vertexIndexBuffer)
-		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Uint32(binary.LittleEndian, vertIndices...), gl.STATIC_DRAW)
+		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, vertIndices...), gl.STATIC_DRAW)
 	}
 
 	switch {

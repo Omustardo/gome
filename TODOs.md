@@ -27,6 +27,8 @@ safe thing to do to prevent using the wrong buffer at some point - but BindBuffe
  gl.UseProgram(gl.Program{}), but this adds even moreexpense.
 * Can we precompile shaders?
 * Add handling, especially on the server side, for signals, like SIGTERM: https://gobyexample.com/signals
+* Current code is limited to max uint16 indices per mesh. This can be increased if we use the OES_element_index_uint
+ extension for WebGL, and change the gl.DrawElements call to use gl.UNSIGNED_INT
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur
