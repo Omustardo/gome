@@ -161,8 +161,8 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 
 	if len(vertIndices) > 0 {
 		vertexIndexBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, vertexIndexBuffer)
-		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, vertIndices...), gl.STATIC_DRAW)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer)
+		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, vertIndices...), gl.STATIC_DRAW)
 	}
 
 	switch {
