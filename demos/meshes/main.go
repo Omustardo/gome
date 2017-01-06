@@ -1,12 +1,14 @@
+// Demo of loading and displaying various meshes.
 package main
 
 import (
 	"flag"
-	"image/color"
 	"log"
 	"math"
 	"os"
 	"time"
+
+	"image/color"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
@@ -28,9 +30,11 @@ var (
 	windowWidth  = flag.Int("window_width", 1000, "initial window width")
 	windowHeight = flag.Int("window_height", 1000, "initial window height")
 
+	frameRate = flag.Duration("framerate", time.Second/60, `Cap on framerate. Provide with units, like "16.66ms"`)
+
 	// Explicitly listing the base dir is a hack. It's needed because `go run` produces a binary in a tmp folder so we can't
 	// use relative asset paths. More explanation in omustardo\gome\asset\asset.go
-	baseDir = flag.String("base_dir", `C:\workspace\Go\src\github.com\omustardo\gome\demos\objloader`, "All file paths should be specified relative to this root.")
+	baseDir = flag.String("base_dir", `C:\workspace\Go\src\github.com\omustardo\gome\demos\meshes`, "All file paths should be specified relative to this root.")
 )
 
 func init() {
@@ -44,7 +48,7 @@ func main() {
 	asset.Initialize(*baseDir)
 
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
-	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
+	if err := view.Initialize(*windowWidth, *windowHeight, "Model Viewer Demo"); err != nil {
 		log.Fatal(err)
 	}
 	defer view.Terminate()
@@ -56,7 +60,6 @@ func main() {
 	if err := gl.GetError(); err != 0 {
 		log.Fatalf("gl error: %v", err)
 	}
-	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down.
 
 	// Initialize singletons.
 	mouse.Initialize(view.Window)
@@ -70,17 +73,48 @@ func main() {
 
 	// =========== Done with common initializations. From here on it's specific to this demo.
 
+	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in the default max lighting, so tone it down.
+
+	// Load meshes.
 	cubeMesh, err := asset.LoadOBJ("assets/cube.obj")
+	cubeMesh.Color = &color.NRGBA{30, 100, 255, 255}
 	if err != nil {
-		log.Fatalf("Unable to load model: %v", err)
+		log.Fatal(err)
 	}
-	player := &model.Model{
+	vehicleMesh, err := asset.LoadDAE("assets/vehicle0.dae")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create models (meshes in world space)
+	cubeModel := &model.Model{
+		Tag:  "OBJ Mesh", // Tag is *only* for human readable output/debugging.
 		Mesh: cubeMesh,
-		//Entity: entity.Default,
 		Entity: entity.Entity{
 			Scale: mgl32.Vec3{100, 100, 100},
 		},
 	}
+	vehicleModel := &model.Model{
+		Tag:  "DAE Mesh",
+		Mesh: vehicleMesh,
+		Entity: entity.Entity{
+			Rotation: mgl32.Vec3{0, 0, 0},
+			// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
+			// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
+			Scale: mgl32.Vec3{10, 10, 10},
+		},
+	}
+
+	models := []*model.Model{cubeModel, vehicleModel}
+	// Adjust model positions so they're spaced nicely
+	offset := float32(0)
+	for _, m := range models {
+		m.Position = mgl32.Vec3{offset, 0, 0}
+		offset += 200
+	}
+
+	// Player is an empty model. It has no mesh so it can't be rendered, but it can still exist in the world.
+	player := &model.Model{}
 	cam := &camera.TargetCamera{
 		Target:       player,
 		TargetOffset: mgl32.Vec3{0, 0, 500},
@@ -92,22 +126,23 @@ func main() {
 
 	rotationPerSecond := float32(math.Pi / 4)
 
-	ticker := time.NewTicker(time.Second / 60)
+	ticker := time.NewTicker(*frameRate)
 	for !view.Window.ShouldClose() {
-		fps.Handler.Update()
 		glfw.PollEvents() // Reads window events, like keyboard and mouse input.
-		// Handler.Update takes current input and stores it. This is necessary to detect things like the start of a keypress.
+		fps.Handler.Update()
 		keyboard.Handler.Update()
 		mouse.Handler.Update()
 
 		ApplyInputs(player, cam)
-		// Update the X and Z rotation.
-		player.Rotation[0] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
-		player.Rotation[2] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
 
-		cam.Update()
+		// Update the rotation.
+		for _, m := range models {
+			m.Rotation[0] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
+			m.Rotation[1] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
+			m.Rotation[2] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
+		}
 
-		// Set up Model-View-Projection Matrix and send it to the shader programs.
+		// Set up Model-View-Projection Matrix and send it to the shader program.
 		mvMatrix := cam.ModelView()
 		w, h := view.Window.GetSize()
 		pMatrix := cam.ProjectionPerspective(float32(w), float32(h))
@@ -117,11 +152,13 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		axis.DrawXYZAxes()
 
-		player.Render()
+		for _, m := range models {
+			m.Render()
+		}
 
 		// Swaps the buffer that was drawn on to be visible. The visible buffer becomes the one that gets drawn on until it's swapped again.
 		view.Window.SwapBuffers()
-		<-ticker.C // wait up to 1/60th of a second. This caps framerate to 60 FPS.
+		<-ticker.C // wait up to the framerate cap.
 	}
 }
 

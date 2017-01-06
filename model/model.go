@@ -26,7 +26,7 @@ func (m *Model) Render() {
 		log.Panic("Attempted to draw a nil model") // TODO: Not fatal error with better logging
 		return
 	}
-	if m.Hidden {
+	if m.Hidden || (m.Mesh == mesh.Mesh{}) {
 		return
 	}
 	if m.Scale.X() == 0 && m.Scale.Y() == 0 && m.Scale.Z() == 0 {
@@ -49,7 +49,7 @@ func (m *Model) Render() {
 	shader.Model.SetTexture(m.Mesh.Texture())
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.Mesh.VertexVBO())
-	gl.EnableVertexAttribArray(shader.Model.VertexPositionAttrib)
+	gl.EnableVertexAttribArray(shader.Model.VertexPositionAttrib) // TODO: Can these VertexAttribArrays be enabled a single time in shader initialization and then just always used?
 	gl.VertexAttribPointer(shader.Model.VertexPositionAttrib, 3, gl.FLOAT, false, 0, 0)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.Mesh.NormalVBO())

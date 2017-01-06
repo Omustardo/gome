@@ -3,7 +3,6 @@ package asset
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -209,9 +208,9 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		return mesh.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
 	}
 
-	log.Printf("Vertices: %v\n", verts)
-	log.Printf("Normals: %v\n", normals)
-	log.Printf("Vertex Indices: %v\n", vertIndices)
+	//log.Printf("Vertices: %v\n", verts)
+	//log.Printf("Normals: %v\n", normals)
+	//log.Printf("Vertex Indices: %v\n", vertIndices)
 
 	itemCount := len(verts) / 3 // 3 vertices per triangle. // @@@@ TODO: Make sure this works.
 	if vertIndices != nil {
