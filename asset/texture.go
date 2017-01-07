@@ -10,6 +10,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
+	"image/color"
+
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/util"
 )
@@ -37,8 +39,10 @@ func LoadTexture(path string) (gl.Texture, error) {
 	switch trueim := img.(type) {
 	case *image.RGBA:
 		return LoadTextureData(width, height, trueim.Pix), nil
-	case *image.NRGBA: // What is NRGBA? It seems to act exactly like RGBA.
+	case *image.NRGBA: // NRGBA is non-premultiplied RGBA. RGBA evidently is supposed to multiply the alpha value by the other colors, so NRGBA of (1, 0.5, 0, 0.5) is RGBA of (0.5, 0.25, 0. 0.5)
 		return LoadTextureData(width, height, trueim.Pix), nil
+	case *image.YCbCr:
+		return LoadTextureData(width, height, ycbCrToRGBA(trueim).Pix), nil
 	default:
 		// copy := image.NewRGBA(trueim.Bounds())
 		// draw.Draw(copy, trueim.Bounds(), trueim, image.Pt(0, 0), draw.Src)
@@ -63,4 +67,17 @@ func LoadTextureData(width, height int, data []uint8) gl.Texture {
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 	return texture
+}
+
+func ycbCrToRGBA(img *image.YCbCr) *image.RGBA {
+	b := img.Bounds()
+	rgba := image.NewRGBA(b)
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			r, g, b, a := img.At(x, y).RGBA()
+			c := color.RGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), uint8(a >> 8)}
+			rgba.SetRGBA(x, y, c)
+		}
+	}
+	return rgba
 }
