@@ -147,7 +147,6 @@ func initializeCube() Mesh {
 func NewCube(col *color.NRGBA, texture gl.Texture) Mesh {
 	c := cube
 	c.Color = col
-	c.texture = texture
-	SetValidDefaults(&c)
+	c.SetTexture(texture)
 	return c
 }

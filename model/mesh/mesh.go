@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"image/color"
 
+	"log"
+
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/util/bytecoder"
 )
@@ -32,6 +34,11 @@ func Initialize() {
 }
 
 type Mesh struct {
+	// Buffers are all private in order to set valid defaults for provided buffers that haven't been initialized.
+	// For example, if the provided texture buffer is empty (no values provided), the setters replaces it with a default
+	// texture containing all 0 values.
+	// The purpose of these defaults is so the same shader can be used regardless of a few missing fields.
+
 	// References to buffers on the GPU.
 	vertices      gl.Buffer
 	vertexIndices gl.Buffer
@@ -61,26 +68,19 @@ type Mesh struct {
 // Most standard use of meshes can be done via the standard ones (i.e. NewCube(), NewSphere(), NewRect())
 // or by loading an object file via the `asset` package.
 func NewMesh(vertices, vertexIndices, normals gl.Buffer, vboMode gl.Enum, itemCount int, color *color.NRGBA, texture gl.Texture, textureCoords gl.Buffer) Mesh {
-	if !texture.Valid() {
-		texture = EmptyTexture
-	}
-	if !textureCoords.Valid() {
-		textureCoords = EmptyTextureCoords
-	}
-	if !normals.Valid() {
-		normals = EmptyNormals
+	if !vertices.Valid() {
+		log.Println("Creating mesh with invalid vertex buffer")
 	}
 	m := Mesh{
 		vertices:      vertices,
 		vertexIndices: vertexIndices,
-		normals:       normals,
 		vboMode:       vboMode,
 		itemCount:     itemCount,
 		Color:         color,
-		texture:       texture,
-		textureCoords: textureCoords,
 	}
-	SetValidDefaults(&m)
+	m.SetNormalVBO(normals)
+	m.SetTexture(texture)
+	m.SetTextureCoords(textureCoords)
 	return m
 }
 
@@ -93,6 +93,12 @@ func (m *Mesh) VertexIndices() gl.Buffer {
 func (m *Mesh) NormalVBO() gl.Buffer {
 	return m.normals
 }
+func (m *Mesh) SetNormalVBO(normals gl.Buffer) {
+	m.normals = normals
+	if !m.normals.Valid() {
+		m.normals = EmptyNormals
+	}
+}
 func (m *Mesh) VBOMode() gl.Enum {
 	return m.vboMode
 }
@@ -102,23 +108,19 @@ func (m *Mesh) ItemCount() int {
 func (m *Mesh) Texture() gl.Texture {
 	return m.texture
 }
-func (m *Mesh) TextureCoords() gl.Buffer {
-	return m.textureCoords
-}
-
-// SetValidDefaults does its best to set valid defaults for buffers that haven't been initialized.
-// For example, if the loaded mesh doesn't have a texture and texture coordinates, this sets a default blank
-// texture and coordinates corresponding to that texture.
-// The purpose of these defaults is so the same shader can be used regardless of a few missing fields.
-func SetValidDefaults(m *Mesh) {
+func (m *Mesh) SetTexture(texture gl.Texture) {
+	m.texture = texture
 	if !m.texture.Valid() {
 		m.texture = EmptyTexture
 	}
+}
+func (m *Mesh) TextureCoords() gl.Buffer {
+	return m.textureCoords
+}
+func (m *Mesh) SetTextureCoords(coords gl.Buffer) {
+	m.textureCoords = coords
 	if !m.textureCoords.Valid() {
 		m.textureCoords = EmptyTextureCoords
-	}
-	if !m.normals.Valid() {
-		m.normals = EmptyNormals
 	}
 }
 
@@ -129,7 +131,7 @@ const (
 var (
 	// TODO: Using these "empty" default buffers is ugly. I'm not sure how to do better though. If this is the way to go
 	// make sure to document the size limitations as any meshes with undefined features that are larger than the size
-	// limits will likely crash, or at least give a lot of error messages.
+	// limits will likely be hard to detect and diagnose.
 
 	// EmptyTexture is a texture buffer filled with just four bytes: [255, 255, 255, 255]
 	// It is referenced by EmptyTextureCoords and is meant to be used as in meshes that don't contain another texture.

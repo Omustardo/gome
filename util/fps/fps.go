@@ -3,7 +3,7 @@
 //   fps.Initialize()
 //   for { // game loop
 //     fps.Handler.Update()
-//     fmt.Println(fps.GetFPS())
+//     fmt.Println(fps.FPS())
 // 	   // do game stuff
 //   }
 package fps

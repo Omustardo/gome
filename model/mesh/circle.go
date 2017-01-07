@@ -42,15 +42,13 @@ func initializeWireframeCircle() Mesh {
 func NewCircle(col *color.NRGBA, texture gl.Texture) Mesh {
 	c := circle
 	c.Color = col
-	c.texture = texture
-	SetValidDefaults(&c)
+	c.SetTexture(texture)
 	return c
 }
 
 func NewCircleOutline(col *color.NRGBA) Mesh {
 	c := wireframeCircle
 	c.Color = col
-	SetValidDefaults(&c)
 	return c
 }
 

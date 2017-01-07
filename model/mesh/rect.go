@@ -11,15 +11,13 @@ import (
 func NewRect(col *color.NRGBA, texture gl.Texture) Mesh {
 	r := rect
 	r.Color = col
-	r.texture = texture
-	SetValidDefaults(&r)
+	r.SetTexture(texture)
 	return r
 }
 
 func NewRectOutline(col *color.NRGBA) Mesh {
 	r := wireframeRect
 	r.Color = col
-	SetValidDefaults(&r)
 	return r
 }
 

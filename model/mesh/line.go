@@ -26,6 +26,5 @@ func NewLine(p1, p2 mgl32.Vec3, col *color.NRGBA) (Mesh, DestroyFunc) {
 	), gl.STATIC_DRAW)
 	l.vertices = vertexBuffer
 
-	SetValidDefaults(&l)
 	return l, func() { gl.DeleteBuffer(vertexBuffer) }
 }
