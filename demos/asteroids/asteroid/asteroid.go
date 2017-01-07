@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	Small = float32(8) * iota
+	Small = float32(1) * iota
 	Medium
 	Large
 )
@@ -29,7 +29,8 @@ type Asteroid struct {
 }
 
 func New() *Asteroid {
-	pos := util.RandVec3().Normalize().Mul(1000) // 1000 == stage size. Need to pass this in or something.
+	pos := util.RandVec3().Normalize().Mul(100) // TODO: pass in limits on starting location
+	pos[2] = 0
 	vel := util.RandVec3().Normalize()
 	scale := Large
 	rot := util.RandVec3().Normalize().Mul(2 * math.Pi)
@@ -46,12 +47,14 @@ func New() *Asteroid {
 	return &Asteroid{
 		Model:         m,
 		Velocity:      vel,
-		RotationSpeed: util.RandVec3().Normalize().Mul(2 * math.Pi),
+		RotationSpeed: util.RandVec3().Normalize().Mul(math.Pi / 3),
 	}
 }
 
 func (a *Asteroid) Update(deltaSeconds float32) {
-	a.Rotation.Dot(a.RotationSpeed.Mul(deltaSeconds))
+	a.Rotation[0] = a.Rotation[0] + a.RotationSpeed[0]*deltaSeconds
+	a.Rotation[1] = a.Rotation[1] + a.RotationSpeed[1]*deltaSeconds
+	a.Rotation[2] = a.Rotation[2] + a.RotationSpeed[2]*deltaSeconds
 	a.Position.Add(a.Velocity.Mul(deltaSeconds))
 
 	// TODO: Wrap around position if it's too far from center/player

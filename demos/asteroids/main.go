@@ -79,7 +79,7 @@ func main() {
 		Mesh: shipMesh,
 		//Entity: entity.Default,
 		Entity: entity.Entity{
-			Scale: mgl32.Vec3{20, 20, 20},
+			Scale: mgl32.Vec3{4, 4, 4},
 		},
 	}
 	cam := &camera.TargetCamera{
