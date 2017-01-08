@@ -4,19 +4,18 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 
 	// for decoding of different file types
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 
-	"image/color"
-
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/util"
 )
 
-// LoadTexture from local assets.
+// LoadTexture from local assets. Handles jpg, png, and static gifs.
 func LoadTexture(path string) (gl.Texture, error) {
 	// based on https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL and https://golang.org/pkg/image/
 

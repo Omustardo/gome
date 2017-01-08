@@ -75,6 +75,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to load ship model: %v", err)
 	}
+	shipTexture, err := asset.LoadTexture("assets/ship/ship.jpg")
+	if err != nil {
+		log.Fatalf("Unable to load asteroid texture: %v", err)
+	}
+	shipMesh.SetTexture(shipTexture)
 	playerShip := &model.Model{
 		Mesh: shipMesh,
 		//Entity: entity.Default,
@@ -93,8 +98,13 @@ func main() {
 
 	asteroidMesh, err := asset.LoadOBJ("assets/rock/rock1.obj")
 	if err != nil {
-		log.Fatalf("Unable to load ship model: %v", err)
+		log.Fatalf("Unable to load asteroid model: %v", err)
 	}
+	asteroidTexture, err := asset.LoadTexture("assets/rock/rock1.jpg")
+	if err != nil {
+		log.Fatalf("Unable to load asteroid texture: %v", err)
+	}
+	asteroidMesh.SetTexture(asteroidTexture)
 	asteroid.SetMesh(asteroidMesh)
 
 	asteroids := []*asteroid.Asteroid{asteroid.New()}
@@ -112,6 +122,9 @@ func main() {
 		for _, a := range asteroids {
 			a.Update(fps.Handler.DeltaTimeSeconds())
 		}
+		playerShip.Rotation[0] += math.Pi * 0.3 * fps.Handler.DeltaTimeSeconds()
+		playerShip.Rotation[1] += math.Pi * 0.7 * fps.Handler.DeltaTimeSeconds()
+		playerShip.Rotation[2] += math.Pi * -0.3 * fps.Handler.DeltaTimeSeconds()
 
 		cam.Update()
 

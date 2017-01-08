@@ -33,6 +33,10 @@ func (m *Model) Render() {
 		log.Println("Attempted to draw a model with scale [0,0,0]")
 		return
 	}
+	if !m.Mesh.VertexVBO().Valid() {
+		log.Println("Attempted to draw a model with no vertices")
+		return
+	}
 
 	// TODO: Consider a "modelviewer" feature - let meshes have their own Render() method where they are rendered within a unit cube centered at the origin with no lighting or other world effects.
 	shader.Model.SetDefaults()
