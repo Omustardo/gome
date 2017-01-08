@@ -1,1 +1,0 @@
-The most basic graphical demo. If running this doesn't work, then something serious is wrong.

@@ -77,7 +77,7 @@ func main() {
 
 	// Load meshes.
 	cubeMesh, err := asset.LoadOBJ("assets/cube.obj")
-	cubeMesh.Color = &color.NRGBA{30, 100, 255, 255}
+	cubeMesh.Color = &color.NRGBA{255, 25, 75, 255}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,9 +87,30 @@ func main() {
 	}
 
 	// Create models (meshes in world space)
-	cubeModel := &model.Model{
-		Tag:  "OBJ Mesh", // Tag is *only* for human readable output/debugging.
+	cubeModel0 := &model.Model{
+		Tag:  "Built in Mesh", // Tag is *only* for human readable output/debugging.
+		Mesh: mesh.NewCube(cubeMesh.Color, gl.Texture{}),
+		Entity: entity.Entity{
+			Scale: mgl32.Vec3{100, 100, 100},
+		},
+	}
+	cubeModel1 := &model.Model{
+		Tag:  "OBJ Mesh",
 		Mesh: cubeMesh,
+		Entity: entity.Entity{
+			Scale: mgl32.Vec3{100, 100, 100},
+		},
+	}
+	rectModel := &model.Model{
+		Tag:  "Built in Mesh",
+		Mesh: mesh.NewRect(&color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
+		Entity: entity.Entity{
+			Scale: mgl32.Vec3{100, 100, 100},
+		},
+	}
+	circleModel := &model.Model{
+		Tag:  "Built in Mesh",
+		Mesh: mesh.NewCircle(&color.NRGBA{200, 50, 100, 255}, gl.Texture{}),
 		Entity: entity.Entity{
 			Scale: mgl32.Vec3{100, 100, 100},
 		},
@@ -105,7 +126,7 @@ func main() {
 		},
 	}
 
-	models := []*model.Model{cubeModel, vehicleModel}
+	models := []*model.Model{cubeModel0, cubeModel1, rectModel, circleModel, vehicleModel}
 	// Adjust model positions so they're spaced nicely
 	offset := float32(0)
 	for _, m := range models {

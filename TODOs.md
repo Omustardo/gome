@@ -1,16 +1,15 @@
 == General
 * Replace any public structs with protos. This allows for the possibility of non-go interaction.
 * Test how well the mouse and keyboard handlers deal with unusual events. 
-Try unplugging mouse/keyboard. Using multiple mice.
+Try unplugging mouse/keyboard. Using multiple mice. This isn't something we should need to worry about, but better to be safe.
 * Gestures / touchpad support. Probably requires modifying goxjs/glfw
 * Fullscreen toggle
-* All of the game logic needs to be based on delta time since it was last applied. Right now it's based on happening 
-per-frame which isn't consistent, and definitely won't work for multiplayer.
 * Initial loading screen. Particularly for the webgl version. It takes a while to load.
 * Trailing camera. Based on player position, but has its own max speed and delay, so stays behind player a bit. 
 Something like: https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html
 * DirectionalCamera that follows player orientation (up on the screen is always the direction the player faces).
-* Draw with specific layers. Right now everything is based on the order of draw calls.
+* Draw with specific layers. Right now everything is based on the order of draw calls. This could be pushed off onto 
+users of gome, but it is likely to be a very common requirement, particularly for 2D games. Better to support it.
 * http://www.gopherjs.org/ #Performance Tips
   * Consider switching everything to float64 as it's more efficient with gopherjs, only if web performance is an issue.
 * Look into golang benchmarks 
@@ -24,7 +23,7 @@ their documentation about being able to zoom in/out to certain size percentages 
 safe thing to do to prevent using the wrong buffer at some point - but BindBuffer calls are expensive.
 * gl.UseProgram() is called way too often. Keep track of current shader in my shader package so only need to call 
  UseProgram() when it's necessary. Similar to using gl.BindBuffer(gl.Buffer{}), it would be safer to use 
- gl.UseProgram(gl.Program{}), but this adds even moreexpense.
+ gl.UseProgram(gl.Program{}), but this adds even more expense.
 * Can we precompile shaders?
 * Add handling, especially on the server side, for signals, like SIGTERM: https://gobyexample.com/signals
 * Current code is limited to max uint16 indices per mesh. This can be increased if we use the OES_element_index_uint
