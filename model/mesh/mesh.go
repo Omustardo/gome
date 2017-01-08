@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	line                    Mesh
 	rect, wireframeRect     Mesh
 	circle, wireframeCircle Mesh
 	cube                    Mesh
@@ -24,7 +23,6 @@ func Initialize() {
 	initializeEmptyTextureCoords()
 	initializeEmptyBuffer()
 
-	line = initializeLine()
 	rect = initializeRect()
 	cube = initializeCube()
 	circle = initializeCircle()

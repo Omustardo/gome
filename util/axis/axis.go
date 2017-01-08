@@ -16,17 +16,17 @@ var xAxis, yAxis, zAxis *model.Model
 // Initialize depends on mesh.Initialize being done first. TODO: This is the start of dependency hell. Stop it. Where could this package go to make it more logical? Inside of model?
 func Initialize() {
 	// Ignore the returned destroy functions on the line meshes since the axes should exist until the program ends.
-	xMesh, _ := mesh.NewLine(
+	xMesh := mesh.NewLine(
 		mgl32.Vec3{-axisLength, 0, 0},
 		mgl32.Vec3{axisLength, 0, 0},
 		&color.NRGBA{255, 0, 0, 255},
 	)
-	yMesh, _ := mesh.NewLine(
+	yMesh := mesh.NewLine(
 		mgl32.Vec3{0, -axisLength, 0},
 		mgl32.Vec3{0, axisLength, 0},
 		&color.NRGBA{0, 255, 0, 255},
 	)
-	zMesh, _ := mesh.NewLine(
+	zMesh := mesh.NewLine(
 		mgl32.Vec3{0, 0, -axisLength},
 		mgl32.Vec3{0, 0, axisLength},
 		&color.NRGBA{0, 0, 255, 255},
