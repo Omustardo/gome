@@ -18,7 +18,13 @@ func SaveScreenshot(width, height int, path string) error {
 	gl.ReadPixels(img.Pix, 0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE)
 
 	// Need to flip the image vertically since the pixels are provided with (0,0) in the top left corner.
-	FlipImageVertically(img)
+	for row := 0; row < height/2; row++ {
+		for col := 0; col < width; col++ {
+			temp := img.At(col, row)
+			img.Set(col, row, img.At(col, height-1-row))
+			img.Set(col, height-1-row, temp)
+		}
+	}
 
 	out, err := os.Create(path) // TODO: WebGL isn't happy with this (no syscalls allowed). Need to make a util_js.go with conditional compilation.
 	if err != nil {

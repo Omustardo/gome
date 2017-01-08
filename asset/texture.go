@@ -12,7 +12,6 @@ import (
 	_ "image/png"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/util"
 )
 
 // LoadTexture from local assets. Handles jpg, png, and static gifs.
@@ -31,22 +30,29 @@ func LoadTexture(path string) (gl.Texture, error) {
 	bounds := img.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
 
-	// Need to flip the image vertically since OpenGL considers 0,0 to be the top left corner.
-	util.FlipImageVertically(img)
-
+	// Get raw RGBA pixels
+	var data []uint8
 	// Image checking from https://github.com/go-gl-legacy/glh/blob/master/texture.go
 	switch trueim := img.(type) {
 	case *image.RGBA:
-		return LoadTextureData(width, height, trueim.Pix), nil
+		data = trueim.Pix
 	case *image.NRGBA: // NRGBA is non-premultiplied RGBA. RGBA evidently is supposed to multiply the alpha value by the other colors, so NRGBA of (1, 0.5, 0, 0.5) is RGBA of (0.5, 0.25, 0. 0.5)
-		return LoadTextureData(width, height, trueim.Pix), nil
+		data = trueim.Pix
 	case *image.YCbCr:
-		return LoadTextureData(width, height, ycbCrToRGBA(trueim).Pix), nil
+		data = ycbCrToRGBA(trueim).Pix
 	default:
+		// TODO: This catch-all may work, but I haven't tested it enough.
 		// copy := image.NewRGBA(trueim.Bounds())
 		// draw.Draw(copy, trueim.Bounds(), trueim, image.Pt(0, 0), draw.Src)
 		return gl.Texture{}, fmt.Errorf("unsupported texture format %T", img)
 	}
+
+	// Need to flip the image vertically since OpenGL considers 0,0 to be the top left corner.
+	// Note width*4 since the data array consists of R,G,B,A values.
+	if err := flipYCoords(data, width*4); err != nil {
+		return gl.Texture{}, err
+	}
+	return LoadTextureData(width, height, data), nil
 }
 
 // LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
@@ -79,4 +85,21 @@ func ycbCrToRGBA(img *image.YCbCr) *image.RGBA {
 		}
 	}
 	return rgba
+}
+
+// Takes a flattened 2D array and the width of the rows.
+// Modifies the values such that if the original array were an image, it would now appear upside down.
+func flipYCoords(data []uint8, width int) error {
+	if len(data)%width != 0 {
+		return fmt.Errorf("expected flattened 2d array, got uneven row length: len %% width == %v", len(data)%width)
+	}
+	height := len(data) / width
+	for row := 0; row < height/2; row++ {
+		for col := 0; col < width; col++ {
+			temp := data[col+row*width]
+			data[col+row*width] = data[col+(height-1-row)*width]
+			data[col+(height-1-row)*width] = temp
+		}
+	}
+	return nil
 }

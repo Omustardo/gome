@@ -108,6 +108,14 @@ func main() {
 			Scale: mgl32.Vec3{100, 100, 100},
 		},
 	}
+	rectOutlineModel := &model.Model{
+		Mesh: mesh.NewRectOutline(&color.NRGBA{255, 25, 75, 255}),
+		Entity: entity.Entity{
+			Position: mgl32.Vec3{},
+			Scale:    mgl32.Vec3{100, 100, 0},
+			Rotation: mgl32.Vec3{},
+		},
+	}
 	circleModel := &model.Model{
 		Tag:  "Built in Mesh",
 		Mesh: mesh.NewCircle(&color.NRGBA{200, 50, 100, 255}, gl.Texture{}),
@@ -126,7 +134,7 @@ func main() {
 		},
 	}
 
-	models := []*model.Model{cubeModel0, cubeModel1, rectModel, circleModel, vehicleModel}
+	models := []*model.Model{cubeModel0, cubeModel1, rectModel, rectOutlineModel, circleModel, vehicleModel}
 	// Adjust model positions so they're spaced nicely
 	offset := float32(0)
 	for _, m := range models {
