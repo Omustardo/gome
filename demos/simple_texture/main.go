@@ -56,8 +56,6 @@ func main() {
 	if err := gl.GetError(); err != 0 {
 		log.Fatalf("gl error: %v", err)
 	}
-	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down.
-
 	// Initialize singletons.
 	mouse.Initialize(view.Window)
 	keyboard.Initialize(view.Window)
@@ -69,6 +67,8 @@ func main() {
 	axis.Initialize()
 
 	// =========== Done with common initializations. From here on it's specific to this demo.
+
+	shader.Model.SetAmbientLight(&color.NRGBA{255, 255, 255, 0})
 
 	tex, err := asset.LoadTexture("assets/ship.jpg")
 	if err != nil {

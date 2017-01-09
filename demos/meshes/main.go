@@ -86,55 +86,80 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create models (meshes in world space)
-	cubeModel0 := &model.Model{
-		Tag:  "Built in Mesh", // Tag is *only* for human readable output/debugging.
-		Mesh: mesh.NewCube(cubeMesh.Color, gl.Texture{}),
-		Entity: entity.Entity{
-			Scale: mgl32.Vec3{100, 100, 100},
-		},
+	capsuleMesh, err := asset.LoadOBJ("assets/capsule/capsule.obj")
+	if err != nil {
+		log.Fatal(err)
 	}
-	cubeModel1 := &model.Model{
-		Tag:  "OBJ Mesh",
-		Mesh: cubeMesh,
-		Entity: entity.Entity{
-			Scale: mgl32.Vec3{100, 100, 100},
-		},
+	capsuleTexture, err := asset.LoadTexture("assets/capsule/capsule0.jpg")
+	if err != nil {
+		log.Fatal(err)
 	}
-	rectModel := &model.Model{
-		Tag:  "Built in Mesh",
-		Mesh: mesh.NewRect(&color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
-		Entity: entity.Entity{
-			Scale: mgl32.Vec3{100, 100, 100},
-		},
-	}
-	rectOutlineModel := &model.Model{
-		Mesh: mesh.NewRectOutline(&color.NRGBA{255, 25, 75, 255}),
-		Entity: entity.Entity{
-			Position: mgl32.Vec3{},
-			Scale:    mgl32.Vec3{100, 100, 0},
-			Rotation: mgl32.Vec3{},
-		},
-	}
-	circleModel := &model.Model{
-		Tag:  "Built in Mesh",
-		Mesh: mesh.NewCircle(&color.NRGBA{200, 50, 100, 255}, gl.Texture{}),
-		Entity: entity.Entity{
-			Scale: mgl32.Vec3{100, 100, 100},
-		},
-	}
-	vehicleModel := &model.Model{
-		Tag:  "DAE Mesh",
-		Mesh: vehicleMesh,
-		Entity: entity.Entity{
-			Rotation: mgl32.Vec3{0, 0, 0},
-			// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
-			// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
-			Scale: mgl32.Vec3{10, 10, 10},
-		},
-	}
+	capsuleMesh.SetTexture(capsuleTexture)
 
-	models := []*model.Model{cubeModel0, cubeModel1, rectModel, rectOutlineModel, circleModel, vehicleModel}
+	// Create models (meshes in world space)
+	models := []*model.Model{
+		// Cube
+		{
+			Tag:  "Built in Mesh", // Tag is *only* for human readable output/debugging.
+			Mesh: mesh.NewCube(cubeMesh.Color, gl.Texture{}),
+			Entity: entity.Entity{
+				Scale: mgl32.Vec3{100, 100, 100},
+			},
+		},
+		// Cube from file
+		{
+			Tag:  "OBJ Mesh",
+			Mesh: cubeMesh,
+			Entity: entity.Entity{
+				Scale: mgl32.Vec3{100, 100, 100},
+			},
+		},
+		// Rect
+		{
+			Tag:  "Built in Mesh",
+			Mesh: mesh.NewRect(&color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Scale: mgl32.Vec3{100, 100, 100},
+			},
+		},
+		// Rect outline
+		{
+			Mesh: mesh.NewRectOutline(&color.NRGBA{255, 25, 75, 255}),
+			Entity: entity.Entity{
+				Position: mgl32.Vec3{},
+				Scale:    mgl32.Vec3{100, 100, 0},
+				Rotation: mgl32.Vec3{},
+			},
+		},
+		// Circle
+		{
+			Tag:  "Built in Mesh",
+			Mesh: mesh.NewCircle(&color.NRGBA{200, 50, 100, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Scale: mgl32.Vec3{100, 100, 100},
+			},
+		},
+		// DAE mesh
+		{
+			Tag:  "DAE Mesh",
+			Mesh: vehicleMesh,
+			Entity: entity.Entity{
+				Rotation: mgl32.Vec3{0, 0, 0},
+				// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
+				// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
+				Scale: mgl32.Vec3{10, 10, 10},
+			},
+		},
+		// Capsule
+		{
+			Tag:  "OBJ Textured Mesh",
+			Mesh: capsuleMesh,
+			Entity: entity.Entity{
+				Rotation: mgl32.Vec3{0, 0, 0},
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+	}
 	// Adjust model positions so they're spaced nicely
 	offset := float32(0)
 	for _, m := range models {
