@@ -3,7 +3,6 @@ package mesh
 import (
 	"encoding/binary"
 	"image/color"
-
 	"log"
 
 	"github.com/goxjs/gl"
@@ -28,7 +27,6 @@ func Initialize() {
 	circle = initializeCircle()
 	wireframeCircle = initializeWireframeCircle()
 	wireframeRect = initializeWireframeRect()
-	// initializeTriangle()
 }
 
 type Mesh struct {
@@ -176,6 +174,3 @@ func initializeEmptyBuffer() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyNormals)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, data...), gl.STATIC_DRAW)
 }
-
-// DestroyFunc is used to clear the buffers used by a mesh. Generally their call should be deferred.
-type DestroyFunc func()

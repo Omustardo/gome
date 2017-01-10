@@ -81,7 +81,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	vehicleMesh, err := asset.LoadDAE("assets/vehicle0.dae")
+	vehicleMesh, err := asset.LoadDAE("assets/ship/vehicle0.dae")
 	if err != nil {
 		log.Fatal(err)
 	}
