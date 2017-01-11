@@ -76,16 +76,12 @@ func main() {
 	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in the default max lighting, so tone it down.
 
 	// Load meshes.
+	// OBJ
 	cubeMesh, err := asset.LoadOBJ("assets/cube.obj")
 	cubeMesh.Color = &color.NRGBA{255, 25, 75, 255}
 	if err != nil {
 		log.Fatal(err)
 	}
-	vehicleMesh, err := asset.LoadDAE("assets/ship/vehicle0.dae")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	capsuleMesh, err := asset.LoadOBJ("assets/capsule/capsule.obj")
 	if err != nil {
 		log.Fatal(err)
@@ -95,6 +91,29 @@ func main() {
 		log.Fatal(err)
 	}
 	capsuleMesh.SetTexture(capsuleTexture)
+	shipMesh, err := asset.LoadOBJ("assets/ship/ship.obj")
+	if err != nil {
+		log.Fatal(err)
+	}
+	shipTexture, err := asset.LoadTexture("assets/ship/ship.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	shipMesh.SetTexture(shipTexture)
+	// DAE
+	vehicleMesh, err := asset.LoadDAE("assets/vehicle/vehicle0.dae")
+	if err != nil {
+		log.Fatal(err)
+	}
+	duckMesh, err := asset.LoadDAE("assets/duck/duck.dae")
+	if err != nil {
+		log.Fatal(err)
+	}
+	duckTexture, err := asset.LoadTexture("assets/duck/duck.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	duckMesh.SetTexture(duckTexture)
 
 	// Create models (meshes in world space)
 	models := []*model.Model{
@@ -139,6 +158,16 @@ func main() {
 				Scale: mgl32.Vec3{100, 100, 100},
 			},
 		},
+		// Textured OBJ mesh
+		{
+			Tag:  "OBJ Textured Mesh",
+			Mesh: shipMesh,
+			Entity: entity.Entity{
+				Rotation: mgl32.Vec3{0, 0, 0},
+				Scale:    mgl32.Vec3{5, 5, 5},
+			},
+		},
+
 		// DAE mesh
 		{
 			Tag:  "DAE Mesh",
@@ -148,6 +177,16 @@ func main() {
 				// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
 				// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
 				Scale: mgl32.Vec3{10, 10, 10},
+			},
+		},
+		{
+			Tag:  "DAE Mesh",
+			Mesh: duckMesh,
+			Entity: entity.Entity{
+				Rotation: mgl32.Vec3{0, 0, 0},
+				// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
+				// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
+				Scale: mgl32.Vec3{0.5, 0.5, 0.5},
 			},
 		},
 		// Capsule

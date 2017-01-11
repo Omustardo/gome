@@ -13,6 +13,7 @@ import (
 
 // LoadOBJ creates a mesh from an obj file.
 // Based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4
+// and similar to: https://github.com/peterudkmaya11/lux/blob/master/utils/objloader.go
 // and https://en.wikipedia.org/wiki/Wavefront_.obj_file
 // and http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
 func LoadOBJ(path string) (mesh.Mesh, error) {
@@ -175,6 +176,8 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			}
 			normalValues[i] = normals[index]
 		}
+		//log.Printf("Normal Indices: %v\n", normalIndices)
+		//log.Printf("Normal Values (%v): %v\n", len(normalValues), normalValues)
 		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normalValues...), gl.STATIC_DRAW)
 	case normals != nil: // Basic case - store the values that were read in directly into the buffer.
 		normalBuffer = gl.CreateBuffer()
