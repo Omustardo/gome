@@ -141,7 +141,7 @@ func initializeCube() Mesh {
 	)
 	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
 
-	return NewMesh(vertexBuffer, indexBuffer, normalBuffer, gl.TRIANGLES, 36, nil, EmptyTexture, textureCoordBuffer)
+	return NewMesh(vertexBuffer, indexBuffer, normalBuffer, gl.TRIANGLES, 36, nil, emptyTexture, textureCoordBuffer)
 }
 
 func NewCube(col *color.NRGBA, texture gl.Texture) Mesh {

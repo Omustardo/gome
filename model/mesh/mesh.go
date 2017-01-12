@@ -19,7 +19,6 @@ var (
 // Loads models into buffers on the GPU. glfw.Init() must be called before calling this.
 func Initialize() {
 	initializeEmptyTexture()
-	initializeEmptyTextureCoords()
 	initializeEmptyBuffer()
 
 	rect = initializeRect()
@@ -92,7 +91,7 @@ func (m *Mesh) NormalVBO() gl.Buffer {
 func (m *Mesh) SetNormalVBO(normals gl.Buffer) {
 	m.normals = normals
 	if !m.normals.Valid() {
-		m.normals = EmptyNormals
+		m.normals = emptyBuffer
 	}
 }
 func (m *Mesh) VBOMode() gl.Enum {
@@ -107,7 +106,7 @@ func (m *Mesh) Texture() gl.Texture {
 func (m *Mesh) SetTexture(texture gl.Texture) {
 	m.texture = texture
 	if !m.texture.Valid() {
-		m.texture = EmptyTexture
+		m.texture = emptyTexture
 	}
 }
 func (m *Mesh) TextureCoords() gl.Buffer {
@@ -116,7 +115,9 @@ func (m *Mesh) TextureCoords() gl.Buffer {
 func (m *Mesh) SetTextureCoords(coords gl.Buffer) {
 	m.textureCoords = coords
 	if !m.textureCoords.Valid() {
-		m.textureCoords = EmptyTextureCoords
+		// emptyBuffer only contains zeroes, which can be used as texture coordinates to all reference a single pixel
+		// in the mesh's texture.
+		m.textureCoords = emptyBuffer
 	}
 }
 
@@ -130,22 +131,17 @@ var (
 	// limits will likely be hard to detect and diagnose.
 
 	// EmptyTexture is a texture buffer filled with just four bytes: [255, 255, 255, 255]
-	// It is referenced by EmptyTextureCoords and is meant to be used as in meshes that don't contain another texture.
-	EmptyTexture gl.Texture
-
-	// EmptyTextureCoords is a buffer on the GPU containing many 1's. These are all texture coordinates, pointing to the
-	// single texel in EmptyTexture. This allows it to be used as a stand in / default texture mapping for objects that
-	// don't have a texture of their own.
-	EmptyTextureCoords gl.Buffer
+	// It is meant to be used as in meshes that don't contain another texture.
+	emptyTexture gl.Texture
 
 	// EmptyNormals is a buffer on the GPU containing many zeros. This is used as a default for meshes that don't have the
 	// relevant values defined, but still need to use a buffer since the shader requires having some values.
-	EmptyNormals gl.Buffer
+	emptyBuffer gl.Buffer
 )
 
 func initializeEmptyTexture() {
-	EmptyTexture = gl.CreateTexture()
-	gl.BindTexture(gl.TEXTURE_2D, EmptyTexture)
+	emptyTexture = gl.CreateTexture()
+	gl.BindTexture(gl.TEXTURE_2D, emptyTexture)
 	// NOTE: gl.FLOAT isn't enabled for texture data types unless gl.getExtension('OES_texture_float'); is set, so just use gl.UNSIGNED_BYTE
 	//   See http://stackoverflow.com/questions/23124597/storing-floats-in-a-texture-in-opengl-es  http://stackoverflow.com/questions/22666556/webgl-texture-creation-trouble
 	gl.TexImage2D(gl.TEXTURE_2D, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, []uint8{255, 255, 255, 255})
@@ -156,21 +152,9 @@ func initializeEmptyTexture() {
 	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 }
 
-func initializeEmptyTextureCoords() {
-	coords := make([]float32, emptyBufferSize) // large array of 1 values
-	for i := range coords {
-		coords[i] = 1.0 // @@@@@@@@@@ why use 1 rather than 0? Thinking it should be 0.
-	}
-	textureCoordinates := bytecoder.Float32(binary.LittleEndian, coords...) // @@@@@@@@@@@@@@@@ TODO: Can this buffer be removed and just use EmptyBuffer instead?
-
-	EmptyTextureCoords = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyTextureCoords)
-	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
-}
-
 func initializeEmptyBuffer() {
 	data := make([]float32, emptyBufferSize) // large array of 0 values
-	EmptyNormals = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, EmptyNormals)
+	emptyBuffer = gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, emptyBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, data...), gl.STATIC_DRAW)
 }
