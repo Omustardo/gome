@@ -19,6 +19,9 @@ func LoadDAE(path string) (mesh.Mesh, error) {
 	return loadDAEData(data)
 }
 
+// TODO: Fully implement DAE loading. Currently only supports the basic vertex mesh. Texture mapping, normals, and advanced DAE features are not implemented.
+// This uses https://github.com/GlenKelley/go-collada which doesn't appear to be complete.
+// In generally DAE appears to be less than well supported, so this is a low priority.
 func loadDAEData(data []byte) (mesh.Mesh, error) {
 	reader := bytes.NewBuffer(data)
 
