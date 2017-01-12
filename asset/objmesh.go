@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/bytecoder"
 	"github.com/omustardo/gome/model/mesh"
-	"github.com/omustardo/gome/util/bytecoder"
 )
 
 // This code is originally based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4

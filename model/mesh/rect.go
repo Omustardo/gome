@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/util/bytecoder"
+	"github.com/omustardo/bytecoder"
 )
 
 func NewRect(col *color.NRGBA, texture gl.Texture) Mesh {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/util/bytecoder"
+	"github.com/omustardo/bytecoder"
 )
 
 const numCircleSegments = 360

@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/util/bytecoder"
+	"github.com/omustardo/bytecoder"
 )
 
 var (
@@ -40,6 +40,9 @@ type Mesh struct {
 
 	normals gl.Buffer
 
+	texture       gl.Texture
+	textureCoords gl.Buffer
+
 	// VBOMode is the gl Mode passed to a Draw call.
 	// Most commonly, it is gl.TRIANGLES. See https://en.wikibooks.org/wiki/OpenGL_Programming/GLStart/Tut3
 	vboMode gl.Enum
@@ -53,9 +56,6 @@ type Mesh struct {
 	// Note that the color.Color interface's Color() function returns weird values (between 0 and 0xFFFF for avoiding overflow).
 	// I recommend just accessing the RGBA fields directly.
 	Color *color.NRGBA
-
-	texture       gl.Texture
-	textureCoords gl.Buffer
 }
 
 // NewMesh combines the input buffers and rendering information into a Mesh struct.

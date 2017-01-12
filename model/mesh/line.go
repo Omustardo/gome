@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/util/bytecoder"
+	"github.com/omustardo/bytecoder"
 )
 
 func NewLine(p1, p2 mgl32.Vec3, col *color.NRGBA) Mesh {

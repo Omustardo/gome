@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"github.com/goxjs/gl"
-	"github.com/omustardo/gome/util/bytecoder"
+	"github.com/omustardo/bytecoder"
 )
 
 // Based on https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Creating_3D_objects_using_WebGL

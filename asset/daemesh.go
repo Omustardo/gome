@@ -7,8 +7,8 @@ import (
 
 	"github.com/GlenKelley/go-collada"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/bytecoder"
 	"github.com/omustardo/gome/model/mesh"
-	"github.com/omustardo/gome/util/bytecoder"
 )
 
 func LoadDAE(path string) (mesh.Mesh, error) {
