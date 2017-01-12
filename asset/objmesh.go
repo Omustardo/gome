@@ -11,11 +11,25 @@ import (
 	"github.com/omustardo/gome/util/bytecoder"
 )
 
-// LoadOBJ creates a mesh from an obj file.
-// Based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4
-// and similar to: https://github.com/peterudkmaya11/lux/blob/master/utils/objloader.go
+// This code is originally based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4
 // and https://en.wikipedia.org/wiki/Wavefront_.obj_file
 // and http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
+//
+// Unfortunately, found this list after implementing... I should probably use one of these instead:
+// Other Golang OBJ loaders from https://github.com/mmchugh/gomobile-examples/issues/6
+//https://github.com/go-qml/qml/blob/v1/examples/gopher/wavefront.go https://github.com/peterhellberg/wavefront/blob/master/wavefront.go
+//https://github.com/Stymphalian/go.gl/blob/master/jgl/obj_filereader.go
+//https://github.com/tobscher/go-three/blob/master/loaders/obj.go
+//https://github.com/adam000/read-obj/tree/master/obj https://github.com/adam000/read-obj/blob/master/mtl/mtl.go
+//https://github.com/udhos/negentropia/blob/master/webserv/src/negentropia/world/obj/obj.go
+//https://github.com/fogleman/pt/blob/master/pt/obj.go
+//https://github.com/luxengine/lux/blob/master/utils/objloader.go
+//https://github.com/gmacd/obj/blob/master/obj.go
+//https://github.com/gographics/goviewer/blob/master/loader/wavefront.go
+//https://github.com/sf1/go3dm
+//https://github.com/peterudkmaya11/lux/blob/master/utils/objloader.go
+
+// LoadOBJ creates a mesh from an obj file.
 func LoadOBJ(path string) (mesh.Mesh, error) {
 	fileData, err := loadFile(path)
 	if err != nil {
@@ -39,7 +53,7 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 
 	// Indices are used by the OBJ file format to declare full triangles via the 'f'ace tag.
 	// Except for the basic vertex indices, the read in indices are converted back to the values that they reference.
-	var vertIndices, textureCoordIndices, normalIndices []uint16
+	var vertIndices, uvIndices, normalIndices []uint16
 
 	for lineNum, line := range lines {
 		lineNum++ // numbering is for debug printing, and humans think of files as starting with line 1.
@@ -114,12 +128,12 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			case strings.Count(line, "/") == 3:
 				count, err = fmt.Sscanf(line, "%d/%d %d/%d %d/%d", &vec[0], &uv[0], &vec[1], &uv[1], &vec[2], &uv[2])
 				vertIndices = append(vertIndices, vec[0]-1, vec[1]-1, vec[2]-1)
-				textureCoordIndices = append(textureCoordIndices, uv[0]-1, uv[1]-1, uv[2]-1)
+				uvIndices = append(uvIndices, uv[0]-1, uv[1]-1, uv[2]-1)
 				expectedCount = 6
 			case strings.Count(line, "/") == 6:
 				count, err = fmt.Sscanf(line, "%d/%d/%d %d/%d/%d %d/%d/%d", &vec[0], &uv[0], &norm[0], &vec[1], &uv[1], &norm[1], &vec[2], &uv[2], &norm[2])
 				vertIndices = append(vertIndices, vec[0]-1, vec[1]-1, vec[2]-1)
-				textureCoordIndices = append(textureCoordIndices, uv[0]-1, uv[1]-1, uv[2]-1)
+				uvIndices = append(uvIndices, uv[0]-1, uv[1]-1, uv[2]-1)
 				normalIndices = append(normalIndices, norm[0]-1, norm[1]-1, norm[2]-1)
 				expectedCount = 9
 			default:
@@ -148,33 +162,31 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		if normalIndices != nil && len(vertIndices) != len(normalIndices) {
 			return mesh.Mesh{}, fmt.Errorf("read in vertex and normal indices, but counts don't match: %d vs %d", len(vertIndices), len(normalIndices))
 		}
-		if textureCoordIndices != nil && len(vertIndices) != len(textureCoordIndices) {
-			return mesh.Mesh{}, fmt.Errorf("read in vertex and texture coord indices, but counts don't match: %d vs %d", len(vertIndices), len(textureCoordIndices))
+		if uvIndices != nil && len(vertIndices) != len(uvIndices) {
+			return mesh.Mesh{}, fmt.Errorf("read in vertex and texture coord indices, but counts don't match: %d vs %d", len(vertIndices), len(uvIndices))
 		}
 	}
 
-	var vertexBuffer, vertexIndexBuffer, textureCoordBuffer, normalBuffer gl.Buffer
+	var vertexBuffer, uvBuffer, normalBuffer gl.Buffer
 
+	if len(vertIndices) > 0 {
+		vertexValues, err := indicesToValues(vertIndices, verts)
+		if err != nil {
+			return mesh.Mesh{}, err
+		}
+		verts = vertexValues
+	}
 	vertexBuffer = gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, verts...), gl.STATIC_DRAW)
-
-	if len(vertIndices) > 0 {
-		vertexIndexBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer)
-		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, vertIndices...), gl.STATIC_DRAW)
-	}
 
 	switch {
 	case normalIndices != nil: // Using index buffers - dereference the normal indices and put the values in the buffer.
 		normalBuffer = gl.CreateBuffer()
 		gl.BindBuffer(gl.ARRAY_BUFFER, normalBuffer)
-		normalValues := make([]mgl32.Vec3, len(normalIndices))
-		for i, index := range normalIndices {
-			if int(index) >= len(normals) {
-				return mesh.Mesh{}, fmt.Errorf("unexpected Normal index %d, out of range of the provided %d normals", index+1, len(normals))
-			}
-			normalValues[i] = normals[index]
+		normalValues, err := indicesToValues(normalIndices, normals)
+		if err != nil {
+			return mesh.Mesh{}, err
 		}
 		//log.Printf("Normal Indices: %v\n", normalIndices)
 		//log.Printf("Normal Values (%v): %v\n", len(normalValues), normalValues)
@@ -188,11 +200,11 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 	}
 
 	switch {
-	case textureCoordIndices != nil: // Using index buffers - dereference the texture coordinates and put actual coords in the buffer.
-		textureCoordBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
-		textureCoordValues := make([]mgl32.Vec2, len(textureCoordIndices))
-		for i, index := range textureCoordIndices {
+	case uvIndices != nil: // Using index buffers - dereference the texture coordinates and put actual coords in the buffer.
+		uvBuffer = gl.CreateBuffer()
+		gl.BindBuffer(gl.ARRAY_BUFFER, uvBuffer)
+		textureCoordValues := make([]mgl32.Vec2, len(uvIndices))
+		for i, index := range uvIndices {
 			if int(index) >= len(textureCoords) {
 				return mesh.Mesh{}, fmt.Errorf("unexpected Texture Coordinate index %d, out of range of the provided %d texture coordinates", index+1, len(textureCoords))
 			}
@@ -200,8 +212,8 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		}
 		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec2(binary.LittleEndian, textureCoordValues...), gl.STATIC_DRAW)
 	case textureCoords != nil: // Basic case - store the values that were read in directly into the buffer.
-		textureCoordBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
+		uvBuffer = gl.CreateBuffer()
+		gl.BindBuffer(gl.ARRAY_BUFFER, uvBuffer)
 		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec2(binary.LittleEndian, textureCoords...), gl.STATIC_DRAW)
 	default:
 		// Nothing to be done - return an uninitialized buffer which must be handled before mesh is rendered.
@@ -215,9 +227,23 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 	//log.Printf("Normals: %v\n", normals)
 	//log.Printf("Vertex Indices: %v\n", vertIndices)
 
-	itemCount := len(verts) / 3 // 3 vertices per triangle. // @@@@ TODO: Make sure this works.
+	itemCount := len(verts) / 3 // 3 vertices per triangle.
 	if vertIndices != nil {
 		itemCount = len(vertIndices)
 	}
-	return mesh.NewMesh(vertexBuffer, vertexIndexBuffer, normalBuffer, gl.TRIANGLES, itemCount, nil, gl.Texture{}, textureCoordBuffer), nil
+	return mesh.NewMesh(vertexBuffer, gl.Buffer{}, normalBuffer, gl.TRIANGLES, itemCount, nil, gl.Texture{}, uvBuffer), nil
+}
+
+// indicesToValues takes a list of indices and the data they reference, and returns the raw list of referenced data
+// with all of the duplicate values that entails.
+// Note that the indices are expected to be zero based, even though OBJ files use 1 based indexing.
+func indicesToValues(indices []uint16, data []mgl32.Vec3) ([]mgl32.Vec3, error) {
+	values := make([]mgl32.Vec3, len(indices))
+	for i, index := range indices {
+		if int(index) >= len(data) {
+			return nil, fmt.Errorf("unexpected index %d, out of range of the provided %d data", index+1, len(data))
+		}
+		values[i] = data[index]
+	}
+	return values, nil
 }
