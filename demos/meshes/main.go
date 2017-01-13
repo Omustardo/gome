@@ -82,7 +82,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	capsuleMesh, err := asset.LoadOBJ("assets/capsule/capsule.obj")
+	capsuleMesh, err := asset.LoadOBJNormalized("assets/capsule/capsule.obj")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func main() {
 		log.Fatal(err)
 	}
 	capsuleMesh.SetTexture(capsuleTexture)
-	shipMesh, err := asset.LoadOBJ("assets/ship/ship.obj")
+	shipMesh, err := asset.LoadOBJNormalized("assets/ship/ship.obj")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func main() {
 			Mesh: shipMesh,
 			Entity: entity.Entity{
 				Rotation: mgl32.Vec3{0, 0, 0},
-				Scale:    mgl32.Vec3{5, 5, 5},
+				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
 

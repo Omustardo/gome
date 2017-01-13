@@ -5,6 +5,9 @@ import (
 	"image/color"
 	"log"
 
+	"fmt"
+
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/omustardo/bytecoder"
 )
@@ -56,6 +59,33 @@ type Mesh struct {
 	// Note that the color.Color interface's Color() function returns weird values (between 0 and 0xFFFF for avoiding overflow).
 	// I recommend just accessing the RGBA fields directly.
 	Color *color.NRGBA
+}
+
+// NewMeshFromArrays copies the input vertices, normals, and texture coordinates into buffers on the GPU.
+func NewMeshFromArrays(vertices, normals []mgl32.Vec3, textureCoords []mgl32.Vec2) (Mesh, error) {
+	var vertexBuffer, uvBuffer, normalBuffer gl.Buffer
+
+	vertexBuffer = gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, vertices...), gl.STATIC_DRAW)
+
+	normalBuffer = gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, normalBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normals...), gl.STATIC_DRAW)
+
+	uvBuffer = gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, uvBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec2(binary.LittleEndian, textureCoords...), gl.STATIC_DRAW)
+
+	if glError := gl.GetError(); glError != 0 {
+		return Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
+	}
+
+	//log.Printf("Vertices: %v\n", verts)
+	//log.Printf("Normals: %v\n", normals)
+	//log.Printf("Vertex Indices: %v\n", vertIndices)
+
+	return NewMesh(vertexBuffer, gl.Buffer{}, normalBuffer, gl.TRIANGLES, len(vertices), nil, gl.Texture{}, uvBuffer), nil
 }
 
 // NewMesh combines the input buffers and rendering information into a Mesh struct.

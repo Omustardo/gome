@@ -71,10 +71,8 @@ func Initialize(width, height int, windowName string) error {
 	framebufferSizeCallback := func(w *glfw.Window, framebufferSizeX, framebufferSizeY int) {
 		gl.Viewport(0, 0, framebufferSizeX, framebufferSizeY)
 	}
-	{
-		framebufferSizeX, framebufferSizeY := window.GetFramebufferSize()
-		framebufferSizeCallback(window, framebufferSizeX, framebufferSizeY)
-	}
+	framebufferSizeX, framebufferSizeY := window.GetFramebufferSize()
+	framebufferSizeCallback(window, framebufferSizeX, framebufferSizeY)
 	window.SetFramebufferSizeCallback(framebufferSizeCallback)
 
 	Window = window

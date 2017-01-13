@@ -144,6 +144,7 @@ func initializeCube() Mesh {
 	return NewMesh(vertexBuffer, indexBuffer, normalBuffer, gl.TRIANGLES, 36, nil, emptyTexture, textureCoordBuffer)
 }
 
+// NewCube returns a Mesh of a unit cube (all sides length 1) centered at the origin.
 func NewCube(col *color.NRGBA, texture gl.Texture) Mesh {
 	c := cube
 	c.Color = col

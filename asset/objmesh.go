@@ -1,13 +1,11 @@
 package asset
 
 import (
-	"encoding/binary"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/goxjs/gl"
-	"github.com/omustardo/bytecoder"
 	"github.com/omustardo/gome/model/mesh"
 )
 
@@ -31,28 +29,47 @@ import (
 
 // LoadOBJ creates a mesh from an obj file.
 func LoadOBJ(path string) (mesh.Mesh, error) {
+	return loadOBJ(path, false)
+}
+
+// LoadOBJNormalized creates a mesh from an obj file.
+// The loaded OBJ is scaled to be as large as possible while still fitting in a unit sphere.
+func LoadOBJNormalized(path string) (mesh.Mesh, error) {
+	return loadOBJ(path, true)
+}
+
+func loadOBJ(path string, normalize bool) (mesh.Mesh, error) {
 	fileData, err := loadFile(path)
 	if err != nil {
 		return mesh.Mesh{}, err
 	}
-	out, err := loadOBJData(fileData)
+	verts, normals, textureCoords, err := loadOBJData(fileData)
 	if err != nil {
 		return mesh.Mesh{}, fmt.Errorf("Error loading %s: %v", path, err)
 	}
-	return out, nil
+
+	if normalize {
+		// Normalize input vertices so the input mesh is exactly as large as it can be while still fitting in a unit sphere.
+		// This makes scaling meshes relative to each other very easy to think about.
+		// TODO: Consider centering meshes when resizing them to avoid empty space making them smaller than necessary.
+		maxLength := float32(math.SmallestNonzeroFloat32)
+		for _, v := range verts {
+			if length := v.Len(); length > maxLength {
+				maxLength = length
+			}
+		}
+		for i := range verts {
+			verts[i] = verts[i].Mul(1 / maxLength)
+		}
+	}
+	return mesh.NewMeshFromArrays(verts, normals, textureCoords)
 }
 
-func loadOBJData(data []byte) (mesh.Mesh, error) {
+func loadOBJData(data []byte) (verts, normals []mgl32.Vec3, textureCoords []mgl32.Vec2, err error) {
 	lines := strings.Split(string(data), "\n")
 
-	// The raw per-point data that defines a mesh.
-	var (
-		verts, normals []mgl32.Vec3
-		textureCoords  []mgl32.Vec2
-	)
-
 	// Indices are used by the OBJ file format to declare full triangles via the 'f'ace tag.
-	// Except for the basic vertex indices, the read in indices are converted back to the values that they reference.
+	// All of these indices are converted back to the values that they reference and stored in gl buffers to be returned.
 	var vertIndices, uvIndices, normalIndices []uint16
 
 	for lineNum, line := range lines {
@@ -67,10 +84,10 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		var lineType string
 		count, err := fmt.Sscanf(line, "%s", &lineType)
 		if err != nil {
-			return mesh.Mesh{}, err
+			return nil, nil, nil, err
 		}
 		if count != 1 {
-			return mesh.Mesh{}, fmt.Errorf("at line #%d, unable to get line type: %v", lineNum, err)
+			return nil, nil, nil, fmt.Errorf("at line #%d, unable to get line type: %v", lineNum, err)
 		}
 		// Trim off the text that has been read.
 		line = strings.TrimSpace(line[len(lineType):])
@@ -81,10 +98,10 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			vec := mgl32.Vec3{}
 			count, err := fmt.Sscanf(line, "%f %f %f", &vec[0], &vec[1], &vec[2])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading vertices: %v", lineNum, err)
+				return nil, nil, nil, fmt.Errorf("at line #%d, error reading vertices: %v", lineNum, err)
 			}
 			if count != 3 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for vertices. Expected 3", lineNum, count)
+				return nil, nil, nil, fmt.Errorf("at line #%d, got %d values for vertices. Expected 3", lineNum, count)
 			}
 			verts = append(verts, vec)
 
@@ -93,10 +110,10 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			vec := mgl32.Vec3{}
 			count, err := fmt.Sscanf(line, "%f %f %f", &vec[0], &vec[1], &vec[2])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading normals: %v", lineNum, err)
+				return nil, nil, nil, fmt.Errorf("at line #%d, error reading normals: %v", lineNum, err)
 			}
 			if count != 3 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for normals. Expected 3", lineNum, count)
+				return nil, nil, nil, fmt.Errorf("at line #%d, got %d values for normals. Expected 3", lineNum, count)
 			}
 			normals = append(normals, vec)
 
@@ -105,10 +122,10 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 			vec := mgl32.Vec2{}
 			count, err := fmt.Sscanf(line, "%f %f", &vec[0], &vec[1])
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading texture vertices: %v", lineNum, err)
+				return nil, nil, nil, fmt.Errorf("at line #%d, error reading texture vertices: %v", lineNum, err)
 			}
 			if count != 2 {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %v values for texture vertices. Expected 2", lineNum, count)
+				return nil, nil, nil, fmt.Errorf("at line #%d, got %v values for texture vertices. Expected 2", lineNum, count)
 			}
 			textureCoords = append(textureCoords, vec)
 
@@ -137,13 +154,13 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 				normalIndices = append(normalIndices, norm[0]-1, norm[1]-1, norm[2]-1)
 				expectedCount = 9
 			default:
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading indices: %v", lineNum, err)
+				return nil, nil, nil, fmt.Errorf("at line #%d, error reading indices: %v", lineNum, err)
 			}
 			if err != nil {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, error reading indices: %v", lineNum, err)
+				return nil, nil, nil, fmt.Errorf("at line #%d, error reading indices: %v", lineNum, err)
 			}
 			if count != expectedCount {
-				return mesh.Mesh{}, fmt.Errorf("at line #%d, got %d values for vec,uv,norm. Expected %d", lineNum, count, expectedCount)
+				return nil, nil, nil, fmt.Errorf("at line #%d, got %d values for vec,uv,norm. Expected %d", lineNum, count, expectedCount)
 			}
 
 		// COMMENT
@@ -152,86 +169,43 @@ func loadOBJData(data []byte) (mesh.Mesh, error) {
 		case "g":
 		// TODO: Support groups
 		default:
-			// Do nothing - ignore unknown fields (
+			// Do nothing - ignore unknown fields
 		}
 	}
-
-	// TODO: Split everything below into another function - all the data processing.
 
 	if vertIndices != nil {
 		if normalIndices != nil && len(vertIndices) != len(normalIndices) {
-			return mesh.Mesh{}, fmt.Errorf("read in vertex and normal indices, but counts don't match: %d vs %d", len(vertIndices), len(normalIndices))
+			return nil, nil, nil, fmt.Errorf("read in vertex and normal indices, but counts don't match: %d vs %d", len(vertIndices), len(normalIndices))
 		}
 		if uvIndices != nil && len(vertIndices) != len(uvIndices) {
-			return mesh.Mesh{}, fmt.Errorf("read in vertex and texture coord indices, but counts don't match: %d vs %d", len(vertIndices), len(uvIndices))
+			return nil, nil, nil, fmt.Errorf("read in vertex and texture coord indices, but counts don't match: %d vs %d", len(vertIndices), len(uvIndices))
 		}
 	}
 
-	var vertexBuffer, uvBuffer, normalBuffer gl.Buffer
-
-	if len(vertIndices) > 0 {
-		vertexValues, err := indicesToValues(vertIndices, verts)
+	// If vertices were provided with an index buffer, transform it into a list of raw vertices.
+	if vertIndices != nil {
+		verts, err = indicesToValues(vertIndices, verts)
 		if err != nil {
-			return mesh.Mesh{}, err
+			return nil, nil, nil, err
 		}
-		verts = vertexValues
 	}
-	vertexBuffer = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, verts...), gl.STATIC_DRAW)
-
-	switch {
-	case normalIndices != nil: // Using index buffers - dereference the normal indices and put the values in the buffer.
-		normalBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, normalBuffer)
-		normalValues, err := indicesToValues(normalIndices, normals)
+	if normalIndices != nil {
+		normals, err = indicesToValues(normalIndices, normals)
 		if err != nil {
-			return mesh.Mesh{}, err
+			return nil, nil, nil, err
 		}
-		//log.Printf("Normal Indices: %v\n", normalIndices)
-		//log.Printf("Normal Values (%v): %v\n", len(normalValues), normalValues)
-		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normalValues...), gl.STATIC_DRAW)
-	case normals != nil: // Basic case - store the values that were read in directly into the buffer.
-		normalBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, normalBuffer)
-		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normals...), gl.STATIC_DRAW)
-	default:
-		// Nothing to be done - return an uninitialized buffer which must be handled before mesh is rendered.
 	}
-
-	switch {
-	case uvIndices != nil: // Using index buffers - dereference the texture coordinates and put actual coords in the buffer.
-		uvBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, uvBuffer)
+	if uvIndices != nil {
 		textureCoordValues := make([]mgl32.Vec2, len(uvIndices))
 		for i, index := range uvIndices {
 			if int(index) >= len(textureCoords) {
-				return mesh.Mesh{}, fmt.Errorf("unexpected Texture Coordinate index %d, out of range of the provided %d texture coordinates", index+1, len(textureCoords))
+				return nil, nil, nil, fmt.Errorf("unexpected Texture Coordinate index %d, out of range of the provided %d texture coordinates", index+1, len(textureCoords))
 			}
 			textureCoordValues[i] = textureCoords[index]
 		}
-		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec2(binary.LittleEndian, textureCoordValues...), gl.STATIC_DRAW)
-	case textureCoords != nil: // Basic case - store the values that were read in directly into the buffer.
-		uvBuffer = gl.CreateBuffer()
-		gl.BindBuffer(gl.ARRAY_BUFFER, uvBuffer)
-		gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec2(binary.LittleEndian, textureCoords...), gl.STATIC_DRAW)
-	default:
-		// Nothing to be done - return an uninitialized buffer which must be handled before mesh is rendered.
+		textureCoords = textureCoordValues
 	}
-
-	if glError := gl.GetError(); glError != 0 {
-		return mesh.Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
-	}
-
-	//log.Printf("Vertices: %v\n", verts)
-	//log.Printf("Normals: %v\n", normals)
-	//log.Printf("Vertex Indices: %v\n", vertIndices)
-
-	itemCount := len(verts) / 3 // 3 vertices per triangle.
-	if vertIndices != nil {
-		itemCount = len(vertIndices)
-	}
-	return mesh.NewMesh(vertexBuffer, gl.Buffer{}, normalBuffer, gl.TRIANGLES, itemCount, nil, gl.Texture{}, uvBuffer), nil
+	return verts, normals, textureCoords, nil
 }
 
 // indicesToValues takes a list of indices and the data they reference, and returns the raw list of referenced data
