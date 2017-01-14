@@ -26,6 +26,22 @@ import (
 //https://github.com/gographics/goviewer/blob/master/loader/wavefront.go
 //https://github.com/sf1/go3dm
 //https://github.com/peterudkmaya11/lux/blob/master/utils/objloader.go
+//
+// TODO: Consider supporting materials (mtl tag). Info on specific MTL tags: http://nendowingsmirai.yuku.com/forum/viewtopic/id/1723#.WHmLqhsrIuU
+// Ns = Phong specular component.
+// Kd = Diffuse color weighted by the diffuse coefficient.
+// Ka = Ambient color weighted by the ambient coefficient.
+// Ks = Specular color weighted by the specular coefficient.
+// d = Dissolve factor (pseudo-transparency). Values are from 0-1. 0 is completely transparent, 1 is opaque.
+// Ni = Refraction index. Values range from 1 upwards. A value of 1 will cause no refraction. A higher value implies refraction.
+// illum = (0, 1, or 2) 0 to disable lighting, 1 for ambient & diffuse only (specular color set to black), 2 for full lighting (see below)
+// sharpness = ?
+// map_Kd = Diffuse color texture map.
+// map_Ks = Specular color texture map.
+// map_Ka = Ambient color texture map.
+// map_Bump = Bump texture map.
+// map_d = Opacity texture map.
+// refl = reflection type and filename (?)
 
 // LoadOBJ creates a mesh from an obj file.
 func LoadOBJ(path string) (mesh.Mesh, error) {
