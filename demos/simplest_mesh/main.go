@@ -18,6 +18,7 @@ import (
 	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
+	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
@@ -69,7 +70,7 @@ func main() {
 		Entity: entity.Entity{
 			Position: mgl32.Vec3{},
 			Scale:    mgl32.Vec3{100, 100, 100},
-			Rotation: mgl32.Vec3{},
+			Rotation: mgl32.QuatIdent(),
 		},
 	}
 
@@ -82,7 +83,7 @@ func main() {
 		FOV:          math.Pi / 2.0,
 	}
 
-	rotationPerSecond := float32(math.Pi / 4)
+	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4)*0.8, float32(math.Pi/4), float32(math.Pi/4)*1.3, mgl32.XYZ)
 
 	ticker := time.NewTicker(time.Second / 60)
 	for !view.Window.ShouldClose() {
@@ -94,12 +95,7 @@ func main() {
 
 		ApplyInputs(target, cam)
 
-		rotate := func(m *model.Model) {
-			m.Rotation[0] += rotationPerSecond * fps.Handler.DeltaTimeSeconds() * 0.8
-			m.Rotation[1] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
-			m.Rotation[2] += rotationPerSecond * fps.Handler.DeltaTimeSeconds() * 1.3
-		}
-		rotate(target)
+		target.ModifyRotationLocalQ(util.ScaleQuatRotation(rotationPerSecond, fps.Handler.DeltaTimeSeconds()))
 
 		cam.Update()
 

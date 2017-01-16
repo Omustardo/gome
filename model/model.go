@@ -41,7 +41,7 @@ func (m *Model) Render() {
 	// TODO: Consider a "modelviewer" feature - let meshes have their own Render() method where they are rendered within a unit cube centered at the origin with no lighting or other world effects.
 	shader.Model.SetDefaults()
 	shader.Model.SetTranslationMatrix(m.Position.X(), m.Position.Y(), m.Position.Z())
-	shader.Model.SetRotationMatrix(m.Rotation.X(), m.Rotation.Y(), m.Rotation.Z())
+	shader.Model.SetRotationMatrixQ(m.Rotation)
 	shader.Model.SetScaleMatrix(m.Scale.X(), m.Scale.Y(), m.Scale.Z())
 	shader.Model.SetColor(m.Mesh.Color)
 	shader.Model.SetTexture(m.Mesh.Texture())
@@ -64,6 +64,10 @@ func (m *Model) Render() {
 	} else {
 		gl.DrawArrays(m.VBOMode(), 0, m.ItemCount())
 	}
+}
+
+func (m *Model) RenderRotationAxes() {
+	// TODO
 }
 
 // TODO: Global shader variables that keeps track of current programs/other vars so we don't have so many shader.UseProgram() and others.

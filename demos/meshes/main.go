@@ -21,6 +21,7 @@ import (
 	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
+	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
@@ -122,7 +123,8 @@ func main() {
 			Tag:  "Built in Mesh", // Tag is *only* for human readable output/debugging.
 			Mesh: mesh.NewCube(cubeMesh.Color, gl.Texture{}),
 			Entity: entity.Entity{
-				Scale: mgl32.Vec3{100, 100, 100},
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
 		// Cube from file
@@ -130,7 +132,8 @@ func main() {
 			Tag:  "OBJ Mesh",
 			Mesh: cubeMesh,
 			Entity: entity.Entity{
-				Scale: mgl32.Vec3{100, 100, 100},
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
 		// Rect
@@ -138,7 +141,8 @@ func main() {
 			Tag:  "Built in Mesh",
 			Mesh: mesh.NewRect(&color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
 			Entity: entity.Entity{
-				Scale: mgl32.Vec3{100, 100, 100},
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
 		// Rect outline
@@ -146,8 +150,8 @@ func main() {
 			Mesh: mesh.NewRectOutline(&color.NRGBA{255, 25, 75, 255}),
 			Entity: entity.Entity{
 				Position: mgl32.Vec3{},
+				Rotation: mgl32.QuatIdent(),
 				Scale:    mgl32.Vec3{100, 100, 0},
-				Rotation: mgl32.Vec3{},
 			},
 		},
 		// Circle
@@ -155,7 +159,8 @@ func main() {
 			Tag:  "Built in Mesh",
 			Mesh: mesh.NewCircle(&color.NRGBA{200, 50, 100, 255}, gl.Texture{}),
 			Entity: entity.Entity{
-				Scale: mgl32.Vec3{100, 100, 100},
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
 		// Textured OBJ mesh
@@ -163,7 +168,7 @@ func main() {
 			Tag:  "OBJ Textured Mesh",
 			Mesh: shipMesh,
 			Entity: entity.Entity{
-				Rotation: mgl32.Vec3{0, 0, 0},
+				Rotation: mgl32.QuatIdent(),
 				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
@@ -173,7 +178,7 @@ func main() {
 			Tag:  "DAE Mesh",
 			Mesh: vehicleMesh,
 			Entity: entity.Entity{
-				Rotation: mgl32.Vec3{0, 0, 0},
+				Rotation: mgl32.QuatIdent(),
 				// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
 				// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
 				Scale: mgl32.Vec3{10, 10, 10},
@@ -183,7 +188,7 @@ func main() {
 			Tag:  "DAE Mesh",
 			Mesh: duckMesh,
 			Entity: entity.Entity{
-				Rotation: mgl32.Vec3{0, 0, 0},
+				Rotation: mgl32.QuatIdent(),
 				// Ideally the scale of all provided meshes fits them exactly into a unit cube, so scale is easy to work with.
 				// In this case the vehicle model is already reasonably large, so don't scale it as much as other models.
 				Scale: mgl32.Vec3{0.5, 0.5, 0.5},
@@ -194,7 +199,7 @@ func main() {
 			Tag:  "OBJ Textured Mesh",
 			Mesh: capsuleMesh,
 			Entity: entity.Entity{
-				Rotation: mgl32.Vec3{0, 0, 0},
+				Rotation: mgl32.QuatIdent(),
 				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
@@ -217,7 +222,7 @@ func main() {
 		FOV:          math.Pi / 2.0,
 	}
 
-	rotationPerSecond := float32(math.Pi / 4)
+	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4), float32(math.Pi/4), float32(math.Pi/4), mgl32.XYZ)
 
 	ticker := time.NewTicker(*frameRate)
 	for !view.Window.ShouldClose() {
@@ -229,10 +234,8 @@ func main() {
 		ApplyInputs(player, cam)
 
 		// Update the rotation.
-		for _, m := range models {
-			m.Rotation[0] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
-			m.Rotation[1] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
-			m.Rotation[2] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
+		for i := range models {
+			models[i].ModifyRotationLocalQ(util.ScaleQuatRotation(rotationPerSecond, fps.Handler.DeltaTimeSeconds()))
 		}
 
 		// Set up Model-View-Projection Matrix and send it to the shader program.

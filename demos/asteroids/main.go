@@ -13,6 +13,7 @@ import (
 	"github.com/goxjs/glfw"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
+	"github.com/omustardo/gome/camera/zoom"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/demos/asteroids/asteroid"
 	"github.com/omustardo/gome/input/keyboard"
@@ -20,6 +21,7 @@ import (
 	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
+	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
@@ -82,18 +84,28 @@ func main() {
 	shipMesh.SetTexture(shipTexture)
 	playerShip := &model.Model{
 		Mesh: shipMesh,
-		//Entity: entity.Default,
 		Entity: entity.Entity{
-			Scale: mgl32.Vec3{4, 4, 4},
+			Position: mgl32.Vec3{0, -200, 0},
+			// Rotate the model so it starts facing directly toward the positive Y axis, which is up on the user's screen.
+			// Remember that these rotations are applied in the order specified by the final parameter
+			// and that like a unit circle, positive values go to the "left" and negative values go to the "right".
+			// X,Y,Z correspond to Roll, Pitch, and Yaw.
+			Rotation: mgl32.AnglesToQuat(mgl32.DegToRad(90), mgl32.DegToRad(-90), 0, mgl32.XYZ),
+			Scale:    mgl32.Vec3{4, 4, 4},
 		},
 	}
 	cam := &camera.TargetCamera{
 		Target:       playerShip,
 		TargetOffset: mgl32.Vec3{0, 0, 500},
 		Up:           mgl32.Vec3{0, 1, 0},
-		Near:         0.1,
-		Far:          10000,
-		FOV:          math.Pi / 2.0,
+		Zoomer: zoom.NewScrollZoom(0.25, 3,
+			func() float32 {
+				return mouse.Handler.Scroll().Y()
+			},
+		),
+		Near: 0.1,
+		Far:  10000,
+		FOV:  math.Pi / 2.0,
 	}
 
 	asteroidMesh, err := asset.LoadOBJ("assets/rock/rock1.obj")
@@ -122,9 +134,6 @@ func main() {
 		for _, a := range asteroids {
 			a.Update(fps.Handler.DeltaTimeSeconds())
 		}
-		playerShip.Rotation[0] += math.Pi * 0.3 * fps.Handler.DeltaTimeSeconds()
-		playerShip.Rotation[1] += math.Pi * 0.7 * fps.Handler.DeltaTimeSeconds()
-		playerShip.Rotation[2] += math.Pi * -0.3 * fps.Handler.DeltaTimeSeconds()
 
 		cam.Update()
 
@@ -150,28 +159,40 @@ func main() {
 }
 
 func ApplyInputs(target *model.Model, cam camera.Camera) {
-	var move mgl32.Vec2
+	// rotation speed in radians per second.
+	rotationSpeed := mgl32.AnglesToQuat(0, 0, mgl32.DegToRad(360/3), mgl32.XYZ)
+
+	// rotate is the direction and amount to rotate.
+	// Note that, like a unit circle, radians of higher positive value are toward the "left", while negative are to the "right".
+	var rotationScale float32
 	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
-		move[0] += -1
+		rotationScale += fps.Handler.DeltaTimeSeconds()
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyD, glfw.KeyRight) {
-		move[0] += 1
+		rotationScale -= fps.Handler.DeltaTimeSeconds()
 	}
+	if rotationScale != 0 {
+		target.ModifyRotationGlobalQ(util.ScaleQuatRotation(rotationSpeed, rotationScale))
+	}
+
+	var move float32
 	if keyboard.Handler.IsKeyDown(glfw.KeyW, glfw.KeyUp) {
-		move[1] += 1
+		move -= fps.Handler.DeltaTimeSeconds()
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyS, glfw.KeyDown) {
-		move[1] += -1
+		move += fps.Handler.DeltaTimeSeconds()
 	}
 	moveSpeed := float32(500)
-	move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
-	target.ModifyCenter(move[0], move[1], 0)
+	_, _, heading := target.RotationAngles().Elem() // direction that the target is facing in radians. Ignore roll and pitch since we're constrained to one axis of rotation - on the XY plane.
+
+	forward := mgl32.Vec3{float32(math.Cos(float64(heading))), float32(math.Sin(float64(heading))), 0}
+	forward = forward.Normalize().Mul(move * moveSpeed) // direction * speed = distance
+	target.ModifyCenterV(forward)                       // current position + distance vector = final location
 
 	w, h := view.Window.GetSize()
 	if mouse.Handler.LeftPressed() {
-		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Center().Vec2())
-
-		move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
-		target.ModifyCenter(move[0], move[1], 0)
+		dir := cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Center().Vec2())
+		dir = dir.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
+		target.ModifyCenter(dir[0], dir[1], 0)
 	}
 }

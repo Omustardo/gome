@@ -75,13 +75,12 @@ func main() {
 		for i := 0; i < count; i++ {
 			col := &color.NRGBA{util.RandUint8(), util.RandUint8(), util.RandUint8(), 255}
 			scale := rand.Float32()*(scaleMax-scaleMin) + scaleMin
-			rot := rand.Float32() * 2 * math.Pi
 			c := &model.Model{
 				Mesh: mesh.NewCube(col, gl.Texture{}),
 				Entity: entity.Entity{
 					Position: mgl32.Vec3{float32(i%countPerRow)*scaleMax - scaleMax*float32(countPerRow)/2.0, float32(i/countPerRow)*scaleMax - scaleMax*float32(countPerRow)/2.0, 0},
 					Scale:    mgl32.Vec3{scale, scale, scale},
-					Rotation: mgl32.Vec3{rot, rot, rot},
+					Rotation: util.RandQuat(),
 				},
 			}
 			cubes = append(cubes, c)
@@ -105,7 +104,7 @@ func main() {
 		FOV:          math.Pi / 2.0,
 	}
 
-	rotationPerSecond := float32(math.Pi / 4)
+	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4)*0.8, float32(math.Pi/4), float32(math.Pi/4)*1.3, mgl32.XYZ)
 
 	ticker := time.NewTicker(time.Second / 60)
 	for !view.Window.ShouldClose() {
@@ -117,12 +116,7 @@ func main() {
 
 		ApplyInputs(target, cam)
 
-		rotate := func(m *model.Model) {
-			m.Rotation[0] += rotationPerSecond * fps.Handler.DeltaTimeSeconds() * 0.8
-			m.Rotation[1] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
-			m.Rotation[2] += rotationPerSecond * fps.Handler.DeltaTimeSeconds() * 1.3
-		}
-		rotate(target)
+		target.ModifyRotationLocalQ(util.ScaleQuatRotation(rotationPerSecond, fps.Handler.DeltaTimeSeconds()))
 
 		cam.Update()
 

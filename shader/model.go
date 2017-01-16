@@ -184,9 +184,16 @@ func (s *model) SetTranslationMatrix(x, y, z float32) {
 	gl.UniformMatrix4fv(s.translationMatrixUniform, translateMatrix[:])
 }
 
+// SetRotationMatrix takes rotation about the X, Y, and Z axes and applies them in the same XYZ order.
 func (s *model) SetRotationMatrix(x, y, z float32) {
 	gl.UseProgram(s.Program)
-	rotationMatrix := mgl32.Rotate3DX(x).Mul3(mgl32.Rotate3DY(y)).Mul3(mgl32.Rotate3DZ(z)).Mat4() // TODO: Use quaternions.
+	rotationMatrix := mgl32.Rotate3DX(x).Mul3(mgl32.Rotate3DY(y)).Mul3(mgl32.Rotate3DZ(z)).Mat4()
+	gl.UniformMatrix4fv(s.rotationMatrixUniform, rotationMatrix[:])
+}
+
+func (s *model) SetRotationMatrixQ(q mgl32.Quat) {
+	gl.UseProgram(s.Program)
+	rotationMatrix := q.Mat4()
 	gl.UniformMatrix4fv(s.rotationMatrixUniform, rotationMatrix[:])
 }
 

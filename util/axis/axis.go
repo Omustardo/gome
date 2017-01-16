@@ -34,15 +34,15 @@ func Initialize() {
 
 	xAxis = &model.Model{
 		Mesh:   xMesh,
-		Entity: entity.Default,
+		Entity: entity.Default(),
 	}
 	yAxis = &model.Model{
 		Mesh:   yMesh,
-		Entity: entity.Default,
+		Entity: entity.Default(),
 	}
 	zAxis = &model.Model{
 		Mesh:   zMesh,
-		Entity: entity.Default,
+		Entity: entity.Default(),
 	}
 }
 

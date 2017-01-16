@@ -80,7 +80,7 @@ func main() {
 		Entity: entity.Entity{
 			Position: mgl32.Vec3{},
 			Scale:    mgl32.Vec3{300, 300, 0},
-			Rotation: mgl32.Vec3{},
+			Rotation: mgl32.QuatIdent(),
 		},
 	}
 
@@ -102,14 +102,6 @@ func main() {
 		mouse.Handler.Update()
 
 		ApplyInputs(target, cam)
-
-		//rotate := func(m *model.Model) {
-		//rotationPerSecond := float32(math.Pi / 4)
-		//	m.Rotation[0] += rotationPerSecond * fps.Handler.DeltaTimeSeconds() * 0.8
-		//	m.Rotation[1] += rotationPerSecond * fps.Handler.DeltaTimeSeconds()
-		//	m.Rotation[2] += rotationPerSecond * fps.Handler.DeltaTimeSeconds() * 1.3
-		//}
-		//rotate(target)
 
 		cam.Update()
 

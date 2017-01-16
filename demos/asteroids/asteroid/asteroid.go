@@ -1,7 +1,7 @@
 package asteroid
 
 import (
-	"math"
+	"math/rand"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/omustardo/gome/core/entity"
@@ -25,37 +25,34 @@ func SetMesh(m mesh.Mesh) {
 type Asteroid struct {
 	model.Model
 	Velocity      mgl32.Vec3
-	RotationSpeed mgl32.Vec3
+	RotationSpeed mgl32.Quat
 }
 
 func New() *Asteroid {
 	pos := util.RandVec3().Normalize().Mul(100) // TODO: pass in limits on starting location
 	pos[2] = 0
-	vel := util.RandVec3().Normalize()
+	vel := mgl32.Vec3{rand.Float32(), rand.Float32(), 0}.Normalize().Mul(rand.Float32() * 15)
 	scale := Large
-	rot := util.RandVec3().Normalize().Mul(2 * math.Pi)
 
 	m := model.Model{
 		Mesh: Mesh,
 		Entity: entity.Entity{
 			Position: pos,
 			Scale:    mgl32.Vec3{scale, scale, scale},
-			Rotation: rot,
+			Rotation: util.RandQuat(),
 		},
 	}
 
 	return &Asteroid{
 		Model:         m,
 		Velocity:      vel,
-		RotationSpeed: util.RandVec3().Normalize().Mul(math.Pi / 3),
+		RotationSpeed: util.ScaleQuatRotation(util.RandQuat(), 0.8), // Scale down rotation speed so it isn't too fast.
 	}
 }
 
 func (a *Asteroid) Update(deltaSeconds float32) {
-	a.Rotation[0] = a.Rotation[0] + a.RotationSpeed[0]*deltaSeconds
-	a.Rotation[1] = a.Rotation[1] + a.RotationSpeed[1]*deltaSeconds
-	a.Rotation[2] = a.Rotation[2] + a.RotationSpeed[2]*deltaSeconds
-	a.Position.Add(a.Velocity.Mul(deltaSeconds))
+	a.ModifyRotationLocalQ(util.ScaleQuatRotation(a.RotationSpeed, deltaSeconds))
+	a.ModifyCenterV(a.Velocity.Mul(deltaSeconds))
 
 	// TODO: Wrap around position if it's too far from center/player
 }

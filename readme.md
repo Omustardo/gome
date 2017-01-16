@@ -16,3 +16,7 @@ Gome (GOlang gaME engine)
  * The scale of models in the game is up to the user to set via entity.Entity's Scale field. Note that leaving it empty
  will mean your model has no physical size and so won't be shown. If you want your model to not be rendered, it's 
  more effective to set model.Hidden = true
+ * Be careful when using mgl32. Its functions tend to return new structs rather than modifying. For example, you might
+ be tempted to modify an Entity's position using ```e.Position.Add(mgl32.Vec3{1,1,0})``` but this doesn't modify 
+ ```e.Position```. It just returns a new vector. Instead, use ```e.Position = e.Position.Add(mgl32.Vec3{1,1,0})```
+  or ```e.ModifyCenter(1,1,0)```
