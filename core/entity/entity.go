@@ -21,7 +21,32 @@ type Entity struct {
 	// Center coordinates of the entity.
 	Position mgl32.Vec3
 
-	// Rotation about the center in radians.
+	// Rotation about the center. Note that this is a quaternion - a mathematical way of representing rotation.
+	// Quaternions make some things easy, like having smooth rotations between different orientations, but
+	// they aren't as intuitive as a simple Roll, Pitch, Yaw representation.
+	//
+	// If you don't want to deal with quaternions, just use the provided rotation related functions attached to the Entity struct:
+	// SetRotation, ModifyRotationLocal, and ModifyRotationGlobal.
+	//
+	// When dealing with quaternions, there are a few basic things to know:
+	// 1. Multiplying quaternions is like applying a rotation, and order matters.
+	//    Q1.Mul(Q2) means start from the rotation of Q1, and apply the Q2 to it.
+	// 2. You can convert roll, pitch, and yaw ("Euler Angles")  into a quaternion.
+	//    quat := mgl32.AnglesToQuat(rot.X(), rot.Y(), rot.Z(), mgl32.XYZ)
+	//    but converting back isn't built into mgl32. I believe the reason for this is there are multiple possible
+	//    combinations of Euler angles that can all result in the same quaternion or overall orientation.
+	// 3. A common situation is having an overall amount that you want to rotate per second, but you need to scale
+	//    it down so only a little bit is done per frame. Do this using some form of quaternion interpolation.
+	//    Slerp (Spherical Linear Interpolation) is quite common, but Nlerp (Normalized Linear Interpolation) is much faster
+	//    and will likely give similar results.
+	//    deltaRotation := mgl32.QuatSlerp(mgl32.QuatIdent(), rotationSpeedPerSecond, timeInSeconds)
+	//
+	//    There's also a function for this in the util package: util.ScaleQuatRotation(q mgl32.Quat, percent float32) mgl32.Quat
+	//    Usage:
+	//      rotationSpeed := mgl32.AnglesToQuat(0, 0, 2 * math.Pi, mgl32.XYZ) // Allow one full rotation per second.
+	//      deltaTime := 0.016 																							  // Time passed in the last frame is very small.
+	//      rotation := util.ScaleQuatRotation(rotationSpeed, deltaTime)		  // rotationSpeed * time = rotation
+	//
 	Rotation mgl32.Quat
 
 	// All meshes and collision boxes are expected to be initialized as unit cubes or unit squares centered at the origin.
@@ -48,38 +73,40 @@ func (e *Entity) ModifyCenter(x, y, z float32) {
 	e.Position[2] += validFloat32(z)
 }
 
-// SetRotation takes a vector of angles in radians and sets the Entity to have that rotation.
-// The rotations are applied in order. X then Y then Z.
-// Set rotation directly with e.Rotation = mgl32.AnglesToQuat(x, y, z, mgl32.XYZ) if you want the rotations to be
+// SetRotation takes a vector of Roll, Pitch, and Yaw in radians and sets the Entity to have that rotation.
+// The rotations are applied in order. X then Y then Z (roll, then pitch, then yaw).
+// Set rotation directly with `e.Rotation = mgl32.AnglesToQuat(x, y, z, mgl32.XYZ)` if you want the rotations to be
 // applied in a different order.
-func (e *Entity) SetRotationV(rot mgl32.Vec3) {
-	e.SetRotation(rot.X(), rot.Y(), rot.Z())
+func (e *Entity) SetRotation(rot mgl32.Vec3) {
+	e.Rotation = mgl32.AnglesToQuat(rot.X(), rot.Y(), rot.Z(), mgl32.XYZ)
 }
 
-// SetRotation takes x,y,z angles in radians and sets the Entity to have that rotation.
-// The rotations are applied in order. X then Y then Z.
-// Set rotation directly with e.Rotation = mgl32.AnglesToQuat(x, y, z, mgl32.XYZ) if you want the rotations to be
-// applied in a different order.
-func (e *Entity) SetRotation(x, y, z float32) {
-	e.Rotation = mgl32.AnglesToQuat(x, y, z, mgl32.XYZ)
+// ModifyRotationLocal applies the provided rotation based on the current orientation.
+// The rotations are applied in order. X then Y then Z (roll, then pitch, then yaw).
+func (e *Entity) ModifyRotationLocal(rot mgl32.Vec3) {
+	e.Rotation = e.Rotation.Mul(mgl32.AnglesToQuat(rot.X(), rot.Y(), rot.Z(), mgl32.XYZ))
+}
+
+// ModifyRotationLocalQ applies the provided rotation based on the current orientation.
+func (e *Entity) ModifyRotationLocalQ(rot mgl32.Quat) {
+	e.Rotation = e.Rotation.Mul(rot)
 }
 
 // ModifyRotationGlobal applies the provided rotation based on the input being global / world space.
+// This means the current orientation of the entity is ignored so it is no longer a relative rotation, but an absolute one.
+// The rotations are applied in order. X then Y then Z (roll, then pitch, then yaw).
 func (e *Entity) ModifyRotationGlobal(rot mgl32.Vec3) {
 	e.ModifyRotationGlobalQ(mgl32.AnglesToQuat(rot.X(), rot.Y(), rot.Z(), mgl32.XYZ))
 }
 
 // ModifyRotationGlobal applies the provided rotation based on the input being global / world space.
+// This means the current orientation of the entity is ignored so it is no longer a relative rotation, but an absolute one.
 func (e *Entity) ModifyRotationGlobalQ(rot mgl32.Quat) {
 	e.Rotation = rot.Mul(e.Rotation)
 }
 
-// ModifyRotation applies the provided rotation based on the current orientation.
-func (e *Entity) ModifyRotationLocalQ(rot mgl32.Quat) {
-	e.Rotation = e.Rotation.Mul(rot)
-}
-
-// RotationAngles returns the rotation of the Entity in radians.
+// RotationAngles returns the roll, pitch, and yaw of the Entity in radians. The
+// Note that multiple
 func (e *Entity) RotationAngles() mgl32.Vec3 {
 	return util.QuatToEulerAngle(e.Rotation)
 }

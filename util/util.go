@@ -27,7 +27,9 @@ func RandQuat() mgl32.Quat {
 
 // QuatToEulerAngle returns the roll, pitch, and yaw of the provided quaternion.
 // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_Angles_Conversion
-// TODO: Why doesn't this exist in mgl32? Am I missing something?
+// TODO: Confirm this works and add unit tests. Note that the Vec3 returned depends on roll, pitch, and yaw being
+// applied in a specific order as different orders give different results. I expect this order is simply roll, pitch,
+// yaw but I haven't confirmed it.
 func QuatToEulerAngle(q mgl32.Quat) mgl32.Vec3 {
 	ySqr := q.Y() * q.Y()
 
@@ -63,5 +65,6 @@ func QuatToEulerAngle(q mgl32.Quat) mgl32.Vec3 {
 //   deltaTime := 0.016 																							 // Time passed in the last frame is very small.
 //   rotation := util.ScaleQuatRotation(rotationSpeed, deltaTime)			 // rotationSpeed * time = rotation
 func ScaleQuatRotation(q mgl32.Quat, percent float32) mgl32.Quat {
+	// TODO: Test using mgl32.QuatNlerp() as it's much faster and likely won't look different.
 	return mgl32.QuatSlerp(mgl32.QuatIdent(), q, percent).Normalize() // TODO: Do we need to normalize?
 }
