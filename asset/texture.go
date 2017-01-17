@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/color"
+	"image/draw"
 
 	// for decoding of different file types
 	_ "image/gif"
@@ -30,22 +30,15 @@ func LoadTexture(path string) (gl.Texture, error) {
 	bounds := img.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
 
-	// Get raw RGBA pixels
-	var data []uint8
-	// Image checking from https://github.com/go-gl-legacy/glh/blob/master/texture.go
-	switch trueim := img.(type) {
-	case *image.RGBA:
-		data = trueim.Pix
-	case *image.NRGBA: // NRGBA is non-premultiplied RGBA. RGBA evidently is supposed to multiply the alpha value by the other colors, so NRGBA of (1, 0.5, 0, 0.5) is RGBA of (0.5, 0.25, 0. 0.5)
-		data = trueim.Pix
-	case *image.YCbCr:
-		data = ycbCrToRGBA(trueim).Pix
-	default:
-		// TODO: This catch-all may work, but I haven't tested it enough.
-		// copy := image.NewRGBA(trueim.Bounds())
-		// draw.Draw(copy, trueim.Bounds(), trueim, image.Pt(0, 0), draw.Src)
-		return gl.Texture{}, fmt.Errorf("unsupported texture format %T", img)
-	}
+	// Get raw RGBA pixels by drawing the image into an NRGBA image. This is necessary to deal with different
+	// image formats that aren't decoded into a pixel array. For example, jpeg compressed images are read in in a way
+	// that mimics their encoding, and due to the way they are compressed, you can't get pixel values easily.
+	// By drawing the decoded image out as NRGBA, we are guaranteed to get something we can deal with.
+	// Note that this is wasteful for images that are already read in as RGBA or NRGBA, but it's a one time cost
+	// and shouldn't be an issue.
+	newimg := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(newimg, bounds, img, bounds.Min, draw.Src)
+	data := newimg.Pix
 
 	// Need to flip the image vertically since OpenGL considers 0,0 to be the top left corner.
 	// Note width*4 since the data array consists of R,G,B,A values.
@@ -72,19 +65,6 @@ func LoadTextureData(width, height int, data []uint8) gl.Texture {
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 	return texture
-}
-
-func ycbCrToRGBA(img *image.YCbCr) *image.RGBA {
-	b := img.Bounds()
-	rgba := image.NewRGBA(b)
-	for y := b.Min.Y; y < b.Max.Y; y++ {
-		for x := b.Min.X; x < b.Max.X; x++ {
-			r, g, b, a := img.At(x, y).RGBA()
-			c := color.RGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), uint8(a >> 8)}
-			rgba.SetRGBA(x, y, c)
-		}
-	}
-	return rgba
 }
 
 // Takes a flattened 2D array and the width of the rows.
