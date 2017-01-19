@@ -12,14 +12,16 @@ import (
 func Default() Entity {
 	return Entity{
 		Position: mgl32.Vec3{0, 0, 0},
-		Rotation: mgl32.QuatIdent(), //  {W:0, V:mgl32.Vec3{0,0,0}} @@@@@@ TODO: If people forget to set Rotation, it prevents them from modifying the rotation later using .Rotate methods.
+		Rotation: mgl32.QuatIdent(), // TODO: If people forget to set Rotation, it prevents them from modifying the rotation later using .Rotate methods. Need to have a way of notifying developers of this.
 		Scale:    mgl32.Vec3{1, 1, 1},
 	}
 }
 
 type Entity struct {
-	// Center coordinates of the entity.
+	// Position of the entity.
 	Position mgl32.Vec3
+
+	// TODO: Add a center value which is a added to position when rendering. As it is, position can be thought of as the bottom left corner of a cube that bounds a mesh. Being able to change positioning to an arbitrary center point will be necessary.
 
 	// Rotation about the center. Note that this is a quaternion - a mathematical way of representing rotation.
 	// Quaternions make some things easy, like having smooth rotations between different orientations, but
@@ -49,8 +51,11 @@ type Entity struct {
 	//
 	Rotation mgl32.Quat
 
-	// All meshes and collision boxes are expected to be initialized as unit cubes or unit squares centered at the origin.
-	// Any other sized objects should be made that way by scaling up or down.
+	// Scale is how large the entity is in each dimension.
+	// All meshes and collision boxes are expected to be initialized as unit cubes or unit squares centered at the origin
+	// so scale can be used to compare them. This breaks if a mesh starts out as being larger or smaller since its scale
+	// will need to be incorrect in order to draw it at the proper size. Any larger or smaller meshes should have their
+	// meshes normalized to fit snugly in a unit cube as they are loaded.
 	Scale mgl32.Vec3
 }
 

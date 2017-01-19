@@ -32,11 +32,11 @@ func Initialize(window *glfw.Window) {
 	window.SetScrollCallback(Handler.scrollCallback)
 }
 
-// handler is the singleton member of the keyboard package. Create it using keyboard.Initialize()
+// handler is the singleton member of the mouse package. Create it using mouse.Initialize()
 type handler struct {
 	// Each variable has three versions to hold three update calls worth of data.
 	// For example, the buttons buffers hold mouse button presses.
-	// stateBuffer is what's changed by the glfw.Window's callback whenever a key is actually pressed. Nothing should read or modify this except the window callback.
+	// stateBuffer is what's changed by the glfw.Window's callback whenever a button is actually pressed. Nothing should read or modify this except the window callback.
 	// When Update is called, the buffer moves to the current state. All game logic reads from this in order to prevent the window callbacks from changing data out from under them.
 	// When Update is called, the current state is moved to the previous state. We need to keep track of the previous data to do comparisons, like to see when a button was just pressed.
 

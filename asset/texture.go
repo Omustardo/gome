@@ -16,8 +16,6 @@ import (
 
 // LoadTexture from local assets. Handles jpg, png, and static gifs.
 func LoadTexture(path string) (gl.Texture, error) {
-	// based on https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL and https://golang.org/pkg/image/
-
 	fileData, err := loadFile(path)
 	if err != nil {
 		return gl.Texture{}, err

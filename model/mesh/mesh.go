@@ -55,7 +55,7 @@ type Mesh struct {
 	// For a rectangle where only the edges are drawn with gl.LINE_LOOP, this would be 4.
 	itemCount int
 
-	// Color is 32-bit non-premultiplied RGBA. It is optional, but leaving it unset is the same as setting it to (1,1,1,1).
+	// Color is 32-bit non-premultiplied RGBA. It is optional, but leaving it nil is the same as setting it to pure white.
 	// Note that the color.Color interface's Color() function returns weird values (between 0 and 0xFFFF for avoiding overflow).
 	// I recommend just accessing the RGBA fields directly.
 	Color *color.NRGBA
@@ -91,7 +91,7 @@ func NewMeshFromArrays(vertices, normals []mgl32.Vec3, textureCoords []mgl32.Vec
 // NewMesh combines the input buffers and rendering information into a Mesh struct.
 // Using this method requires loading OpenGL buffers yourself. It's not recommended for general use.
 // Most standard use of meshes can be done via the standard ones (i.e. NewCube(), NewSphere(), NewRect())
-// or by loading an object file via the `asset` package.
+// or by loading an model from file via the `asset` package.
 func NewMesh(vertices, vertexIndices, normals gl.Buffer, vboMode gl.Enum, itemCount int, color *color.NRGBA, texture gl.Texture, textureCoords gl.Buffer) Mesh {
 	if !vertices.Valid() {
 		log.Println("Creating mesh with invalid vertex buffer")
@@ -145,8 +145,6 @@ func (m *Mesh) TextureCoords() gl.Buffer {
 func (m *Mesh) SetTextureCoords(coords gl.Buffer) {
 	m.textureCoords = coords
 	if !m.textureCoords.Valid() {
-		// emptyBuffer only contains zeroes, which can be used as texture coordinates to all reference a single pixel
-		// in the mesh's texture.
 		m.textureCoords = emptyBuffer
 	}
 }
@@ -166,6 +164,8 @@ var (
 
 	// EmptyNormals is a buffer on the GPU containing many zeros. This is used as a default for meshes that don't have the
 	// relevant values defined, but still need to use a buffer since the shader requires having some values.
+	// When used as a normal buffer, it means the vertices have no normal, which doesn't make logical sense, but seems to work in practice.
+	// When used as a texture coordinate buffer in combination with emptyTexture, the zero values are used as coordinates and all reference a single pixel in the texture.
 	emptyBuffer gl.Buffer
 )
 
