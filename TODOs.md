@@ -34,6 +34,8 @@ safe thing to do to prevent using the wrong buffer at some point - but BindBuffe
 * Resizing screen shouldn't cause everything to be black.
 * Anisotropic filtering
 * When moving, little objects like stars appear smaller/darker and brighten when not moving. Unsure what is causing this.
+* Add support for finding and setting the center of a model. Right now the input mesh can be normalized so the scale is 
+right, but if the center is in the bottom left corner of a cube, the rotation is totally off.
 
 == Thread Safety
 * Mouse/keyboard handler reads and writes.

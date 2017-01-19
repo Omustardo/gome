@@ -14,14 +14,14 @@ import (
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
-	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/demos/asteroids/asteroid"
+	"github.com/omustardo/gome/demos/asteroids/bullet"
+	"github.com/omustardo/gome/demos/asteroids/player"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
 	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
-	"github.com/omustardo/gome/util"
 	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
@@ -73,7 +73,7 @@ func main() {
 
 	// =========== Done with common initializations. From here on it's specific to this demo.
 
-	shipMesh, err := asset.LoadOBJ("assets/ship/ship.obj")
+	shipMesh, err := asset.LoadOBJNormalized("assets/ship/ship.obj")
 	if err != nil {
 		log.Fatalf("Unable to load ship model: %v", err)
 	}
@@ -82,20 +82,10 @@ func main() {
 		log.Fatalf("Unable to load asteroid texture: %v", err)
 	}
 	shipMesh.SetTexture(shipTexture)
-	playerShip := &model.Model{
-		Mesh: shipMesh,
-		Entity: entity.Entity{
-			Position: mgl32.Vec3{0, -200, 0},
-			// Rotate the model so it starts facing directly toward the positive Y axis, which is up on the user's screen.
-			// Remember that these rotations are applied in the order specified by the final parameter
-			// and that like a unit circle, positive values go to the "left" and negative values go to the "right".
-			// X,Y,Z correspond to Roll, Pitch, and Yaw.
-			Rotation: mgl32.AnglesToQuat(mgl32.DegToRad(90), mgl32.DegToRad(-90), 0, mgl32.XYZ),
-			Scale:    mgl32.Vec3{4, 4, 4},
-		},
-	}
+	ship := player.New(shipMesh)
+
 	cam := &camera.TargetCamera{
-		Target:       playerShip,
+		Target:       ship,
 		TargetOffset: mgl32.Vec3{0, 0, 500},
 		Up:           mgl32.Vec3{0, 1, 0},
 		Zoomer: zoom.NewScrollZoom(0.25, 3,
@@ -108,7 +98,7 @@ func main() {
 		FOV:  math.Pi / 2.0,
 	}
 
-	asteroidMesh, err := asset.LoadOBJ("assets/rock/rock1.obj")
+	asteroidMesh, err := asset.LoadOBJNormalized("assets/rock/rock1.obj")
 	if err != nil {
 		log.Fatalf("Unable to load asteroid model: %v", err)
 	}
@@ -119,7 +109,11 @@ func main() {
 	asteroidMesh.SetTexture(asteroidTexture)
 	asteroid.SetMesh(asteroidMesh)
 
-	asteroids := []*asteroid.Asteroid{asteroid.New()}
+	bullets := []*bullet.Bullet{}
+	asteroids := []*asteroid.Asteroid{}
+	for i := 0; i < 5; i++ {
+		asteroids = append(asteroids, asteroid.New())
+	}
 
 	ticker := time.NewTicker(time.Second / 60)
 	for !view.Window.ShouldClose() {
@@ -129,10 +123,80 @@ func main() {
 		keyboard.Handler.Update()
 		mouse.Handler.Update()
 
-		ApplyInputs(playerShip, cam)
+		ship.Move(keyboard.Handler.IsKeyDown(glfw.KeyW, glfw.KeyUp), keyboard.Handler.IsKeyDown(glfw.KeyS, glfw.KeyDown), fps.Handler.DeltaTimeSeconds())
+		ship.Rotate(keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft), keyboard.Handler.IsKeyDown(glfw.KeyD, glfw.KeyRight), fps.Handler.DeltaTimeSeconds())
+
+		if keyboard.Handler.JustPressed(glfw.KeySpace) {
+			if b := ship.FireWeapon(); b != nil {
+				bullets = append(bullets, b)
+			}
+		}
+
+		// TODO: Remove once done debugging @@@@@@@@@@@@@@@@@
+		ApplyInputs(&ship.Model, cam)
+
+		// TODO: Add "win" condition
+		if len(asteroids) == 0 {
+			log.Println("Winner!")
+			return
+		}
 
 		for _, a := range asteroids {
 			a.Update(fps.Handler.DeltaTimeSeconds())
+		}
+		for _, b := range bullets {
+			b.Update(fps.Handler.DeltaTimeSeconds())
+		}
+
+		asteroidsToAdd := []*asteroid.Asteroid{}
+		asteroidsToRemove := make(map[int]bool)
+		bulletsToRemove := make(map[int]bool)
+		for i, a := range asteroids {
+			// if an asteroid is within range of a bullet, split it and destroy the bullet.
+			for j, b := range bullets {
+				if !bulletsToRemove[j] && a.Position.Sub(b.Position).Len() <= a.Scale.X()+b.Scale.X() {
+					bulletsToRemove[j] = true
+					asteroidsToRemove[i] = true
+					a1, a2 := a.Split()
+					if a1 != nil && a2 != nil {
+						asteroidsToAdd = append(asteroidsToAdd, a1, a2)
+					}
+				}
+			}
+		}
+		if asteroidsToRemove != nil {
+			temp := []*asteroid.Asteroid{}
+			for i := range asteroids {
+				if !asteroidsToRemove[i] {
+					temp = append(temp, asteroids[i])
+				}
+			}
+			asteroids = temp
+		}
+		if bulletsToRemove != nil {
+			temp := []*bullet.Bullet{}
+			for i := range bullets {
+				if !bulletsToRemove[i] && bullets[i].LifespanSeconds > 0 {
+					temp = append(temp, bullets[i])
+				}
+			}
+			bullets = temp
+		}
+		asteroids = append(asteroids, asteroidsToAdd...)
+
+		// TODO: If an asteroid is within range of player, game over.
+		for _, a := range asteroids {
+			if a.Position.Sub(ship.Position).Len() <= a.Scale.X()+ship.Scale.X() {
+				log.Println("Death")
+				// return
+			}
+		}
+
+		// If an asteroid is too far from the origin, reverse its velocity
+		for _, a := range asteroids {
+			if a.Position.Len() > 3000 {
+				a.Velocity = a.Velocity.Mul(-1)
+			}
 		}
 
 		cam.Update()
@@ -149,8 +213,17 @@ func main() {
 
 		for _, a := range asteroids {
 			a.Render()
+			// DEBUG:
+			r := model.Model{
+				Mesh:   mesh.NewCircleOutline(&color.NRGBA{255, 0, 0, 255}),
+				Entity: a.Entity,
+			}
+			r.Render()
 		}
-		playerShip.Render()
+		for _, b := range bullets {
+			b.Render()
+		}
+		ship.Render()
 
 		// Swaps the buffer that was drawn on to be visible. The visible buffer becomes the one that gets drawn on until it's swapped again.
 		view.Window.SwapBuffers()
@@ -159,40 +232,10 @@ func main() {
 }
 
 func ApplyInputs(target *model.Model, cam camera.Camera) {
-	// rotation speed in radians per second.
-	rotationSpeed := mgl32.AnglesToQuat(0, 0, mgl32.DegToRad(360/3), mgl32.XYZ)
-
-	// rotate is the direction and amount to rotate.
-	// Note that, like a unit circle, radians of higher positive value are toward the "left", while negative are to the "right".
-	var rotationScale float32
-	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
-		rotationScale += fps.Handler.DeltaTimeSeconds()
-	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyD, glfw.KeyRight) {
-		rotationScale -= fps.Handler.DeltaTimeSeconds()
-	}
-	if rotationScale != 0 {
-		target.ModifyRotationGlobalQ(util.ScaleQuatRotation(rotationSpeed, rotationScale))
-	}
-
-	var move float32
-	if keyboard.Handler.IsKeyDown(glfw.KeyW, glfw.KeyUp) {
-		move -= fps.Handler.DeltaTimeSeconds()
-	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyS, glfw.KeyDown) {
-		move += fps.Handler.DeltaTimeSeconds()
-	}
-	moveSpeed := float32(500)
-	_, _, heading := target.RotationAngles().Elem() // direction that the target is facing in radians. Ignore roll and pitch since we're constrained to one axis of rotation - on the XY plane.
-
-	forward := mgl32.Vec3{float32(math.Cos(float64(heading))), float32(math.Sin(float64(heading))), 0}
-	forward = forward.Normalize().Mul(move * moveSpeed) // direction * speed = distance
-	target.ModifyCenterV(forward)                       // current position + distance vector = final location
-
 	w, h := view.Window.GetSize()
 	if mouse.Handler.LeftPressed() {
 		dir := cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Center().Vec2())
-		dir = dir.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
-		target.ModifyCenter(dir[0], dir[1], 0)
+		dir = dir.Normalize().Mul(500 * fps.Handler.DeltaTimeSeconds())
+		target.ModifyPosition(dir[0], dir[1], 0)
 	}
 }
