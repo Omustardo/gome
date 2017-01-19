@@ -39,7 +39,7 @@ func New(mesh mesh.Mesh) *Player {
 		MoveSpeed:     500,
 		RotationSpeed: mgl32.AnglesToQuat(0, 0, mgl32.DegToRad(360/3), mgl32.XYZ),
 		canFireAt:     time.Now(),
-		FireRate:      time.Second * 1,
+		FireRate:      time.Millisecond * 300,
 	}
 }
 
@@ -47,7 +47,7 @@ func (p *Player) FireWeapon() *bullet.Bullet {
 	if !p.CanFire() {
 		return nil
 	}
-	p.canFireAt = p.canFireAt.Add(p.FireRate)
+	p.canFireAt = time.Now().Add(p.FireRate)
 	b := bullet.New()
 
 	// TODO: This is an odd forward vector - it's dependent on how the model is originally defined and loaded facing -X
