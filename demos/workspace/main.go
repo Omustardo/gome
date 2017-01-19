@@ -344,7 +344,7 @@ func ApplyInputs(player *model.Model, cam camera.Camera) {
 	}
 	playerSpeed := float32(500)
 	move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
-	player.ModifyCenter(move[0], move[1], 0)
+	player.ModifyPosition(move[0], move[1], 0)
 
 	w, h := view.Window.GetSize()
 	if keyboard.Handler.JustPressed(glfw.KeySpace) {
@@ -354,7 +354,7 @@ func ApplyInputs(player *model.Model, cam camera.Camera) {
 		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())
 
 		move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
-		player.ModifyCenter(move[0], move[1], 0)
+		player.ModifyPosition(move[0], move[1], 0)
 	}
 	if mouse.Handler.RightPressed() {
 

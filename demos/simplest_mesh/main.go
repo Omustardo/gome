@@ -133,13 +133,13 @@ func ApplyInputs(target *model.Model, cam camera.Camera) {
 	}
 	moveSpeed := float32(500)
 	move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
-	target.ModifyCenter(move[0], move[1], 0)
+	target.ModifyPosition(move[0], move[1], 0)
 
 	w, h := view.Window.GetSize()
 	if mouse.Handler.LeftPressed() {
 		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Center().Vec2())
 
 		move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
-		target.ModifyCenter(move[0], move[1], 0)
+		target.ModifyPosition(move[0], move[1], 0)
 	}
 }
