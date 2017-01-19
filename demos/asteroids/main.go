@@ -132,9 +132,6 @@ func main() {
 			}
 		}
 
-		// TODO: Remove once done debugging @@@@@@@@@@@@@@@@@
-		ApplyInputs(&ship.Model, cam)
-
 		// TODO: Add "win" condition
 		if len(asteroids) == 0 {
 			log.Println("Winner!")
@@ -228,14 +225,5 @@ func main() {
 		// Swaps the buffer that was drawn on to be visible. The visible buffer becomes the one that gets drawn on until it's swapped again.
 		view.Window.SwapBuffers()
 		<-ticker.C // wait up to 1/60th of a second. This caps framerate to 60 FPS.
-	}
-}
-
-func ApplyInputs(target *model.Model, cam camera.Camera) {
-	w, h := view.Window.GetSize()
-	if mouse.Handler.LeftPressed() {
-		dir := cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Center().Vec2())
-		dir = dir.Normalize().Mul(500 * fps.Handler.DeltaTimeSeconds())
-		target.ModifyPosition(dir[0], dir[1], 0)
 	}
 }
