@@ -78,12 +78,12 @@ func main() {
 
 	// Load meshes.
 	// OBJ
-	cubeMesh, err := asset.LoadOBJ("assets/cube.obj")
+	cubeMesh, err := asset.LoadOBJ("assets/cube.obj", asset.OBJOpts{})
 	cubeMesh.Color = &color.NRGBA{255, 25, 75, 255}
 	if err != nil {
 		log.Fatal(err)
 	}
-	capsuleMesh, err := asset.LoadOBJNormalized("assets/capsule/capsule.obj")
+	capsuleMesh, err := asset.LoadOBJ("assets/capsule/capsule.obj", asset.OBJOpts{Normalize: true, Center: &mgl32.Vec3{0.5, 0.5, 0.5}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func main() {
 		log.Fatal(err)
 	}
 	capsuleMesh.SetTexture(capsuleTexture)
-	shipMesh, err := asset.LoadOBJNormalized("assets/ship/ship.obj")
+	shipMesh, err := asset.LoadOBJ("assets/ship/ship.obj", asset.OBJOpts{Normalize: true, Center: &mgl32.Vec3{0.5, 0.5, 0.5}})
 	if err != nil {
 		log.Fatal(err)
 	}

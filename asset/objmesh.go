@@ -9,10 +9,6 @@ import (
 	"github.com/omustardo/gome/model/mesh"
 )
 
-// This code is originally based on https://gist.github.com/davemackintosh/67959fa9dfd9018d79a4
-// and https://en.wikipedia.org/wiki/Wavefront_.obj_file
-// and http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
-//
 // Unfortunately, found this list after implementing... I should probably use one of these instead:
 // Other Golang OBJ loaders from https://github.com/mmchugh/gomobile-examples/issues/6
 //https://github.com/go-qml/qml/blob/v1/examples/gopher/wavefront.go https://github.com/peterhellberg/wavefront/blob/master/wavefront.go
@@ -43,18 +39,25 @@ import (
 // map_d = Opacity texture map.
 // refl = reflection type and filename (?)
 
+// OBJOpts describes how to modify a mesh as it is loaded.
+type OBJOpts struct {
+	// The mesh is scaled to be as large as possible while still fitting in a unit sphere.
+	// Use this if you are loading multiple meshes designed at different scales and want to be able to work with them
+	// in a consistent manner. This makes scaling meshes relative to each other very easy to think about.
+	Normalize bool
+
+	// Center calculates the center of the mesh by finding the min and max values for x,y,z and then shifts
+	// the mesh by a percent of the range you specify.
+	// If nil this is ignored.
+	// Use this if the center of your mesh isn't where you want it to be.
+	//
+	// For example, if your OBJ file contains a unit cube with one corner at the origin and you
+	// specify Center: mgl32.Vec3{0.5, 0.5, 0.5} then the loaded mesh will be a unit cube centered at the origin.
+	Center *mgl32.Vec3
+}
+
 // LoadOBJ creates a mesh from an obj file.
-func LoadOBJ(path string) (mesh.Mesh, error) {
-	return loadOBJ(path, false)
-}
-
-// LoadOBJNormalized creates a mesh from an obj file.
-// The loaded OBJ is scaled to be as large as possible while still fitting in a unit sphere.
-func LoadOBJNormalized(path string) (mesh.Mesh, error) {
-	return loadOBJ(path, true)
-}
-
-func loadOBJ(path string, normalize bool) (mesh.Mesh, error) {
+func LoadOBJ(path string, opts OBJOpts) (mesh.Mesh, error) {
 	fileData, err := loadFile(path)
 	if err != nil {
 		return mesh.Mesh{}, err
@@ -64,10 +67,24 @@ func loadOBJ(path string, normalize bool) (mesh.Mesh, error) {
 		return mesh.Mesh{}, fmt.Errorf("Error loading %s: %v", path, err)
 	}
 
-	if normalize {
-		// Normalize input vertices so the input mesh is exactly as large as it can be while still fitting in a unit sphere.
-		// This makes scaling meshes relative to each other very easy to think about.
-		// TODO: Consider centering meshes when resizing them to avoid empty space making them smaller than necessary.
+	// Center the mesh at the origin.
+	if opts.Center != nil {
+		// Get the center point and subtract it from all vertices.
+		lower, upper := bounds(verts)
+		scale := upper.Sub(lower)
+		scale = mgl32.Vec3{
+			scale.X() * (*opts.Center).X(),
+			scale.Y() * (*opts.Center).Y(),
+			scale.Z() * (*opts.Center).Z(),
+		}
+		offset := scale.Add(lower)
+		for i := range verts {
+			verts[i] = verts[i].Sub(offset)
+		}
+	}
+
+	// Normalize input vertices so the input mesh is exactly as large as it can be while still fitting in a unit sphere.
+	if opts.Normalize {
 		maxLength := float32(math.SmallestNonzeroFloat32)
 		for _, v := range verts {
 			if length := v.Len(); length > maxLength {
@@ -236,4 +253,33 @@ func indicesToValues(indices []uint16, data []mgl32.Vec3) ([]mgl32.Vec3, error) 
 		values[i] = data[index]
 	}
 	return values, nil
+}
+
+// bounds returns two points making up a bounding rectangular prism that contains all provided points.
+func bounds(vecs []mgl32.Vec3) (lower, upper mgl32.Vec3) {
+	var minX, maxX, minY, maxY, minZ, maxZ float32
+	for i := range vecs {
+		minX = min(vecs[i].X(), minX)
+		minY = min(vecs[i].Y(), minY)
+		minZ = min(vecs[i].Z(), minZ)
+
+		maxX = max(vecs[i].X(), maxX)
+		maxY = max(vecs[i].Y(), maxY)
+		maxZ = max(vecs[i].Z(), maxZ)
+	}
+	return mgl32.Vec3{minX, minY, minZ}, mgl32.Vec3{maxX, maxY, maxZ}
+}
+
+func min(a, b float32) float32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
 }

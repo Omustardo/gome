@@ -73,7 +73,7 @@ func main() {
 
 	// =========== Done with common initializations. From here on it's specific to this demo.
 
-	shipMesh, err := asset.LoadOBJNormalized("assets/ship/ship.obj")
+	shipMesh, err := asset.LoadOBJ("assets/ship/ship.obj", asset.OBJOpts{Normalize: true})
 	if err != nil {
 		log.Fatalf("Unable to load ship model: %v", err)
 	}
@@ -98,7 +98,7 @@ func main() {
 		FOV:  math.Pi / 2.0,
 	}
 
-	asteroidMesh, err := asset.LoadOBJNormalized("assets/rock/rock1.obj")
+	asteroidMesh, err := asset.LoadOBJ("assets/rock/rock1.obj", asset.OBJOpts{Normalize: true, Center: &mgl32.Vec3{0.5, 0.5, 0.5}})
 	if err != nil {
 		log.Fatalf("Unable to load asteroid model: %v", err)
 	}
