@@ -19,7 +19,6 @@ import (
 	"github.com/omustardo/gome/demos/asteroids/player"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
-	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/axis"
@@ -210,12 +209,7 @@ func main() {
 
 		for _, a := range asteroids {
 			a.Render()
-			// DEBUG:
-			r := model.Model{
-				Mesh:   mesh.NewCircleOutline(&color.NRGBA{255, 0, 0, 255}),
-				Entity: a.Entity,
-			}
-			r.Render()
+			a.RenderDebugSphere()
 		}
 		for _, b := range bullets {
 			b.Render()

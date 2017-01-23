@@ -1,8 +1,10 @@
 package model
 
 import (
+	"image/color"
 	"log"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/model/mesh"
@@ -68,6 +70,21 @@ func (m *Model) Render() {
 
 func (m *Model) RenderRotationAxes() {
 	// TODO
+}
+
+// RenderDebugSphere draws three circles that live in the bounding sphere of the model.
+func (m *Model) RenderDebugSphere() {
+	r := Model{
+		Mesh:   mesh.NewCircleOutline(&color.NRGBA{255, 0, 0, 255}),
+		Entity: m.Entity,
+	}
+	r.Render()
+	r.ModifyRotationLocal(mgl32.Vec3{0, mgl32.DegToRad(90), 0})
+	r.Color = &color.NRGBA{0, 255, 0, 255}
+	r.Render()
+	r.ModifyRotationLocal(mgl32.Vec3{mgl32.DegToRad(90), 0, 0})
+	r.Color = &color.NRGBA{0, 0, 255, 255}
+	r.Render()
 }
 
 // TODO: Global shader variables that keeps track of current programs/other vars so we don't have so many shader.UseProgram() and others.
