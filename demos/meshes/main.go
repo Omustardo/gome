@@ -118,6 +118,15 @@ func main() {
 
 	// Create models (meshes in world space)
 	models := []*model.Model{
+		// Sphere
+		{
+			Tag:  "Generated Icosahedron",
+			Mesh: mesh.NewIcosahedron(&color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
 		// Cube
 		{
 			Tag:  "Built in Mesh", // Tag is *only* for human readable output/debugging.

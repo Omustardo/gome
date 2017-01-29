@@ -2,10 +2,9 @@ package mesh
 
 import (
 	"encoding/binary"
+	"fmt"
 	"image/color"
 	"log"
-
-	"fmt"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
@@ -16,7 +15,8 @@ var (
 	rect, wireframeRect     Mesh
 	circle, wireframeCircle Mesh
 	cube                    Mesh
-	// TODO: Sphere, wireframeCube
+	icosahedron             Mesh
+	// sphere                  Mesh
 )
 
 // Loads models into buffers on the GPU. glfw.Init() must be called before calling this.
@@ -29,6 +29,8 @@ func Initialize() {
 	circle = initializeCircle()
 	wireframeCircle = initializeWireframeCircle()
 	wireframeRect = initializeWireframeRect()
+	icosahedron = initializeIcosahedron()
+	// sphere = initializeSphere()
 }
 
 type Mesh struct {
