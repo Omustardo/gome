@@ -120,6 +120,46 @@ func main() {
 	models := []*model.Model{
 		// Sphere
 		{
+			Tag:  "Generated Sphere. Detail 0",
+			Mesh: mesh.NewSphere(0, &color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+		{
+			Tag:  "Generated Sphere. Detail 1",
+			Mesh: mesh.NewSphere(1, &color.NRGBA{80, 50, 150, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+		{
+			Tag:  "Generated Sphere. Detail 2",
+			Mesh: mesh.NewSphere(2, &color.NRGBA{80, 60, 200, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+		{
+			Tag:  "Generated Sphere. Detail 3",
+			Mesh: mesh.NewSphere(3, &color.NRGBA{100, 80, 240, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+		{
+			Tag:  "Generated Sphere. Detail 4",
+			Mesh: mesh.NewSphere(4, &color.NRGBA{120, 100, 255, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+		{
 			Tag:  "Generated Icosahedron",
 			Mesh: mesh.NewIcosahedron(&color.NRGBA{80, 50, 100, 255}, gl.Texture{}),
 			Entity: entity.Entity{

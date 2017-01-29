@@ -54,7 +54,7 @@ func NewIcosahedron(col *color.NRGBA, texture gl.Texture) Mesh {
 // icosahedronVertices returns a slice of the points making up the 20 faces of an icosahedron.
 // The return value is 60 vertices, grouped into 20 triangles.
 // Based on http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
-func icosahedronFaces() [20][3]mgl32.Vec3 {
+func icosahedronFaces() [][3]mgl32.Vec3 {
 	t := float32((1.0 + math.Sqrt(5.0)) / 2.0)
 	points := make([]mgl32.Vec3, 0, 12)
 	points = append(points, mgl32.Vec3{-1, t, 0})
@@ -73,7 +73,7 @@ func icosahedronFaces() [20][3]mgl32.Vec3 {
 		points[i] = points[i].Normalize()
 	}
 
-	faces := [20][3]mgl32.Vec3{
+	faces := [][3]mgl32.Vec3{
 		// 5 faces around point 0
 		{points[0], points[11], points[5]},
 		{points[0], points[5], points[1]},
@@ -108,7 +108,7 @@ func icosahedronFaces() [20][3]mgl32.Vec3 {
 // icosahedronNormals takes the triangles making up an icosahedron and returns a slice of normals.
 // There will be one normal per vertex, for a total of 60 normals. All normals for a single triangle
 // are the same.
-func icosahedronNormals(faces [20][3]mgl32.Vec3) []mgl32.Vec3 {
+func icosahedronNormals(faces [][3]mgl32.Vec3) []mgl32.Vec3 {
 	normals := make([]mgl32.Vec3, 0, 60)
 	for _, f := range faces {
 		// Cross product of two sides of a triangle is a surface normal.

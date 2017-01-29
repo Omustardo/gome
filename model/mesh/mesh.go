@@ -16,7 +16,14 @@ var (
 	circle, wireframeCircle Mesh
 	cube                    Mesh
 	icosahedron             Mesh
-	// sphere                  Mesh
+
+	// spheres is a mapping from detail level to a corresponding mesh.
+	// Initial detail levels are generated on Initialize() in initializeSpheres(), and higher detail levels are
+	// created as needed in NewSphere().
+	spheres map[int]Mesh
+	// TODO: Consider adding optional spheres type where where the normals are matched to the triangles that make up the mesh.
+	// Currently the built in spheres look smooth because the normals face directly out from the center. If they matched the
+	// actual triangle normals, you would be able to see the triangles in the mesh. This may be more visually pleasing in some cases.
 )
 
 // Loads models into buffers on the GPU. glfw.Init() must be called before calling this.
@@ -30,7 +37,7 @@ func Initialize() {
 	wireframeCircle = initializeWireframeCircle()
 	wireframeRect = initializeWireframeRect()
 	icosahedron = initializeIcosahedron()
-	// sphere = initializeSphere()
+	initializeSpheres(4)
 }
 
 type Mesh struct {
