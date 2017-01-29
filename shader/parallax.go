@@ -88,7 +88,7 @@ func setupParallaxShader() error {
 	if gl.GetProgrami(program, gl.VALIDATE_STATUS) != gl.TRUE {
 		return fmt.Errorf("parallax shader: gl validate status: %s", gl.GetProgramInfoLog(program))
 	}
-	gl.UseProgram(program)
+	UseProgram(program)
 
 	// Get gl "names" of variables in the shader program.
 	// https://www.opengl.org/sdk/docs/man/html/glUniform.xhtml
@@ -110,16 +110,16 @@ func setupParallaxShader() error {
 }
 
 func (s *parallax) SetDefaults() {
-	gl.UseProgram(s.Program) // TODO: If all of these UseProgram calls are expensive, make a global shader.Current = shader.Basic.Program, and it's easy to do CPU only checks.
+	UseProgram(s.Program) // TODO: If all of these UseProgram calls are expensive, make a global shader.Current = shader.Basic.Program, and it's easy to do CPU only checks.
 }
 
 func (s *parallax) SetCameraPosition(pos mgl32.Vec3) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	gl.Uniform2f(s.cameraPositionUniform, pos.X(), pos.Y())
 }
 
 func (s *parallax) SetMVPMatrix(pMatrix, mvMatrix mgl32.Mat4) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	gl.UniformMatrix4fv(s.pMatrixUniform, pMatrix[:])
 	gl.UniformMatrix4fv(s.mvMatrixUniform, mvMatrix[:])
 }

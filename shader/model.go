@@ -99,7 +99,7 @@ func setupModelShader() error {
 	if gl.GetProgrami(program, gl.VALIDATE_STATUS) != gl.TRUE {
 		return fmt.Errorf("basic shader: gl validate status: %s", gl.GetProgramInfoLog(program))
 	}
-	gl.UseProgram(program)
+	UseProgram(program)
 
 	// Get gl "names" of variables in the shader program.
 	// https://www.opengl.org/sdk/docs/man/html/glUniform.xhtml
@@ -127,7 +127,7 @@ func setupModelShader() error {
 }
 
 func (s *model) SetDefaults() {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	s.SetColor(nil)
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
@@ -135,7 +135,7 @@ func (s *model) SetDefaults() {
 }
 
 func (s *model) SetColor(color *color.NRGBA) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	if color == nil {
 		gl.Uniform4f(s.colorUniform, 1, 1, 1, 1)
 		return
@@ -145,7 +145,7 @@ func (s *model) SetColor(color *color.NRGBA) {
 
 // Alpha value is ignored since it doesn't make sense. Also why is there no color.RGB?
 func (s *model) SetAmbientLight(color *color.NRGBA) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	if color == nil {
 		gl.Uniform3f(s.ambientLightUniform, 0, 0, 0)
 		return
@@ -171,7 +171,7 @@ func (s *model) SetTexture(texture gl.Texture) {
 }
 
 func (s *model) SetMVPMatrix(pMatrix, mvMatrix mgl32.Mat4) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	gl.UniformMatrix4fv(s.pMatrixUniform, pMatrix[:])
 	gl.UniformMatrix4fv(s.mvMatrixUniform, mvMatrix[:])
 	normalMatrix := mvMatrix.Inv().Transpose()
@@ -179,26 +179,26 @@ func (s *model) SetMVPMatrix(pMatrix, mvMatrix mgl32.Mat4) {
 }
 
 func (s *model) SetTranslationMatrix(x, y, z float32) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	translateMatrix := mgl32.Translate3D(x, y, z)
 	gl.UniformMatrix4fv(s.translationMatrixUniform, translateMatrix[:])
 }
 
 // SetRotationMatrix takes rotation about the X, Y, and Z axes and applies them in the same XYZ order.
 func (s *model) SetRotationMatrix(x, y, z float32) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	rotationMatrix := mgl32.Rotate3DX(x).Mul3(mgl32.Rotate3DY(y)).Mul3(mgl32.Rotate3DZ(z)).Mat4()
 	gl.UniformMatrix4fv(s.rotationMatrixUniform, rotationMatrix[:])
 }
 
 func (s *model) SetRotationMatrixQ(q mgl32.Quat) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	rotationMatrix := q.Mat4()
 	gl.UniformMatrix4fv(s.rotationMatrixUniform, rotationMatrix[:])
 }
 
 func (s *model) SetScaleMatrix(x, y, z float32) {
-	gl.UseProgram(s.Program)
+	UseProgram(s.Program)
 	scaleMatrix := mgl32.Scale3D(x, y, z)
 	gl.UniformMatrix4fv(s.scaleMatrixUniform, scaleMatrix[:])
 }
