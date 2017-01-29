@@ -9,6 +9,7 @@
 package fps
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -20,6 +21,7 @@ func Initialize() {
 	if Handler != nil {
 		panic("Handler already initialized")
 	}
+	fmt.Println("Starting FPS counter...")
 	Handler = newRollingCounter()
 }
 

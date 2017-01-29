@@ -1,6 +1,8 @@
 // Package asset provides tools to manage loading, use, and unloading of assets, such as images and audio.
 package asset
 
+import "fmt"
+
 // TODO: Find a better way to do this.
 // The problem is that the js version of loadFile must take a relative path to work with http GET requests.
 // For the desktop version, relative path should be fine when distributing the game to end users, but it doesn't work
@@ -11,5 +13,6 @@ package asset
 var baseDir string // = flag.String("base_dir", `C:\workspace\Go\src\github.com\omustardo\gome\demos`, "All file paths should be specified relative to this root.")
 
 func Initialize(baseDirectory string) {
+	fmt.Println("Setting up asset path...")
 	baseDir = baseDirectory
 }

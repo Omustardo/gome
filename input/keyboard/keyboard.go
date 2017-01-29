@@ -24,6 +24,8 @@ func Initialize(window *glfw.Window) {
 	if window == nil {
 		panic("window is nil")
 	}
+	fmt.Println("Initializing keyboard handler...")
+
 	Handler = &handler{
 		state:         make(map[glfw.Key]bool),
 		previousState: make(map[glfw.Key]bool),

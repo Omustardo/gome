@@ -23,6 +23,7 @@ func Initialize(width, height int, windowName string) error {
 	if Window != nil {
 		panic("view.Window already initialized")
 	}
+	fmt.Println("Creating Window...")
 
 	err := glfw.Init(gl.ContextWatcher)
 	if err != nil {

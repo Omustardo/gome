@@ -4,6 +4,7 @@
 package mouse
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -22,6 +23,8 @@ func Initialize(window *glfw.Window) {
 	if window == nil {
 		panic("window is nil")
 	}
+	fmt.Println("Initializing mouse handler...")
+
 	Handler = &handler{
 		buttonsBuffer:   make(map[glfw.MouseButton]bool),
 		buttons:         make(map[glfw.MouseButton]bool),

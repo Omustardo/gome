@@ -10,6 +10,8 @@ import (
 
 	"image/color"
 
+	"fmt"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/glfw"
@@ -115,6 +117,7 @@ func main() {
 		log.Fatal(err)
 	}
 	duckMesh.SetTexture(duckTexture)
+	fmt.Println("Done loading assets")
 
 	// Create models (meshes in world space)
 	models := []*model.Model{

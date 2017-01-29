@@ -1,6 +1,7 @@
 package axis
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -15,6 +16,7 @@ var xAxis, yAxis, zAxis *model.Model
 
 // Initialize depends on mesh.Initialize being done first. TODO: This is the start of dependency hell. Stop it. Where could this package go to make it more logical? Inside of model?
 func Initialize() {
+	fmt.Println("Initializing XYZ Axis...")
 	// Ignore the returned destroy functions on the line meshes since the axes should exist until the program ends.
 	xMesh := mesh.NewLine(
 		mgl32.Vec3{-axisLength, 0, 0},
