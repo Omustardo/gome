@@ -12,6 +12,7 @@ import (
 	_ "image/png"
 
 	"github.com/goxjs/gl"
+	"github.com/omustardo/gome/util"
 )
 
 // LoadTexture from local assets. Handles jpg, png, and static gifs.
@@ -43,26 +44,7 @@ func LoadTexture(path string) (gl.Texture, error) {
 	if err := flipYCoords(data, width*4); err != nil {
 		return gl.Texture{}, err
 	}
-	return LoadTextureData(width, height, data), nil
-}
-
-// LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
-// It's up to the caller to delete the texture buffer using gl.DeleteTexture(texture) when it's no longer needed.
-func LoadTextureData(width, height int, data []uint8) gl.Texture {
-	// gl.Enable(gl.TEXTURE_2D) // some sources says this is needed, but it doesn't seem to be. In fact, it gives an "invalid capability" message in webgl.
-
-	texture := gl.CreateTexture()
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-	// NOTE: gl.FLOAT isn't enabled for texture data types unless gl.getExtension('OES_texture_float'); is set, so just use gl.UNSIGNED_BYTE
-	//   See http://stackoverflow.com/questions/23124597/storing-floats-in-a-texture-in-opengl-es  http://stackoverflow.com/questions/22666556/webgl-texture-creation-trouble
-	gl.TexImage2D(gl.TEXTURE_2D, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, data)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.GenerateMipmap(gl.TEXTURE_2D)
-	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
-	return texture
+	return util.LoadTextureData(width, height, data), nil
 }
 
 // Takes a flattened 2D array and the width of the rows.

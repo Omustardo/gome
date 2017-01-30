@@ -19,8 +19,8 @@ import (
 	"github.com/omustardo/gome/demos/asteroids/player"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
+	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/shader"
-	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
 )
@@ -178,11 +178,12 @@ func main() {
 
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		axis.DrawXYZAxes()
+		model.RenderXYZAxes()
 
 		for _, a := range asteroids {
 			a.Render()
 			a.RenderDebugSphere()
+			a.RenderRotationAxes()
 		}
 		for _, b := range bullets {
 			b.Render()

@@ -25,7 +25,6 @@ import (
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
-	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
 )
@@ -274,7 +273,7 @@ func main() {
 
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		axis.DrawXYZAxes()
+		model.RenderXYZAxes()
 
 		for _, m := range models {
 			m.Render()

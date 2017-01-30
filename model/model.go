@@ -40,7 +40,6 @@ func (m *Model) Render() {
 		return
 	}
 
-	// TODO: Consider a "modelviewer" feature - let meshes have their own Render() method where they are rendered within a unit cube centered at the origin with no lighting or other world effects.
 	shader.Model.SetDefaults()
 	shader.Model.SetTranslationMatrix(m.Position.X(), m.Position.Y(), m.Position.Z())
 	shader.Model.SetRotationMatrixQ(m.Rotation)
@@ -68,8 +67,26 @@ func (m *Model) Render() {
 	}
 }
 
+const axisLength = 1e12
+
+// DrawXYZAxes draws the three basic X,Y,Z axes colored red, green, and blue respectively.
+func RenderXYZAxes() {
+	axes := Model{
+		Mesh: mesh.Axes,
+		Entity: entity.Entity{
+			Scale: mgl32.Vec3{axisLength, axisLength, axisLength},
+		},
+	}
+	axes.Render()
+}
+
 func (m *Model) RenderRotationAxes() {
-	// TODO
+	axes := Model{
+		Mesh:   mesh.Axes,
+		Entity: m.Entity,
+	}
+	axes.Scale = axes.Scale.Mul(2) //1.25)
+	axes.Render()
 }
 
 // RenderDebugSphere draws three circles that live in the bounding sphere of the model.

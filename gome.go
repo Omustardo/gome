@@ -10,7 +10,6 @@ import (
 	"github.com/omustardo/gome/input/mouse"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
-	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
 )
@@ -42,7 +41,6 @@ func Initialize(windowTitle string, windowWidth, windowHeight int, baseDir strin
 	// Load standard meshes (cubes, rectangles, etc). These depend on OpenGL buffers, which depend on having an OpenGL
 	// context. They must be called sometime after glfw is initialized to work.
 	mesh.Initialize()
-	axis.Initialize()
 
 	return view.Terminate
 }
