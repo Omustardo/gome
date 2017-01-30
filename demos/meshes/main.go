@@ -242,11 +242,11 @@ func main() {
 	player := &model.Model{}
 	cam := &camera.TargetCamera{
 		Target:       player,
-		TargetOffset: mgl32.Vec3{0, 0, 500},
+		TargetOffset: mgl32.Vec3{0, 0, 1000},
 		Up:           mgl32.Vec3{0, 1, 0},
 		Near:         0.1,
 		Far:          10000,
-		FOV:          math.Pi / 2.0,
+		FOV:          math.Pi / 4.0,
 	}
 
 	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4), float32(math.Pi/4), float32(math.Pi/4), mgl32.XYZ)

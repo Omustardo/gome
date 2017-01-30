@@ -66,7 +66,7 @@ func main() {
 		Up:           mgl32.Vec3{0, 1, 0},
 		Near:         0.1,
 		Far:          10000,
-		FOV:          math.Pi / 2.0,
+		FOV:          math.Pi / 4.0,
 	}
 
 	ticker := time.NewTicker(time.Second / 60)

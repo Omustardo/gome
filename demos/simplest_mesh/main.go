@@ -55,7 +55,7 @@ func main() {
 		Up:           mgl32.Vec3{0, 1, 0},
 		Near:         0.1,
 		Far:          10000,
-		FOV:          math.Pi / 2.0,
+		FOV:          math.Pi / 4.0,
 	}
 
 	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4)*0.8, float32(math.Pi/4), float32(math.Pi/4)*1.3, mgl32.XYZ)
