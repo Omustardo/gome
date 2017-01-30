@@ -23,8 +23,8 @@ func Initialize(width, height int, windowName string) error {
 	if Window != nil {
 		panic("view.Window already initialized")
 	}
-	fmt.Println("Creating Window...")
 
+	fmt.Println("Initializing GLFW...")
 	err := glfw.Init(gl.ContextWatcher)
 	if err != nil {
 		return fmt.Errorf("unable to initialize glfw: %v", err)
@@ -39,6 +39,7 @@ func Initialize(width, height int, windowName string) error {
 	//glfw.WindowHint(glfw.OpenGLProfile, glfw.OPENGL_CORE_PROFILE)
 	//glfw.WindowHint(glfw.OpenGLForwardCompatible, gl.TRUE)
 
+	fmt.Println("Creating Window...")
 	// Note CreateWindow ignores input size for WebGL/HTML canvas - it expands to fill browser window. This still matters for desktop.
 	window, err := glfw.CreateWindow(width, height, windowName, nil, nil)
 	if err != nil {

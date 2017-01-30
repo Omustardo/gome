@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"image/color"
 	"log"
 	"math"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/glfw"
+	"github.com/omustardo/gome"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
@@ -19,7 +19,6 @@ import (
 	"github.com/omustardo/gome/demos/asteroids/player"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
-	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
@@ -43,34 +42,8 @@ func init() {
 
 func main() {
 	flag.Parse()
-	asset.Initialize(*baseDir)
-
-	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
-	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
-		log.Fatal(err)
-	}
-	defer view.Terminate()
-
-	// Initialize Shaders
-	if err := shader.Initialize(); err != nil {
-		log.Fatal(err)
-	}
-	if err := gl.GetError(); err != 0 {
-		log.Fatalf("gl error: %v", err)
-	}
-	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down.
-
-	// Initialize singletons.
-	mouse.Initialize(view.Window)
-	keyboard.Initialize(view.Window)
-	fps.Initialize()
-
-	// Load standard meshes (cubes, rectangles, etc). These depend on OpenGL buffers, which depend on having an OpenGL
-	// context. They must be called sometime after glfw is initialized to work.
-	mesh.Initialize()
-	axis.Initialize()
-
-	// =========== Done with common initializations. From here on it's specific to this demo.
+	terminate := gome.Initialize("Asteroids", *windowWidth, *windowHeight, *baseDir)
+	defer terminate()
 
 	shipMesh, err := asset.LoadOBJ("assets/ship/ship.obj", asset.OBJOpts{Normalize: true})
 	if err != nil {

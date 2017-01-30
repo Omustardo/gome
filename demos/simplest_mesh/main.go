@@ -11,6 +11,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/glfw"
+	"github.com/omustardo/gome"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/input/keyboard"
@@ -37,33 +38,8 @@ func init() {
 
 func main() {
 	flag.Parse()
-
-	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
-	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
-		log.Fatal(err)
-	}
-	defer view.Terminate()
-
-	// Initialize Shaders
-	if err := shader.Initialize(); err != nil {
-		log.Fatal(err)
-	}
-	if err := gl.GetError(); err != 0 {
-		log.Fatalf("gl error: %v", err)
-	}
-	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down.
-
-	// Initialize singletons.
-	mouse.Initialize(view.Window)
-	keyboard.Initialize(view.Window)
-	fps.Initialize()
-
-	// Load standard meshes (cubes, rectangles, etc). These depend on OpenGL buffers, which depend on having an OpenGL
-	// context. They must be called sometime after glfw is initialized to work.
-	mesh.Initialize()
-	axis.Initialize()
-
-	// =========== Done with common initializations. From here on it's specific to this demo.
+	terminate := gome.Initialize("Generated Cube", *windowWidth, *windowHeight, "")
+	defer terminate()
 
 	target := &model.Model{
 		Mesh: mesh.NewCube(&color.NRGBA{255, 25, 75, 255}, gl.Texture{}),
