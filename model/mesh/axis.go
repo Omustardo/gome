@@ -22,13 +22,15 @@ func initializeAxes() Mesh {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW)
 
-	texture := util.LoadTextureData(3, 1, []uint8{
+	texture := util.LoadTextureData(2, 2, []uint8{
 		// X Axis: Red
 		255, 0, 0, 255,
 		// Y Axis: Green
 		0, 255, 0, 255,
 		// Z Axis: Blue
 		0, 0, 255, 255,
+		// Pad so the texture size is a power of 2.
+		0, 0, 0, 0,
 	})
 
 	textureCoordBuffer := gl.CreateBuffer()
@@ -38,11 +40,11 @@ func initializeAxes() Mesh {
 		0, 0,
 		0, 0,
 		// Y Axis
-		0.5, 0.5,
-		0.5, 0.5,
+		1, 0,
+		1, 0,
 		// Z Axis
-		1, 1,
-		1, 1,
+		0, 1,
+		0, 1,
 	)
 	gl.BufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW)
 
