@@ -18,6 +18,7 @@ import (
 	"github.com/omustardo/gome"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
+	"github.com/omustardo/gome/camera/zoom"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/input/keyboard"
 	"github.com/omustardo/gome/input/mouse"
@@ -231,22 +232,37 @@ func main() {
 			},
 		},
 	}
-	// Adjust model positions so they're spaced nicely
-	offset := float32(0)
-	for _, m := range models {
-		m.Position = mgl32.Vec3{offset, 0, 0}
-		offset += 200
+
+	// Adjust model positions so they're spaced nicely by making them into roughly a square layout that's centered at the origin.
+	dimensions := float32(math.Ceil(math.Sqrt(float64(len(models)))))
+	cellSize := float32(200)
+	offset := -dimensions * cellSize / 2 // by default everything is drawn in quadrant 1, so shift down and left
+	if int(dimensions)%2 == 0 {
+		offset += cellSize / 2 // if even number of items, offset so they fit nicely around the axes
+	}
+	fmt.Printf("%d models, arranging into %v by %v grid\n", len(models), dimensions, dimensions)
+	for i := float32(0); i < dimensions; i++ {
+		for j := float32(0); j < dimensions && (j+i*dimensions < float32(len(models))); j++ {
+			index := int(i*dimensions + j)
+			models[index].Position = mgl32.Vec3{j * cellSize, float32(i * cellSize), 0}.Add(mgl32.Vec3{offset, offset, 0})
+		}
 	}
 
 	// Player is an empty model. It has no mesh so it can't be rendered, but it can still exist in the world.
 	player := &model.Model{}
+	player.Position[0] = 0
 	cam := &camera.TargetCamera{
 		Target:       player,
 		TargetOffset: mgl32.Vec3{0, 0, 1000},
 		Up:           mgl32.Vec3{0, 1, 0},
-		Near:         0.1,
-		Far:          10000,
-		FOV:          math.Pi / 4.0,
+		Zoomer: zoom.NewScrollZoom(0.1, 3,
+			func() float32 {
+				return mouse.Handler.Scroll().Y()
+			},
+		),
+		Near: 0.1,
+		Far:  10000,
+		FOV:  math.Pi / 4.0,
 	}
 
 	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4), float32(math.Pi/4), float32(math.Pi/4), mgl32.XYZ)
@@ -271,6 +287,7 @@ func main() {
 		pMatrix := cam.ProjectionPerspective(float32(w), float32(h))
 		shader.Model.SetMVPMatrix(pMatrix, mvMatrix)
 
+		cam.Update()
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		model.RenderXYZAxes()

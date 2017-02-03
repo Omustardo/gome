@@ -88,3 +88,8 @@ func LoadTextureData(width, height int, data []uint8) gl.Texture {
 	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 	return texture
 }
+
+func isPowerOfTwo(n int) bool {
+	// http://www.graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
+	return (n&(n-1)) == 0 && n != 0
+}
