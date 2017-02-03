@@ -23,7 +23,7 @@ func initializeIcosahedron() Mesh {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
 	gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
 
-	normals := icosahedronNormals(faces)
+	normals := triangleNormals(faces)
 	normalBytes := bytecoder.Vec3(binary.LittleEndian, normals...)
 	normalVBO := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)
@@ -105,18 +105,73 @@ func icosahedronFaces() [][3]mgl32.Vec3 {
 	return faces
 }
 
-// icosahedronNormals takes the triangles making up an icosahedron and returns a slice of normals.
-// There will be one normal per vertex, for a total of 60 normals. All normals for a single triangle
-// are the same.
-func icosahedronNormals(faces [][3]mgl32.Vec3) []mgl32.Vec3 {
-	normals := make([]mgl32.Vec3, 0, 60)
-	for _, f := range faces {
-		// Cross product of two sides of a triangle is a surface normal.
-		v := f[1].Sub(f[0])
-		w := f[2].Sub(f[0])
-		n := v.Cross(w)
-		// Append the same normal three times, since we need 1 normal per vertex.
-		normals = append(normals, n, n, n)
+// NewSubdividedIcosahedron returns a mesh for an n sided figure created by recursively dividing each face of an
+// icosahedron (20 sided figure). Note that this recursive division of each triangular face grows very quickly and
+// may cause unexpected crashes due to running out of memory if the number of divisions is too large.
+func NewSubdividedIcosahedron(divisions int, col *color.NRGBA, texture gl.Texture) Mesh {
+	if divisions < 0 {
+		return Mesh{}
 	}
-	return normals
+	if divisions < len(subdividedIcosahedron) {
+		if m, ok := subdividedIcosahedron[divisions]; ok {
+			m.Color = col
+			m.SetTexture(texture)
+			return m
+		}
+	}
+
+	if subdividedIcosahedron == nil {
+		subdividedIcosahedron = make(map[int]Mesh)
+	}
+	faces := icosahedronFaces()
+
+	// Make more spheres of increasing detail by subdividing the icosahedron faces,
+	for i := 0; i <= divisions; i++ {
+		// Only create the mesh if it hasn't been done yet.
+		if _, ok := subdividedIcosahedron[i]; !ok {
+			vertices := make([]mgl32.Vec3, 0, 20*3*int(math.Pow(float64(i), 4)))
+			for _, f := range faces {
+				vertices = append(vertices, f[0], f[1], f[2])
+			}
+			vertexBytes := bytecoder.Vec3(binary.LittleEndian, vertices...)
+			vertexVBO := gl.CreateBuffer()
+
+			gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
+			gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
+
+			normals := triangleNormals(faces)
+			normalBytes := bytecoder.Vec3(binary.LittleEndian, normals...)
+			normalVBO := gl.CreateBuffer()
+			gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)
+			gl.BufferData(gl.ARRAY_BUFFER, normalBytes, gl.STATIC_DRAW)
+
+			//texCoords := circleTexCoords(numCircleSegments)
+			//texCoordBytes := bytecoder.Vec2(binary.LittleEndian, texCoords...)
+			//texCoordsVBO := gl.CreateBuffer()
+			//gl.BindBuffer(gl.ARRAY_BUFFER, texCoordsVBO)
+			//gl.BufferData(gl.ARRAY_BUFFER, texCoordBytes, gl.STATIC_DRAW)
+
+			subdividedIcosahedron[i] = NewMesh(vertexVBO, gl.Buffer{}, normalVBO, gl.TRIANGLES, len(vertices), nil, gl.Texture{}, gl.Buffer{})
+		}
+		// Divide each face into four faces and continue.
+		newFaces := make([][3]mgl32.Vec3, 0, 4*len(faces))
+		for _, f := range faces {
+			// for each face, divide it into four triangles
+			for _, face := range subdivideTriangle(f) {
+				// and then push them outward so they are on the surface of the sphere
+				for vert := range face {
+					face[vert] = face[vert].Normalize()
+				}
+				newFaces = append(newFaces, face)
+			}
+		}
+		faces = newFaces
+	}
+
+	if m, ok := subdividedIcosahedron[divisions]; ok {
+		m.Color = col
+		m.SetTexture(texture)
+		return m
+	}
+	return Mesh{} // should never happen
 }

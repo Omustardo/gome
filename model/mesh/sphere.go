@@ -43,29 +43,16 @@ func initializeSpheres(maxDetail int) {
 		// Divide each face into four faces and continue.
 		newFaces := make([][3]mgl32.Vec3, 0, 4*len(faces))
 		for _, f := range faces {
-			newFaces = append(newFaces, subdivideTriangle(f)...)
+			// for each face, divide it into four triangles
+			for _, face := range subdivideTriangle(f) {
+				// and then push them outward so they are on the surface of the sphere
+				for vert := range face {
+					face[vert] = face[vert].Normalize()
+				}
+				newFaces = append(newFaces, face)
+			}
 		}
 		faces = newFaces
-	}
-}
-
-// subdivideTriangle takes a triangle as input and returns the four triangles created by subdividing it.
-func subdivideTriangle(tri [3]mgl32.Vec3) [][3]mgl32.Vec3 {
-	// Get the three midpoints
-	a := tri[0].Add(tri[1]).Mul(0.5)
-	b := tri[1].Add(tri[2]).Mul(0.5)
-	c := tri[2].Add(tri[0]).Mul(0.5)
-
-	// Push them outward so they are on the surface of the sphere
-	a = a.Normalize()
-	b = b.Normalize()
-	c = c.Normalize()
-
-	return [][3]mgl32.Vec3{
-		{tri[0], a, c},
-		{tri[1], b, a},
-		{tri[2], c, b},
-		{a, b, c},
 	}
 }
 

@@ -146,6 +146,22 @@ func main() {
 				Scale:    mgl32.Vec3{100, 100, 100},
 			},
 		},
+		{
+			Tag:  "Subdivided Icosahedron - 1",
+			Mesh: mesh.NewSubdividedIcosahedron(1, &color.NRGBA{111, 20, 30, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
+		{
+			Tag:  "Subdivided Icosahedron - 2",
+			Mesh: mesh.NewSubdividedIcosahedron(2, &color.NRGBA{165, 20, 30, 255}, gl.Texture{}),
+			Entity: entity.Entity{
+				Rotation: mgl32.QuatIdent(),
+				Scale:    mgl32.Vec3{100, 100, 100},
+			},
+		},
 		// Cube
 		{
 			Tag:  "Built in Mesh", // Tag is *only* for human readable output/debugging.

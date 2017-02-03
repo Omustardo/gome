@@ -9,6 +9,10 @@ import (
 	"github.com/omustardo/bytecoder"
 )
 
+// TODO: Line is an odd case. Other meshes can be easily scaled and rotated while still using the same basic built in
+// model, but that doesn't work for lines. The way this is, each line requires creating a buffer on the GPU which is
+// never deleted. Adding a delete method just for line meshes is odd, since none of the other models do it, but it's
+// probably necessary.
 func NewLine(p1, p2 mgl32.Vec3, col *color.NRGBA) Mesh {
 	vertexBuffer := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)

@@ -17,6 +17,9 @@ var (
 	cube                    Mesh
 	icosahedron             Mesh
 
+	// subdividedIcosahedron is a mapping from detail level to a corresponding mesh.
+	subdividedIcosahedron map[int]Mesh
+
 	// spheres is a mapping from detail level to a corresponding mesh.
 	// Initial detail levels are generated on Initialize() in initializeSpheres(), and higher detail levels are
 	// created as needed in NewSphere().
@@ -139,6 +142,13 @@ func (m *Mesh) SetNormalVBO(normals gl.Buffer) {
 		m.normals = emptyBuffer
 	}
 }
+
+// SetVBOMode allows changing what mode a mesh is rendered in. It's recommended not to use this on the built in meshes
+// as they are created with the VBO Mode they expect to be rendered with.
+// The VBO modes include gl.TRIANGLES, gl.LINES, gl.LINE_LOOP, etc.
+func (m *Mesh) SetVBOMode(mode gl.Enum) {
+	m.vboMode = mode
+}
 func (m *Mesh) VBOMode() gl.Enum {
 	return m.vboMode
 }
@@ -202,4 +212,40 @@ func initializeEmptyBuffer() {
 	emptyBuffer = gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, emptyBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, data...), gl.STATIC_DRAW)
+}
+
+// subdivideTriangle takes a triangle as input and returns the four triangles created by subdividing it.
+func subdivideTriangle(tri [3]mgl32.Vec3) [][3]mgl32.Vec3 {
+	// Get the three midpoints
+	a := tri[0].Add(tri[1]).Mul(0.5)
+	b := tri[1].Add(tri[2]).Mul(0.5)
+	c := tri[2].Add(tri[0]).Mul(0.5)
+
+	return [][3]mgl32.Vec3{
+		{tri[0], a, c},
+		{tri[1], b, a},
+		{tri[2], c, b},
+		{a, b, c},
+	}
+}
+
+// triangleNormals takes triangles that presumably make up mesh and returns a slice of normals.
+// There will be one normal per vertex, for a total of 3 * len(triangles).
+// All normals for a single triangle are the same.
+// Note that the direction of the normals is based on the right hand rule, so the order by which the vertices are defined can flip the direction of the normal.
+// If you need it in the other direction, just negate each normal:
+// for i := range normals {
+//   normals[i] = normals[i].Mul(-1)
+// }
+func triangleNormals(triangles [][3]mgl32.Vec3) []mgl32.Vec3 {
+	normals := make([]mgl32.Vec3, 0, 60)
+	for _, f := range triangles {
+		// Cross product of two sides of a triangle is a surface normal.
+		v := f[1].Sub(f[0])
+		w := f[2].Sub(f[0])
+		n := v.Cross(w)
+		// Append the same normal three times, since we need 1 normal per vertex.
+		normals = append(normals, n, n, n)
+	}
+	return normals
 }
