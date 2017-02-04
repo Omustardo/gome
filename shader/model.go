@@ -41,6 +41,8 @@ void main() {
 	// === Lighting ===
 	// Put normals into world space. Don't translate as that would affect the direction of the normal.
 	vec4 worldNormal = normalize(uRotationMatrix * uScaleMatrix * vec4(aNormal, 1.0));
+	// TODO: If lighting starts looking odd with meshes that get scaled, look at: http://web.archive.org/web/20120228095346/http://www.arcsynthesis.org/gltut/Illumination/Tut09%20Normal%20Transformation.html
+
 	float intensity = max(dot(worldNormal.xyz, uDiffuseLightDirection.xyz), 0.0);
 	vLighting = uDiffuseLightColor * intensity;
 }
