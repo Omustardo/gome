@@ -28,6 +28,9 @@ safe thing to do to prevent using the wrong buffer at some point - but BindBuffe
 * Add handling, especially on the server side, for signals, like SIGTERM: https://gobyexample.com/signals
 * Current code is limited to max uint16 indices per mesh. This can be increased if we use the OES_element_index_uint
  extension for WebGL, and change the gl.DrawElements call to use gl.UNSIGNED_INT
+* The way axes are drawn isn't smart. They are simply two points which make a line. This seems reasonable, until
+you take into account camera drawing distances. You want the axis line to be "infinite" in length, but if you put
+the endpoints too far away, then they are culled and the entire axis isn't drawn.
 
 == Graphical
 * Add motion blur https://github.com/goxjs/example/tree/master/motionblur

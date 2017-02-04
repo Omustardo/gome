@@ -67,7 +67,7 @@ func (m *Model) Render() {
 	}
 }
 
-const axisLength = 1e12
+const axisLength = 1e6
 
 // DrawXYZAxes draws the three basic X,Y,Z axes colored red, green, and blue respectively.
 func RenderXYZAxes() {
