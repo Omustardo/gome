@@ -23,7 +23,7 @@ func initializeIcosahedron() Mesh {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
 	gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
 
-	normals := triangleNormals(faces)
+	normals := TriangleNormals(faces)
 	normalBytes := bytecoder.Vec3(binary.LittleEndian, normals...)
 	normalVBO := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)
@@ -139,7 +139,7 @@ func NewSubdividedIcosahedron(divisions int, col *color.NRGBA, texture gl.Textur
 			gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
 			gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
 
-			normals := triangleNormals(faces)
+			normals := TriangleNormals(faces)
 			normalBytes := bytecoder.Vec3(binary.LittleEndian, normals...)
 			normalVBO := gl.CreateBuffer()
 			gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)

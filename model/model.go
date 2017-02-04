@@ -104,8 +104,5 @@ func (m *Model) RenderDebugSphere() {
 	r.Render()
 }
 
-// TODO: Global shader variables that keeps track of current programs/other vars so we don't have so many shader.UseProgram() and others.
-// This sort of thing really ought to be in goxjs/gl rather than in here...
-
 // TODO: Make sure there's documentation that all Index Buffers must be of type gl.UNSIGNED_SHORT (golang's uint16)
 // and all other buffers must be gl.Float (golang's float32).

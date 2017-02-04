@@ -24,9 +24,6 @@ var (
 	// Initial detail levels are generated on Initialize() in initializeSpheres(), and higher detail levels are
 	// created as needed in NewSphere().
 	spheres map[int]Mesh // TODO: consider making this a slice.
-	// TODO: Consider adding optional spheres type where where the normals are matched to the triangles that make up the mesh.
-	// Currently the built in spheres look smooth because the normals face directly out from the center. If they matched the
-	// actual triangle normals, you would be able to see the triangles in the mesh. This may be more visually pleasing in some cases.
 
 	// Axes are the X,Y,Z axes in a mesh. All axes are of length 1, so they should be scaled before being drawn in most cases.
 	// The XYZ axes are colored RGB respectively.
@@ -229,7 +226,7 @@ func subdivideTriangle(tri [3]mgl32.Vec3) [][3]mgl32.Vec3 {
 	}
 }
 
-// triangleNormals takes triangles that presumably make up mesh and returns a slice of normals.
+// TriangleNormals takes triangles that presumably make up mesh and returns a slice of normals.
 // There will be one normal per vertex, for a total of 3 * len(triangles).
 // All normals for a single triangle are the same.
 // Note that the direction of the normals is based on the right hand rule, so the order by which the vertices are defined can flip the direction of the normal.
@@ -237,7 +234,7 @@ func subdivideTriangle(tri [3]mgl32.Vec3) [][3]mgl32.Vec3 {
 // for i := range normals {
 //   normals[i] = normals[i].Mul(-1)
 // }
-func triangleNormals(triangles [][3]mgl32.Vec3) []mgl32.Vec3 {
+func TriangleNormals(triangles [][3]mgl32.Vec3) []mgl32.Vec3 {
 	normals := make([]mgl32.Vec3, 0, 60)
 	for _, f := range triangles {
 		// Cross product of two sides of a triangle is a surface normal.

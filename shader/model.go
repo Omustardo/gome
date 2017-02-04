@@ -37,13 +37,14 @@ void main() {
 
 	// Lighting
 	vec3 directionalLight = vec3(0.5, 0.5, 0.5); // Color of the directional light.
-	vec3 directionalVector = vec3(0, 0, 1); // Light goes from negative to positive Z.
+	vec3 lightDirection = vec3(0, 0, 1); // Light goes from negative to positive Z.
 
-	vec4 worldNormal = uTranslationMatrix * uRotationMatrix * vec4(aNormal, 1.0); // Put normals into world space. No need to scale since they stay as unit vectors.
+	// Put normals into world space. No need to scale since they stay as unit vectors.
+	vec4 worldNormal = transpose(inverse(uTranslationMatrix * uRotationMatrix)) * vec4(aNormal, 1.0);
 	vec4 transformedNormal = uNormalMatrix * worldNormal; // Need to adjust normals a bit more. See: http://web.archive.org/web/20120228095346/http://www.arcsynthesis.org/gltut/Illumination/Tut09%20Normal%20Transformation.html
 
-	float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-	vLighting = directionalLight * directional;
+	float intensity = max(dot(transformedNormal.xyz, lightDirection.xyz), 0.0);
+	vLighting = directionalLight * intensity;
 }
 `
 	modelFragmentSource = `
