@@ -23,28 +23,26 @@ uniform mat4 uScaleMatrix;
 
 uniform mat4 uMVMatrix;
 uniform mat4 uPMatrix;
-uniform mat4 uNormalMatrix;
+
+uniform vec3 uDiffuseLightDirection;
+uniform vec3 uDiffuseLightColor;
 
 varying vec3 vLighting;
 varying vec2 vTextureCoord;
 
 void main() {
+	// === Texture ===
 	vTextureCoord = aTextureCoord;
 
-	// Position
+	// === Position ===
 	vec4 worldPosition = uTranslationMatrix * uRotationMatrix * uScaleMatrix * vec4(aVertexPosition, 1.0);
 	gl_Position = uPMatrix * uMVMatrix * worldPosition;
 
-	// Lighting
-	vec3 directionalLight = vec3(0.5, 0.5, 0.5); // Color of the directional light.
-	vec3 lightDirection = vec3(0, 0, 1); // Light goes from negative to positive Z.
-
-	// Put normals into world space. No need to scale since they stay as unit vectors.
-	vec4 worldNormal = transpose(inverse(uTranslationMatrix * uRotationMatrix)) * vec4(aNormal, 1.0);
-	vec4 transformedNormal = uNormalMatrix * worldNormal; // Need to adjust normals a bit more. See: http://web.archive.org/web/20120228095346/http://www.arcsynthesis.org/gltut/Illumination/Tut09%20Normal%20Transformation.html
-
-	float intensity = max(dot(transformedNormal.xyz, lightDirection.xyz), 0.0);
-	vLighting = directionalLight * intensity;
+	// === Lighting ===
+	// Put normals into world space. Don't translate as that would affect the direction of the normal.
+	vec4 worldNormal = normalize(uRotationMatrix * uScaleMatrix * vec4(aNormal, 1.0));
+	float intensity = max(dot(worldNormal.xyz, uDiffuseLightDirection.xyz), 0.0);
+	vLighting = uDiffuseLightColor * intensity;
 }
 `
 	modelFragmentSource = `
@@ -73,12 +71,14 @@ type model struct {
 	rotationMatrixUniform    gl.Uniform
 	scaleMatrixUniform       gl.Uniform
 
-	mvMatrixUniform     gl.Uniform
-	pMatrixUniform      gl.Uniform
-	normalMatrixUniform gl.Uniform
+	mvMatrixUniform gl.Uniform
+	pMatrixUniform  gl.Uniform
 
 	colorUniform        gl.Uniform
 	ambientLightUniform gl.Uniform
+
+	diffuseLightDirectionUniform gl.Uniform
+	diffuseLightColorUniform     gl.Uniform
 
 	VertexPositionAttrib gl.Attrib
 	NormalAttrib         gl.Attrib
@@ -107,9 +107,8 @@ func setupModelShader() error {
 	Model = &model{
 		Program: program,
 
-		pMatrixUniform:      gl.GetUniformLocation(program, "uPMatrix"),
-		mvMatrixUniform:     gl.GetUniformLocation(program, "uMVMatrix"),
-		normalMatrixUniform: gl.GetUniformLocation(program, "uNormalMatrix"),
+		pMatrixUniform:  gl.GetUniformLocation(program, "uPMatrix"),
+		mvMatrixUniform: gl.GetUniformLocation(program, "uMVMatrix"),
 
 		translationMatrixUniform: gl.GetUniformLocation(program, "uTranslationMatrix"),
 		rotationMatrixUniform:    gl.GetUniformLocation(program, "uRotationMatrix"),
@@ -117,6 +116,9 @@ func setupModelShader() error {
 
 		colorUniform:        gl.GetUniformLocation(program, "uColor"),
 		ambientLightUniform: gl.GetUniformLocation(program, "uAmbientLight"),
+
+		diffuseLightDirectionUniform: gl.GetUniformLocation(program, "uDiffuseLightDirection"),
+		diffuseLightColorUniform:     gl.GetUniformLocation(program, "uDiffuseLightColor"),
 
 		VertexPositionAttrib: gl.GetAttribLocation(program, "aVertexPosition"),
 		NormalAttrib:         gl.GetAttribLocation(program, "aNormal"),
@@ -130,6 +132,7 @@ func setupModelShader() error {
 func (s *model) SetDefaults() {
 	UseProgram(s.Program)
 	s.SetColor(nil)
+	s.SetDiffuse(mgl32.Vec3{0, 0, 0}, &color.NRGBA{})
 	s.SetTranslationMatrix(0, 0, 0)
 	s.SetRotationMatrix(0, 0, 0)
 	s.SetScaleMatrix(1, 1, 1)
@@ -142,6 +145,18 @@ func (s *model) SetColor(color *color.NRGBA) {
 		return
 	}
 	gl.Uniform4f(s.colorUniform, float32(color.R)/255.0, float32(color.G)/255.0, float32(color.B)/255.0, float32(color.A)/255.0)
+}
+
+// SetDiffuse sets directional lighting. If color is nil, it's set to white. Alpha value is ignored.
+func (s *model) SetDiffuse(dir mgl32.Vec3, color *color.NRGBA) {
+	UseProgram(s.Program)
+	if color == nil {
+		gl.Uniform3f(s.diffuseLightColorUniform, 1, 1, 1)
+	} else {
+		gl.Uniform3f(s.diffuseLightColorUniform, float32(color.R)/255.0, float32(color.G)/255.0, float32(color.B)/255.0)
+	}
+	dir = dir.Normalize()
+	gl.Uniform3f(s.diffuseLightDirectionUniform, dir[0], dir[1], dir[2])
 }
 
 // Alpha value is ignored since it doesn't make sense. Also why is there no color.RGB?
@@ -175,8 +190,6 @@ func (s *model) SetMVPMatrix(pMatrix, mvMatrix mgl32.Mat4) {
 	UseProgram(s.Program)
 	gl.UniformMatrix4fv(s.pMatrixUniform, pMatrix[:])
 	gl.UniformMatrix4fv(s.mvMatrixUniform, mvMatrix[:])
-	normalMatrix := mvMatrix.Inv().Transpose()
-	gl.UniformMatrix4fv(s.normalMatrixUniform, normalMatrix[:])
 }
 
 func (s *model) SetTranslationMatrix(x, y, z float32) {

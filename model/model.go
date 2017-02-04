@@ -40,7 +40,6 @@ func (m *Model) Render() {
 		return
 	}
 
-	shader.Model.SetDefaults()
 	shader.Model.SetTranslationMatrix(m.Position.X(), m.Position.Y(), m.Position.Z())
 	shader.Model.SetRotationMatrixQ(m.Rotation)
 	shader.Model.SetScaleMatrix(m.Scale.X(), m.Scale.Y(), m.Scale.Z())

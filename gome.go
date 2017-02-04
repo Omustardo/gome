@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/input/keyboard"
@@ -32,6 +33,7 @@ func Initialize(windowTitle string, windowWidth, windowHeight int, baseDir strin
 		log.Fatalf("gl error: %v", err)
 	}
 	shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down as a default.
+	shader.Model.SetDiffuse(mgl32.Vec3{0, 0, 1}, &color.NRGBA{150, 150, 150, 255})
 
 	// Initialize singletons.
 	mouse.Initialize(view.Window)
