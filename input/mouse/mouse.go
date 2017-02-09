@@ -6,6 +6,7 @@ package mouse
 import (
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/glfw"
@@ -76,10 +77,32 @@ func (h *handler) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 }
 
 // scrollCallback is a function for glfw to call when a scroll wheel event occurs.
+// Note that scroll values can be inconsistent between different browsers and between different desktop OS's.
+// See https://github.com/goxjs/glfw/issues/10 for more detail and why this is not feasible to fix.
 func (h *handler) scrollCallback(_ *glfw.Window, xoff, yoff float64) {
+	xoff = normalizeScrollDelta(xoff)
+	yoff = normalizeScrollDelta(yoff)
 	// log.Println("got scroll event:", xoff, yoff)
 	h.scrollBuffer[0] += float32(xoff)
 	h.scrollBuffer[1] += float32(yoff)
+}
+
+// normalizeScrollDelta is an empirically "ok" solution to normalize scroll wheel values between different between OS's,
+// input hardware, and browsers. It uses a log function to get deltas to reasonably similar values while still maintaining
+// some difference so things like MacOS trackpad kinetic scrolling still works.
+// See https://github.com/goxjs/glfw/issues/10 for more information.
+func normalizeScrollDelta(delta float64) float64 {
+	switch {
+	// If delta is small, return as is. This is likely the case for kinetic trackpad scrolling events.
+	case math.Abs(delta) <= 1:
+		return delta
+	case delta > 0:
+		return math.Log10(delta)
+	case delta < 0:
+		return -math.Log10(-delta)
+	default:
+		return 0
+	}
 }
 
 func setState(state map[glfw.MouseButton]bool, button glfw.MouseButton, action glfw.Action) {
@@ -139,11 +162,16 @@ func (h *handler) PreviousPosition() mgl32.Vec2 {
 // Scroll returns the amount of scrolling done in the previous Update() call.
 // The Y value is the standard forward/back, while the left/right scrolling available on some mice is in the X value.
 // Positive for Forward/Left. Negative for Back/Right. 0 by default.
+// Note that scroll values can be inconsistent between different browsers and between different desktop OS's.
+// Some normalization is done so values aren't wildly different, but don't depend on getting specific values (like +1.0 or -1.0).
+// See https://github.com/goxjs/glfw/issues/10 for more detail and why this is not feasible to fix.
 func (h *handler) Scroll() mgl32.Vec2 {
 	return h.scroll.Sub(h.previousScroll)
 }
 
 // ScrollTotal returns the amount of scrolling done since the start of the mouse handler.
+// Note that scroll values can be inconsistent between different browsers and between different desktop OS's.
+// See https://github.com/goxjs/glfw/issues/10 for more detail and why this is not feasible to fix.
 func (h *handler) ScrollTotal() mgl32.Vec2 {
 	return h.scroll
 }
