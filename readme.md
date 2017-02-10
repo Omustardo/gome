@@ -8,7 +8,7 @@ This project is certainly pre-alpha so I don't recommend depending on anything i
 I'm not attempting to develop a full featured engine like Unreal or Unity, but I hope to eventually support enough of
 the basics to implement a networked game with simple physics. I chose Go because I appreciate its simplicity and find
 it pleasant to work with. It also has GopherJS, which allows programs developed in Go to be compiled not only
-into regular binaries, but also into javascript. With the github.com/goxjs/gl and glfw packages, this allows the same 
+into regular binaries, but also into javascript. With the `github.com/goxjs/gl` and `glfw` packages, this allows the same 
 OpenGL shaders to be compiled for both desktop and webgl (see the gome shader package).
 
 Some of my GopherJS demos are hosted at https://omustardo.github.io/ but note that not all of them were made using gome.

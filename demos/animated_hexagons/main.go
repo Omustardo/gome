@@ -110,7 +110,7 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		model.RenderXYZAxes()
 
-		count := 20
+		count := 40
 		for row := 0; row < count/2; row++ {
 			for col := 0; col < count*2; col++ {
 				xoffset := 2 * 0.75 * scale * float32(col)
@@ -123,6 +123,7 @@ func main() {
 					// Add time based position to animate
 					loopDurationMillis := float64(5000)
 					m.Position[2] *= float32(row) * float32(math.Sin(float64(util.GetTimeMillis())*math.Pi/loopDurationMillis))
+					m.ModifyRotationLocal(mgl32.Vec3{0, float32(math.Sin(math.Pi / 3 * float64(int64(row)*util.GetTimeMillis()) * math.Pi / loopDurationMillis)), 0})
 					m.Render()
 				}
 			}
