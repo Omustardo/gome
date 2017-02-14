@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"log"
 
 	// for decoding of different file types
 	_ "image/gif"
@@ -37,19 +38,68 @@ func LoadTexture(path string) (gl.Texture, error) {
 	// and shouldn't be an issue.
 	newimg := image.NewNRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(newimg, bounds, img, bounds.Min, draw.Src)
-	data := newimg.Pix
+	return LoadTextureData(width, newimg.Pix), nil
+}
 
-	// Need to flip the image vertically since OpenGL considers 0,0 to be the top left corner.
-	// Note width*4 since the data array consists of R,G,B,A values.
-	if err := flipYCoords(data, width*4); err != nil {
-		return gl.Texture{}, err
+// LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
+// It's up to the caller to delete the texture buffer using gl.DeleteTexture(texture) when it's no longer needed.
+// Note that the input data must not be ragged - each row must be the same length.
+func LoadTextureData2D(data [][]uint8) gl.Texture {
+	if len(data) == 0 {
+		return gl.Texture{}
 	}
-	return util.LoadTextureData(width, height, data), nil
+	width := len(data[0])
+	flat := make([]uint8, len(data)*len(data[0]))
+	for _, row := range data {
+		if len(row) != width {
+			log.Printf("Got ragged 2D array. Found rows of len %d and %d", width, len(row))
+			return gl.Texture{}
+		}
+		flat = append(flat, row...)
+	}
+	return LoadTextureData(width, flat)
+}
+
+// LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
+// width is the length of each row of data in RGBA pixels - note that the input data is in bytes, so the actual length
+// of each row is width * 4, and the total length of the input data should be 4 * width * height. TODO: Consider passing in actual width of the data. This is a bit confusing either way... alternatively pass in array of colors, but that loses efficiency.
+//
+// It's up to the caller to delete the texture buffer using gl.DeleteTexture(texture) when it's no longer needed.
+// Note that the input data must not be ragged - each row must be the same length.
+func LoadTextureData(width int, data []uint8) gl.Texture {
+	if width <= 0 {
+		return gl.Texture{} // TODO: return errors
+	}
+	if !util.IsPowerOfTwo(width) || !util.IsPowerOfTwo(len(data)/width) {
+		return gl.Texture{} // TODO: return errors: webgl requires poweroftwo texture dimensions to make mipmaps.
+	}
+
+	// gl.Enable(gl.TEXTURE_2D) // some sources says this is needed, but it doesn't seem to be. In fact, it gives an "invalid capability" message in webgl.
+	height := len(data) / (width * 4)
+
+	// TODO: Am I doing textures incorrectly? The freetype demos don't flip and the image still comes out fine. I think that is just that image.Encode uses 0,0 as bottom left, but double check to be sure.
+	// Need to flip the image vertically since OpenGL considers 0,0 to be the top left corner.
+	if err := flipYCoords(width*4, data); err != nil {
+		return gl.Texture{}
+	}
+
+	texture := gl.CreateTexture()
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	// NOTE: gl.FLOAT isn't enabled for texture data types unless gl.getExtension('OES_texture_float'); is set, so just use gl.UNSIGNED_BYTE
+	//   See http://stackoverflow.com/questions/23124597/storing-floats-in-a-texture-in-opengl-es  http://stackoverflow.com/questions/22666556/webgl-texture-creation-trouble
+	gl.TexImage2D(gl.TEXTURE_2D, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, data)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.GenerateMipmap(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
+	return texture
 }
 
 // Takes a flattened 2D array and the width of the rows.
 // Modifies the values such that if the original array were an image, it would now appear upside down.
-func flipYCoords(data []uint8, width int) error {
+func flipYCoords(width int, data []uint8) error {
 	if len(data)%width != 0 {
 		return fmt.Errorf("expected flattened 2d array, got uneven row length: len %% width == %v", len(data)%width)
 	}

@@ -5,7 +5,6 @@ import (
 
 	"github.com/goxjs/gl"
 	"github.com/omustardo/bytecoder"
-	"github.com/omustardo/gome/util"
 )
 
 func initializeAxes() Mesh {
@@ -22,7 +21,9 @@ func initializeAxes() Mesh {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW)
 
-	texture := util.LoadTextureData(2, 2, []uint8{
+	// TODO: Texture loading is done in the asset package, but using asset.LoadTexture here creates an odd dependency.
+	// Consider making a separate package solely for putting bytes into GPU buffers.
+	textureData := []uint8{
 		// X Axis: Red
 		255, 0, 0, 255,
 		// Y Axis: Green
@@ -31,7 +32,16 @@ func initializeAxes() Mesh {
 		0, 0, 255, 255,
 		// Pad so the texture size is a power of 2.
 		0, 0, 0, 0,
-	})
+	}
+	texture := gl.CreateTexture()
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, 2, 2, gl.RGBA, gl.UNSIGNED_BYTE, textureData)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.GenerateMipmap(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 
 	textureCoordBuffer := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)

@@ -30,5 +30,9 @@ func SaveScreenshot(width, height int, path string) error {
 	if err != nil {
 		return err
 	}
-	return png.Encode(out, img)
+	if err := png.Encode(out, img); err != nil {
+		out.Close() // uncaught error if close fails
+		return err
+	}
+	return out.Close()
 }
