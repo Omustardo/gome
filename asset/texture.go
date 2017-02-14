@@ -38,7 +38,7 @@ func LoadTexture(path string) (gl.Texture, error) {
 	// and shouldn't be an issue.
 	newimg := image.NewNRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(newimg, bounds, img, bounds.Min, draw.Src)
-	return LoadTextureData(width, newimg.Pix), nil
+	return LoadTextureDataImageNRGBA(newimg), nil
 }
 
 // LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
@@ -58,6 +58,19 @@ func LoadTextureData2D(data [][]uint8) gl.Texture {
 		flat = append(flat, row...)
 	}
 	return LoadTextureData(width, flat)
+}
+
+func LoadTextureDataImageRGBA(img *image.RGBA) gl.Texture {
+	if img == nil {
+		return gl.Texture{}
+	}
+	return LoadTextureData(img.Bounds().Dx(), img.Pix)
+}
+func LoadTextureDataImageNRGBA(img *image.NRGBA) gl.Texture {
+	if img == nil {
+		return gl.Texture{}
+	}
+	return LoadTextureData(img.Bounds().Dx(), img.Pix)
 }
 
 // LoadTextureData takes raw RGBA image data and puts it into a texture unit on the GPU.
