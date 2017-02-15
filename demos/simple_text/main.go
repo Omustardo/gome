@@ -213,9 +213,9 @@ func generateTextTexture() gl.Texture {
 		pt.Y += c.PointToFixed(*size * *spacing)
 	}
 
-	tex := asset.LoadTextureDataImageRGBA(rgba)
-	if !tex.Valid() {
-		log.Fatalln("Failed to load generated texture")
+	tex, err := asset.LoadTextureDataImage(rgba)
+	if err != nil {
+		log.Fatalln("Failed to load generated texture:", err)
 	}
 	return tex
 }

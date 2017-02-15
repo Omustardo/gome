@@ -5,6 +5,7 @@ import (
 
 	"github.com/goxjs/gl"
 	"github.com/omustardo/bytecoder"
+	"github.com/omustardo/gome/util/glutil"
 )
 
 func initializeAxes() Mesh {
@@ -33,15 +34,10 @@ func initializeAxes() Mesh {
 		// Pad so the texture size is a power of 2.
 		0, 0, 0, 0,
 	}
-	texture := gl.CreateTexture()
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, 2, 2, gl.RGBA, gl.UNSIGNED_BYTE, textureData)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.GenerateMipmap(gl.TEXTURE_2D)
-	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
+	texture, err := glutil.LoadTextureData(2, 2, textureData)
+	if err != nil {
+		panic(err) // TODO: Ideally move away from this sort of initialize / singleton method, but if not at least return errors.
+	}
 
 	textureCoordBuffer := gl.CreateBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
