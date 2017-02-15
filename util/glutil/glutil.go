@@ -2,9 +2,12 @@
 package glutil
 
 import (
+	"encoding/binary"
 	"fmt"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/bytecoder"
 	"github.com/omustardo/gome/util"
 )
 
@@ -52,4 +55,38 @@ func LoadTextureData(width, height int, data []uint8) (gl.Texture, error) {
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
 	return texture, nil
+}
+
+// LoadBuffer takes a float32 slice and stores the underlying data in a buffer on the GPU.
+func LoadBuffer(data []byte) gl.Buffer {
+	buf := gl.CreateBuffer()
+	gl.BindBuffer(gl.ARRAY_BUFFER, buf)                  // Bind the target buffer so we can store values in it. https://www.opengl.org/sdk/docs/man4/html/glBindBuffer.xhtml
+	gl.BufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW) // store values in buffer
+	return buf
+}
+
+// LoadBufferUint16 takes a uint16 slice and stores the underlying data in a buffer on the GPU.
+func LoadBufferUint16(data []uint16) gl.Buffer {
+	return LoadBuffer(bytecoder.Uint16(binary.LittleEndian, data...))
+}
+
+// LoadBufferFloat32 takes a float32 slice and stores the underlying data in a buffer on the GPU.
+func LoadBufferFloat32(data []float32) gl.Buffer {
+	return LoadBuffer(bytecoder.Float32(binary.LittleEndian, data...))
+}
+
+func LoadBufferVec2(data []mgl32.Vec2) gl.Buffer {
+	return LoadBuffer(bytecoder.Vec2(binary.LittleEndian, data...))
+}
+
+func LoadBufferVec3(data []mgl32.Vec3) gl.Buffer {
+	return LoadBuffer(bytecoder.Vec3(binary.LittleEndian, data...))
+}
+
+// LoadIndexBuffer takes a uint16 slice and stores the underlying data in an ELEMENT_ARRAY buffer on the GPU.
+func LoadIndexBuffer(data []uint16) gl.Buffer {
+	buf := gl.CreateBuffer()
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, bytecoder.Uint16(binary.LittleEndian, data...), gl.STATIC_DRAW)
+	return buf
 }

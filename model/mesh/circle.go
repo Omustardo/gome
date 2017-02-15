@@ -1,29 +1,19 @@
 package mesh
 
 import (
-	"encoding/binary"
 	"image/color"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/bytecoder"
+	"github.com/omustardo/gome/util/glutil"
 )
 
 const numCircleSegments = 360
 
 func initializeCircle() Mesh {
-	vertices := circleVertices(numCircleSegments)
-	vertexBytes := bytecoder.Vec3(binary.LittleEndian, vertices...)
-	vertexVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
-
-	texCoords := circleTexCoords(numCircleSegments)
-	texCoordBytes := bytecoder.Vec2(binary.LittleEndian, texCoords...)
-	texCoordsVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, texCoordsVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, texCoordBytes, gl.STATIC_DRAW)
+	vertexVBO := glutil.LoadBufferVec3(circleVertices(numCircleSegments))
+	texCoordsVBO := glutil.LoadBufferVec2(circleTexCoords(numCircleSegments))
 
 	// item count is numSegments+2 because it's the total number of vertices in the fan:
 	// one for the center, and one for each point on the circle, and then a single duplicate to close the circle.
@@ -31,11 +21,7 @@ func initializeCircle() Mesh {
 }
 
 func initializeWireframeCircle() Mesh {
-	vertices := wireframeCircleVertices(numCircleSegments)
-	vertexBytes := bytecoder.Vec3(binary.LittleEndian, vertices...)
-	vertexVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
+	vertexVBO := glutil.LoadBufferVec3(wireframeCircleVertices(numCircleSegments))
 	return NewMesh(vertexVBO, gl.Buffer{}, gl.Buffer{}, gl.LINE_LOOP, numCircleSegments, nil, gl.Texture{}, gl.Buffer{})
 }
 

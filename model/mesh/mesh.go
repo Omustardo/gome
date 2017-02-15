@@ -1,14 +1,13 @@
 package mesh
 
 import (
-	"encoding/binary"
 	"fmt"
 	"image/color"
 	"log"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/bytecoder"
+	"github.com/omustardo/gome/util/glutil"
 )
 
 var (
@@ -80,25 +79,13 @@ type Mesh struct {
 func NewMeshFromArrays(vertices, normals []mgl32.Vec3, textureCoords []mgl32.Vec2) (Mesh, error) {
 	var vertexBuffer, uvBuffer, normalBuffer gl.Buffer
 
-	vertexBuffer = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, vertices...), gl.STATIC_DRAW)
-
-	normalBuffer = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, normalBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normals...), gl.STATIC_DRAW)
-
-	uvBuffer = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, uvBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec2(binary.LittleEndian, textureCoords...), gl.STATIC_DRAW)
+	vertexBuffer = glutil.LoadBufferVec3(vertices)
+	normalBuffer = glutil.LoadBufferVec3(normals)
+	uvBuffer = glutil.LoadBufferVec2(textureCoords)
 
 	if glError := gl.GetError(); glError != 0 {
 		return Mesh{}, fmt.Errorf("gl.GetError: %v", glError)
 	}
-
-	//log.Printf("Vertices: %v\n", verts)
-	//log.Printf("Normals: %v\n", normals)
-	//log.Printf("Vertex Indices: %v\n", vertIndices)
 
 	return NewMesh(vertexBuffer, gl.Buffer{}, normalBuffer, gl.TRIANGLES, len(vertices), nil, gl.Texture{}, uvBuffer), nil
 }
@@ -192,23 +179,16 @@ var (
 )
 
 func initializeEmptyTexture() {
-	emptyTexture = gl.CreateTexture()
-	gl.BindTexture(gl.TEXTURE_2D, emptyTexture)
-	// NOTE: gl.FLOAT isn't enabled for texture data types unless gl.getExtension('OES_texture_float'); is set, so just use gl.UNSIGNED_BYTE
-	//   See http://stackoverflow.com/questions/23124597/storing-floats-in-a-texture-in-opengl-es  http://stackoverflow.com/questions/22666556/webgl-texture-creation-trouble
-	gl.TexImage2D(gl.TEXTURE_2D, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, []uint8{255, 255, 255, 255})
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.BindTexture(gl.TEXTURE_2D, gl.Texture{}) // bind to "null" to prevent using the wrong texture by mistake.
+	var err error
+	emptyTexture, err = glutil.LoadTextureData(1, 1, []uint8{255, 255, 255, 255}) // TODO: This sort of initialization behavior should be done in an actual init, where a panic is reasonable.
+	if err != nil {
+		panic(err)
+	}
 }
 
 func initializeEmptyBuffer() {
 	data := make([]float32, emptyBufferSize) // large array of 0 values
-	emptyBuffer = gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, emptyBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Float32(binary.LittleEndian, data...), gl.STATIC_DRAW)
+	emptyBuffer = glutil.LoadBufferFloat32(data)
 }
 
 // subdivideTriangle takes a triangle as input and returns the four triangles created by subdividing it.

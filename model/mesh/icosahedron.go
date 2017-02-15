@@ -1,14 +1,12 @@
 package mesh
 
 import (
-	"math"
-
-	"encoding/binary"
 	"image/color"
+	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/bytecoder"
+	"github.com/omustardo/gome/util/glutil"
 )
 
 func initializeIcosahedron() Mesh {
@@ -18,23 +16,14 @@ func initializeIcosahedron() Mesh {
 	for _, f := range faces {
 		vertices = append(vertices, f[0], f[1], f[2])
 	}
-	vertexBytes := bytecoder.Vec3(binary.LittleEndian, vertices...)
-	vertexVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
+	vertexVBO := glutil.LoadBufferVec3(vertices)
 
 	normals := TriangleNormals(faces)
-	normalBytes := bytecoder.Vec3(binary.LittleEndian, normals...)
-	normalVBO := gl.CreateBuffer()
-	gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, normalBytes, gl.STATIC_DRAW)
+	normalVBO := glutil.LoadBufferVec3(normals)
 
 	// TODO: add texture coordinates
 	//texCoords := circleTexCoords(numCircleSegments)
-	//texCoordBytes := bytecoder.Vec2(binary.LittleEndian, texCoords...)
-	//texCoordsVBO := gl.CreateBuffer()
-	//gl.BindBuffer(gl.ARRAY_BUFFER, texCoordsVBO)
-	//gl.BufferData(gl.ARRAY_BUFFER, texCoordBytes, gl.STATIC_DRAW)
+	//texCoordsVBO := glutil.LoadBufferVec2(texCoords)
 
 	return NewMesh(vertexVBO, gl.Buffer{}, normalVBO, gl.TRIANGLES, 20*3, nil, gl.Texture{}, gl.Buffer{})
 }
@@ -133,23 +122,13 @@ func NewSubdividedIcosahedron(divisions int, col *color.NRGBA, texture gl.Textur
 			for _, f := range faces {
 				vertices = append(vertices, f[0], f[1], f[2])
 			}
-			vertexBytes := bytecoder.Vec3(binary.LittleEndian, vertices...)
-			vertexVBO := gl.CreateBuffer()
-
-			gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
-			gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
+			vertexVBO := glutil.LoadBufferVec3(vertices)
 
 			normals := TriangleNormals(faces)
-			normalBytes := bytecoder.Vec3(binary.LittleEndian, normals...)
-			normalVBO := gl.CreateBuffer()
-			gl.BindBuffer(gl.ARRAY_BUFFER, normalVBO)
-			gl.BufferData(gl.ARRAY_BUFFER, normalBytes, gl.STATIC_DRAW)
+			normalVBO := glutil.LoadBufferVec3(normals)
 
 			//texCoords := circleTexCoords(numCircleSegments)
-			//texCoordBytes := bytecoder.Vec2(binary.LittleEndian, texCoords...)
-			//texCoordsVBO := gl.CreateBuffer()
-			//gl.BindBuffer(gl.ARRAY_BUFFER, texCoordsVBO)
-			//gl.BufferData(gl.ARRAY_BUFFER, texCoordBytes, gl.STATIC_DRAW)
+			//texCoordsVBO := glutil.LoadBufferVec2(texCoords)
 
 			subdividedIcosahedron[i] = NewMesh(vertexVBO, gl.Buffer{}, normalVBO, gl.TRIANGLES, len(vertices), nil, gl.Texture{}, gl.Buffer{})
 		}

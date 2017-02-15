@@ -1,13 +1,12 @@
 package mesh
 
 import (
-	"encoding/binary"
 	"image/color"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
-	"github.com/omustardo/bytecoder"
+	"github.com/omustardo/gome/util/glutil"
 )
 
 // maxDetail determines how many times to recursively subdivide an icosahedron
@@ -25,17 +24,10 @@ func initializeSpheres(maxDetail int) {
 			for _, f := range faces {
 				vertices = append(vertices, f[0], f[1], f[2])
 			}
-			vertexBytes := bytecoder.Vec3(binary.LittleEndian, vertices...)
-			vertexVBO := gl.CreateBuffer()
-
-			gl.BindBuffer(gl.ARRAY_BUFFER, vertexVBO)
-			gl.BufferData(gl.ARRAY_BUFFER, vertexBytes, gl.STATIC_DRAW)
+			vertexVBO := glutil.LoadBufferVec3(vertices)
 
 			//texCoords := circleTexCoords(numCircleSegments)
-			//texCoordBytes := bytecoder.Vec2(binary.LittleEndian, texCoords...)
-			//texCoordsVBO := gl.CreateBuffer()
-			//gl.BindBuffer(gl.ARRAY_BUFFER, texCoordsVBO)
-			//gl.BufferData(gl.ARRAY_BUFFER, texCoordBytes, gl.STATIC_DRAW)
+			//texCoordsVBO := glutil.LoadBufferVec2(texCoords)
 
 			// Use vertexVBO as the normalVBO to smooth out polygon edges.
 			spheres[i] = NewMesh(vertexVBO, gl.Buffer{}, vertexVBO, gl.TRIANGLES, len(vertices), nil, gl.Texture{}, gl.Buffer{})
