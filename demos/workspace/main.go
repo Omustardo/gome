@@ -51,7 +51,7 @@ func init() {
 
 func main() {
 	flag.Parse()
-	asset.Initialize(*baseDir)
+	asset.SetBaseDir(*baseDir)
 
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
 	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {

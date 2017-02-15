@@ -18,7 +18,7 @@ import (
 // Init should be called near the start of the main method.
 // It sets up the glfw window, shaders, input, and basic meshes among other things.
 func Initialize(windowTitle string, windowWidth, windowHeight int, baseDir string) func() {
-	asset.Initialize(baseDir)
+	asset.SetBaseDir(baseDir)
 
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
 	if err := view.Initialize(windowWidth, windowHeight, windowTitle); err != nil {

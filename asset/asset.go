@@ -12,7 +12,9 @@ import "fmt"
 // Explicitly setting baseDir is a reasonable solution, as long as it's removed and only relative paths are used when development is done.
 var baseDir string // = flag.String("base_dir", `C:\workspace\Go\src\github.com\omustardo\gome\demos`, "All file paths should be specified relative to this root.")
 
-func Initialize(baseDirectory string) {
-	fmt.Println("Setting up asset path...")
+// SetBaseDir sets the base directory from which all path based asset loading occurs on.
+// Note that this method has no effect if used in a +js environment as URL are used in place of file paths on the web.
+func SetBaseDir(baseDirectory string) {
+	fmt.Println("Setting asset path...")
 	baseDir = baseDirectory
 }
