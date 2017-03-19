@@ -51,7 +51,7 @@ If anyone has suggestions to improve file loading, I'm very open to them.
  `[200,0,0,100]`  then the premultiplied RGBA version is `[200*(100/255),0,0,100] = [78,0,0,100]`. 
  I believe users will find NRGBA more natural to work with so that's the default. 
  Note that you should access the color values directly, i.e. `color.R`, rather than using the `RGBA()` function.
- Also note that RGBA commonly used without multiplying the alpha value, but I chose NRGBA so it's explicit.
+ Also note that RGBA is commonly used without multiplying the alpha value, but I chose NRGBA so it's explicit.
  
 ### Gotcha's
  * The scale of models in the game is up to the user to set via entity.Entity's Scale field. Note that leaving it empty

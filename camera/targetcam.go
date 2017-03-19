@@ -29,7 +29,7 @@ type TargetCamera struct {
 }
 
 func (c *TargetCamera) ModelView() mgl32.Mat4 {
-	return mgl32.LookAtV(c.Position(), c.Target.Center(), c.Up)
+	return mgl32.LookAtV(c.Position(), c.Target.GetPosition(), c.Up)
 }
 
 func (c *TargetCamera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
@@ -60,7 +60,7 @@ func (c *TargetCamera) Position() mgl32.Vec3 {
 	// Adjust the distance from camera to target by the amount of zoom.
 	// A zoom of 3 means everything should be 3 times as large, so the distance from target to camera should be 1/3 the default.
 	offset := c.TargetOffset.Mul(1.0 / c.GetCurrentZoomPercent())
-	return c.Target.Center().Add(offset)
+	return c.Target.GetPosition().Add(offset)
 }
 
 // ScreenToWorldCoord2D returns the world coordinates of a point on the screen.

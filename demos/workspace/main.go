@@ -13,6 +13,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
 	"github.com/goxjs/glfw"
+	"github.com/omustardo/gome"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/camera/zoom"
@@ -24,7 +25,6 @@ import (
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
-	"github.com/omustardo/gome/util/axis"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
 )
@@ -51,33 +51,12 @@ func init() {
 
 func main() {
 	flag.Parse()
-	asset.SetBaseDir(*baseDir)
 
-	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
-	if err := view.Initialize(*windowWidth, *windowHeight, "Graphics Demo"); err != nil {
-		log.Fatal(err)
-	}
-	defer view.Terminate()
+	terminate := gome.Initialize("Graphics Demo", *windowWidth, *windowHeight, *baseDir)
+	defer terminate()
 
-	// Initialize Shaders
-	if err := shader.Initialize(); err != nil {
-		log.Fatal(err)
-	}
-	if err := gl.GetError(); err != 0 {
-		log.Fatalf("gl error: %v", err)
-	}
 	shader.Model.SetAmbientLight(&color.NRGBA{255, 255, 255, 0}) // 2D objects look good in max lighting.
 	// shader.Model.SetAmbientLight(&color.NRGBA{60, 60, 60, 0}) // 3D objects don't look 3D in max lighting, so tone it down.
-
-	// Initialize singletons.
-	mouse.Initialize(view.Window)
-	keyboard.Initialize(view.Window)
-	fps.Initialize()
-
-	// Load standard meshes (cubes, rectangles, etc). These depend on OpenGL buffers, which depend on having an OpenGL
-	// context. They must be called sometime after glfw is initialized to work.
-	mesh.Initialize()
-	axis.Initialize()
 
 	// =========== Done with common initializations. From here on it's specific to this demo. TODO: Move above stuff into a nice wrapper. Split anything that doesn't depend on OpenGL/main thread into a goroutine.
 
@@ -96,7 +75,7 @@ func main() {
 		Entity: entity.Entity{
 			Position: mgl32.Vec3{},
 			Scale:    mgl32.Vec3{100, 100},
-			Rotation: mgl32.Vec3{},
+			Rotation: mgl32.QuatIdent(),
 		},
 	}
 
@@ -119,7 +98,7 @@ func main() {
 		Entity: entity.Entity{
 			Position: mgl32.Vec3{-150, 100},
 			Scale:    mgl32.Vec3{100, 100},
-			Rotation: mgl32.Vec3{},
+			Rotation: mgl32.QuatIdent(),
 		},
 	}
 
@@ -129,7 +108,7 @@ func main() {
 			Entity: entity.Entity{
 				Position: mgl32.Vec3{100, 200, 0},
 				Scale:    mgl32.Vec3{20, 20, 0},
-				Rotation: mgl32.Vec3{},
+				Rotation: mgl32.QuatIdent(),
 			},
 		},
 		{
@@ -137,7 +116,7 @@ func main() {
 			Entity: entity.Entity{
 				Position: mgl32.Vec3{-200, -100, 0},
 				Scale:    mgl32.Vec3{15, 15, 0},
-				Rotation: mgl32.Vec3{},
+				Rotation: mgl32.QuatIdent(),
 			},
 		},
 		{
@@ -145,7 +124,7 @@ func main() {
 			Entity: entity.Entity{
 				Position: mgl32.Vec3{0, 50, 0},
 				Scale:    mgl32.Vec3{35, 35, 0},
-				Rotation: mgl32.Vec3{},
+				Rotation: mgl32.QuatIdent(),
 			},
 		},
 	}
@@ -213,7 +192,7 @@ func main() {
 		Entity: entity.Entity{
 			Position: mgl32.Vec3{0, 0, 0},
 			Scale:    mgl32.Vec3{32, 32, 32},
-			Rotation: mgl32.Vec3{},
+			Rotation: mgl32.QuatIdent(),
 		},
 	}
 	rotationPerSecond := float32(math.Pi / 4)
@@ -222,8 +201,8 @@ func main() {
 		Mesh: shipMesh,
 		Entity: entity.Entity{
 			Position: mgl32.Vec3{0, 100, 0},
-			Rotation: mgl32.Vec3{},
 			Scale:    mgl32.Vec3{5, 5, 5},
+			Rotation: mgl32.QuatIdent(),
 		},
 	}
 	shipModel.Mesh.Color = &color.NRGBA{155, 155, 155, 255}
@@ -242,15 +221,11 @@ func main() {
 		ApplyInputs(player, cam)
 
 		// Update the cube's X and Z rotation.
-		texturedCube.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
-		texturedCube.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
-
-		shipModel.Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
-		shipModel.Rotation[2] += rotationPerSecond * float32((*frameRate).Seconds())
-
-		miscCircles[0].Rotation[0] += rotationPerSecond * float32((*frameRate).Seconds())
-		miscCircles[0].Rotation[1] += 0.8 * rotationPerSecond * float32((*frameRate).Seconds())
-		miscCircles[0].Rotation[2] += 1.3 * rotationPerSecond * float32((*frameRate).Seconds())
+		r := rotationPerSecond * float32((*frameRate).Seconds())
+		texturedCube.ModifyRotationGlobal(mgl32.Vec3{r, 0, r})
+		shipModel.ModifyRotationGlobal(mgl32.Vec3{r, 0, r})
+		shipModel.ModifyRotationGlobal(mgl32.Vec3{r, 0, r})
+		miscCircles[0].ModifyRotationGlobal(mgl32.Vec3{r, 0.8 * r, 1.3 * r})
 
 		for _, r := range orbitingRects {
 			r.Update()
@@ -273,7 +248,7 @@ func main() {
 
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // TODO: Some cool graphical effects result from not clearing the screen.
-		axis.DrawXYZAxes()
+		model.RenderXYZAxes()
 		for _, c := range miscCircles {
 			c.Render()
 		}
@@ -351,7 +326,7 @@ func ApplyInputs(player *model.Model, cam camera.Camera) {
 		util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
 	}
 	if mouse.Handler.LeftPressed() {
-		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Center().Vec2())
+		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Position.Vec2())
 
 		move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
 		player.ModifyPosition(move[0], move[1], 0)

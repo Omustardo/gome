@@ -10,13 +10,13 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
+	"github.com/omustardo/bytecoder"
 	"github.com/omustardo/gome/camera"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/model"
 	"github.com/omustardo/gome/model/mesh"
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util"
-	"github.com/omustardo/gome/util/bytecoder"
 )
 
 type Shape interface {
@@ -53,7 +53,7 @@ func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSp
 				Entity: entity.Entity{
 					Position: mgl32.Vec3{rand.Float32()*20000 - 10000, rand.Float32()*20000 - 10000, 0},
 					Scale:    mgl32.Vec3{rand.Float32()*(maxWidth-minWidth) + minWidth, rand.Float32()*(maxWidth-minWidth) + minWidth, 0},
-					Rotation: mgl32.Vec3{0, 0, rand.Float32() * 2 * math.Pi},
+					Rotation: mgl32.AnglesToQuat(0, 0, rand.Float32()*2*math.Pi, mgl32.XYZ),
 				},
 			},
 			Target:           target,
@@ -79,7 +79,7 @@ func GetParallaxBuffers(arr []ParallaxRect) (parallaxPositionBuffer, parallaxTra
 	for _, rect := range arr {
 		posData = append(posData, vertices...)
 		for i := 0; i < 6; i++ {
-			tx, ty, _ := rect.Center().Elem()
+			tx, ty, _ := rect.Position.Elem()
 			transData = append(transData, tx, ty)
 			transRatioData = append(transRatioData, rect.TranslationRatio)
 			angleData = append(angleData, rect.Rotation.Z())
@@ -167,7 +167,7 @@ func NewOrbitingRect(rect entity.Entity, c *color.NRGBA, orbitCenter mgl32.Vec2,
 			Entity: entity.Entity{
 				Position: orbitCenter.Vec3(0),
 				Scale:    mgl32.Vec3{orbitRadius, orbitRadius, 0},
-				Rotation: mgl32.Vec3{},
+				Rotation: mgl32.QuatIdent(),
 			},
 		},
 		orbitTarget:     orbitTarget,
@@ -180,13 +180,13 @@ func NewOrbitingRect(rect entity.Entity, c *color.NRGBA, orbitCenter mgl32.Vec2,
 
 func (r *OrbitingRect) Update() {
 	if r.orbitTarget != nil {
-		r.orbit.Position = r.orbitTarget.Center()
+		r.orbit.Position = r.orbitTarget.GetPosition()
 	}
 	now := util.GetTimeMillis()
 	percentRevolution := float32(now%r.revolutionSpeed) / float32(r.revolutionSpeed)
 	rads := percentRevolution * 2 * math.Pi
 	offset := mgl32.Vec3{float32(math.Cos(float64(rads))), float32(math.Sin(float64(rads))), 0}.Mul(r.orbit.Scale[0]) // TODO: use multiple scale dimensions (essentially the radius) to have elliptical orbits
-	x, y, _ := r.orbit.Center().Add(offset).Elem()
+	x, y, _ := r.orbit.Position.Add(offset).Elem()
 	r.SetPosition(x, y, 0)
 
 	// Elliptical orbit calculation: http://math.stackexchange.com/questions/22064/calculating-a-point-that-lies-on-an-ellipse-given-an-angle
@@ -200,7 +200,7 @@ func (r *OrbitingRect) Update() {
 
 	if r.rotateSpeed != 0 {
 		percentRotation := float32(now%r.rotateSpeed) / float32(r.rotateSpeed)
-		r.Rotation[2] = percentRotation * 2 * math.Pi
+		r.ModifyRotationGlobal(mgl32.Vec3{0, 0, percentRotation * 2 * math.Pi})
 	}
 }
 

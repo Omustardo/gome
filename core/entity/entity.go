@@ -9,19 +9,18 @@ import (
 	"github.com/omustardo/gome/util"
 )
 
-func Default() Entity {
-	return Entity{
-		Position: mgl32.Vec3{0, 0, 0},
-		Rotation: mgl32.QuatIdent(), // TODO: If people forget to set Rotation, it prevents them from modifying the rotation later using .Rotate methods. Need to have a way of notifying developers of this.
-		Scale:    mgl32.Vec3{1, 1, 1},
-	}
+// Target provides a position. Functions that only deal with the position of an Entity should take a Target rather than
+// a full entity.
+type Target interface {
+	GetPosition() mgl32.Vec3
 }
 
 type Entity struct {
 	// Position of the entity.
 	Position mgl32.Vec3
 
-	// TODO: Add a center value which is a added to position when rendering. As it is, position can be thought of as the bottom left corner of a cube that bounds a mesh. Being able to change positioning to an arbitrary center point will be necessary.
+	// TODO: Add a center value which is a added to position when rendering. As it is, position can be thought of as the
+	// bottom left corner of a cube that bounds a mesh. Being able to change positioning to an arbitrary center point will be necessary.
 
 	// Rotation about the center. Note that this is a quaternion - a mathematical way of representing rotation.
 	// Quaternions make some things easy, like having smooth rotations between different orientations, but
@@ -53,26 +52,48 @@ type Entity struct {
 
 	// Scale is how large the entity is in each dimension.
 	// All meshes and collision boxes are expected to be initialized as unit cubes or unit squares centered at the origin
-	// so scale can be used to compare them. This breaks if a mesh starts out as being larger or smaller since its scale
-	// will need to be incorrect in order to draw it at the proper size. Any larger or smaller meshes should have their
+	// so scale can be used to compare them. This breaks if a mesh starts out as being larger/smaller since its scale
+	// will need to be smaller/larger in order to draw it at the proper size. Any larger or smaller meshes should have their
 	// meshes normalized to fit snugly in a unit cube as they are loaded.
 	Scale mgl32.Vec3
 }
 
-func (e *Entity) Center() mgl32.Vec3 {
+func Default() Entity {
+	return Entity{
+		Position: mgl32.Vec3{0, 0, 0},
+		Rotation: mgl32.QuatIdent(), // TODO: If people forget to set Rotation, it prevents them from modifying the rotation later using .Rotate methods. Need to have a way of notifying developers of this.
+		Scale:    mgl32.Vec3{1, 1, 1},
+	}
+}
+
+func (e *Entity) Forward() mgl32.Vec3 {
+	return e.Position.Add(e.Rotation.Rotate(mgl32.Vec3{1, 0, 0}))
+}
+
+// GetPosition gets the entity's position. Position is public and can be accessed directly, but this
+// is necessary to make Entity implement the Target interface.
+// TODO: Consider alternatives to this. We definitely want to be able to access just the position via an interface
+// so functions that only need position don't get access to everything else.
+// GetPosition isn't idiomatic Go, but the name Position would clash with the field.
+// One option is to make the entity position private, but then rotation and scale should likely be made private
+// and it makes everything just a bit more difficult to work with.
+func (e *Entity) GetPosition() mgl32.Vec3 {
 	return e.Position
 }
 
+// SetPosition directly sets the entity's position.
 func (e *Entity) SetPosition(x, y, z float32) {
 	e.Position[0] = validFloat32(x)
 	e.Position[1] = validFloat32(y)
 	e.Position[2] = validFloat32(z)
 }
 
+// ModifyPositionV adds the provided vector to the entity's position.
 func (e *Entity) ModifyPositionV(vec mgl32.Vec3) {
 	e.ModifyPosition(vec.X(), vec.Y(), vec.Z())
 }
 
+// ModifyPosition adds the provided vector to the entity's position.
 func (e *Entity) ModifyPosition(x, y, z float32) {
 	e.Position[0] += validFloat32(x)
 	e.Position[1] += validFloat32(y)
@@ -115,11 +136,6 @@ func (e *Entity) ModifyRotationGlobalQ(rot mgl32.Quat) {
 // Note that multiple
 func (e *Entity) RotationAngles() mgl32.Vec3 {
 	return util.QuatToEulerAngle(e.Rotation)
-}
-
-// Target has a center. If something only needs access to an entity's position, pass it as a Target.
-type Target interface {
-	Center() mgl32.Vec3
 }
 
 // validFloat32 checks for values that wouldn't exist in the coordinate system of the game world and returns
