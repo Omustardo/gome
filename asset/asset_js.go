@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func loadFile(path string) ([]byte, error) {
+func LoadFile(path string) ([]byte, error) {
 	return httpGet(path)
 }
 

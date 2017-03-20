@@ -12,7 +12,7 @@ import (
 )
 
 func LoadDAE(path string) (mesh.Mesh, error) {
-	data, err := loadFile(path)
+	data, err := LoadFile(path)
 	if err != nil {
 		return mesh.Mesh{}, err
 	}

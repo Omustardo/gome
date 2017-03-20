@@ -6,7 +6,7 @@ import (
 )
 
 func LoadFont(path string) (*truetype.Font, error) {
-	data, err := loadFile(path)
+	data, err := LoadFile(path)
 	if err != nil {
 		return nil, err
 	}

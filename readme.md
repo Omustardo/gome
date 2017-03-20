@@ -53,6 +53,10 @@ If anyone has suggestions to improve file loading, I'm very open to them.
  Note that you should access the color values directly, i.e. `color.R`, rather than using the `RGBA()` function.
  Also note that RGBA is commonly used without multiplying the alpha value, but I chose NRGBA so it's explicit.
  
+### Tips
+ 
+ * The built in axis rendering functions color them RGB for XYZ, in that order.
+
 ### Gotcha's
  * The scale of models in the game is up to the user to set via entity.Entity's Scale field. Note that leaving it empty
  will mean your model has no physical size and so won't be shown. If you want your model to not be rendered, it's 

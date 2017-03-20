@@ -17,7 +17,7 @@ import (
 
 // LoadTexture from local assets. Handles jpg, png, and static gifs.
 func LoadTexture(path string) (gl.Texture, error) {
-	fileData, err := loadFile(path)
+	fileData, err := LoadFile(path)
 	if err != nil {
 		return gl.Texture{}, err
 	}

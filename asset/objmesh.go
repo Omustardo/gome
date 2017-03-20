@@ -58,7 +58,7 @@ type OBJOpts struct {
 
 // LoadOBJ creates a mesh from an obj file.
 func LoadOBJ(path string, opts OBJOpts) (mesh.Mesh, error) {
-	fileData, err := loadFile(path)
+	fileData, err := LoadFile(path)
 	if err != nil {
 		return mesh.Mesh{}, err
 	}
