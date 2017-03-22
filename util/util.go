@@ -73,3 +73,14 @@ func IsPowerOfTwo(n int) bool {
 	// http://www.graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
 	return (n&(n-1)) == 0 && n != 0
 }
+
+// RoundUpToPowerOfTwo returns the smallest number that is >= n and also a power of two.
+// If n is close to the max int value, unexpected behavior results are likely.
+func RoundUpToPowerOfTwo(n int) int {
+	// http://stackoverflow.com/questions/466204/rounding-up-to-nearest-power-of-2
+	power := 1
+	for power < n {
+		power *= 2
+	}
+	return power
+}
