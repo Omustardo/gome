@@ -16,7 +16,6 @@ import (
 	"github.com/omustardo/gome"
 	"github.com/omustardo/gome/asset"
 	"github.com/omustardo/gome/camera"
-	"github.com/omustardo/gome/camera/zoom"
 	"github.com/omustardo/gome/core/entity"
 	"github.com/omustardo/gome/demos/workspace/shape"
 	"github.com/omustardo/gome/input/keyboard"
@@ -79,19 +78,22 @@ func main() {
 		},
 	}
 
-	cam := &camera.TargetCamera{
-		Target:       player,
-		TargetOffset: mgl32.Vec3{0, 0, 500},
-		Up:           mgl32.Vec3{0, 1, 0},
-		Zoomer: zoom.NewScrollZoom(0.25, 3,
-			func() float32 {
-				return mouse.Handler.Scroll().Y()
-			},
-		),
-		Near: 0.1,
-		Far:  10000,
-		FOV:  math.Pi / 2.0,
-	}
+	//cam := &camera.TargetCamera{
+	//	Target:       player,
+	//	TargetOffset: mgl32.Vec3{0, 0, 500},
+	//	Up:           mgl32.Vec3{0, 1, 0},
+	//	Zoomer: zoom.NewScrollZoom(0.25, 3,
+	//		func() float32 {
+	//			return mouse.Handler.Scroll().Y()
+	//		},
+	//	),
+	//	Near: 0.1,
+	//	Far:  10000,
+	//	FOV:  math.Pi / 2.0,
+	//}
+
+	cam := camera.NewFreeCamera()
+	cam.SetPosition(0, 0, 500)
 
 	miscRect := &model.Model{
 		Mesh: mesh.NewRect(&color.NRGBA{180, 110, 111, 255}, gl.Texture{}),
@@ -218,7 +220,7 @@ func main() {
 		mouse.Handler.Update()
 
 		// Handle Input
-		ApplyInputs(player, cam)
+		ApplyInputs(player)
 
 		// Update the cube's X and Z rotation.
 		r := rotationPerSecond * float32((*frameRate).Seconds())
@@ -237,7 +239,7 @@ func main() {
 			// do stuff with game logic on ticks to minimize expensive calculations.
 		default:
 		}
-		cam.Update()
+		cam.Update(fps.Handler.DeltaTime())
 
 		// Set up Model-View-Projection Matrix and send it to the shader programs.
 		mvMatrix := cam.ModelView()
@@ -261,7 +263,7 @@ func main() {
 		//	r.DrawFilled()
 		//}
 		// New batched method:
-		shape.DrawParallaxBuffers(6*len(parallaxObjects) /* vertices in total */, cam.Position(),
+		shape.DrawParallaxBuffers(6*len(parallaxObjects) /* vertices in total */, cam.Position,
 			parallaxPositionBuffer, parallaxTranslationBuffer, parallaxTranslationRatioBuffer,
 			parallaxAngleBuffer, parallaxScaleBuffer, parallaxColorBuffer)
 
@@ -303,7 +305,7 @@ func main() {
 	}
 }
 
-func ApplyInputs(player *model.Model, cam camera.Camera) {
+func ApplyInputs(player *model.Model) {
 	var move mgl32.Vec2
 	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
 		move[0] += -1
@@ -326,7 +328,10 @@ func ApplyInputs(player *model.Model, cam camera.Camera) {
 		util.SaveScreenshot(w, h, filepath.Join(*screenshotPath, fmt.Sprintf("%d.png", util.GetTimeMillis())))
 	}
 	if mouse.Handler.LeftPressed() {
-		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(player.Position.Vec2())
+		move = mgl32.Vec2{
+			mouse.Handler.Position().X() - float32(w)/2,
+			-(mouse.Handler.Position().Y() - float32(h)/2),
+		}
 
 		move = move.Normalize().Mul(playerSpeed * fps.Handler.DeltaTimeSeconds())
 		player.ModifyPosition(move[0], move[1], 0)

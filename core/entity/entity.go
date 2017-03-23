@@ -70,6 +70,10 @@ func (e *Entity) Forward() mgl32.Vec3 {
 	return e.Position.Add(e.Rotation.Rotate(mgl32.Vec3{1, 0, 0}))
 }
 
+func (e *Entity) Up() mgl32.Vec3 {
+	return e.Rotation.Rotate(mgl32.Vec3{0, 1, 0})
+}
+
 // GetPosition gets the entity's position. Position is public and can be accessed directly, but this
 // is necessary to make Entity implement the Target interface.
 // TODO: Consider alternatives to this. We definitely want to be able to access just the position via an interface

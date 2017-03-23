@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"math"
 	"os"
 	"time"
 
@@ -56,19 +55,12 @@ func main() {
 	shipMesh.SetTexture(shipTexture)
 	ship := player.New(shipMesh)
 
-	cam := &camera.TargetCamera{
-		Target:       ship,
-		TargetOffset: mgl32.Vec3{0, 0, 500},
-		Up:           mgl32.Vec3{0, 1, 0},
-		Zoomer: zoom.NewScrollZoom(0.1, 3,
-			func() float32 {
-				return mouse.Handler.Scroll().Y()
-			},
-		),
-		Near: 0.1,
-		Far:  10000,
-		FOV:  math.Pi / 4.0,
-	}
+	cam := camera.NewTargetCamera(ship, mgl32.Vec3{0, 0, 500})
+	cam.Zoomer = zoom.NewScrollZoom(0.1, 3,
+		func() float32 {
+			return mouse.Handler.Scroll().Y()
+		},
+	)
 
 	asteroidMesh, err := asset.LoadOBJ("assets/rock/rock1.obj", asset.OBJOpts{Normalize: true, Center: &mgl32.Vec3{0.5, 0.5, 0.5}})
 	if err != nil {
@@ -168,7 +160,7 @@ func main() {
 			}
 		}
 
-		cam.Update()
+		cam.Update(fps.Handler.DeltaTime())
 
 		// Set up Model-View-Projection Matrix and send it to the shader programs.
 		mvMatrix := cam.ModelView()

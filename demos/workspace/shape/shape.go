@@ -2,11 +2,9 @@ package shape
 
 import (
 	"encoding/binary"
-	"math/rand"
-
-	"math"
-
 	"image/color"
+	"math"
+	"math/rand"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/goxjs/gl"
@@ -30,12 +28,12 @@ type Shape interface {
 	ModifyCenter(x, y float32)
 	// Center is a point about which all actions, like rotation, are defined.
 	// TODO: Consider the ability to modify the center point for rotating.
-	Center() mgl32.Vec3
+	Position() mgl32.Vec3
 }
 
 type ParallaxRect struct {
 	model.Model
-	Target camera.Camera
+	Target camera.CameraI
 	// Essentially, how this object moves in comparison to the camera.
 	// 1 is the same speed. 0.2 is 20% of camera speed.
 	// The larger the number, the further away the object appears to be. For example, a ratio of 0.95 means the object
@@ -44,7 +42,7 @@ type ParallaxRect struct {
 	TranslationRatio float32
 }
 
-func GenParallaxRects(target camera.Camera, count int, minWidth, maxWidth, minSpeedRatio, maxSpeedRatio float32) []ParallaxRect {
+func GenParallaxRects(target camera.CameraI, count int, minWidth, maxWidth, minSpeedRatio, maxSpeedRatio float32) []ParallaxRect {
 	shapes := make([]ParallaxRect, count)
 	for i := 0; i < count; i++ {
 		shapes[i] = ParallaxRect{

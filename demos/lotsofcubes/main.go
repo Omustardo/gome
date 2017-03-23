@@ -70,15 +70,7 @@ func main() {
 		Hidden: true,
 	}
 
-	cam := &camera.TargetCamera{
-		Target:       target,
-		TargetOffset: mgl32.Vec3{0, 0, 1000},
-		Up:           mgl32.Vec3{0, 1, 0},
-		Near:         0.1,
-		Far:          10000,
-		FOV:          math.Pi / 4.0,
-	}
-
+	cam := camera.NewTargetCamera(target, mgl32.Vec3{0, 0, 1000})
 	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4)*0.8, float32(math.Pi/4), float32(math.Pi/4)*1.3, mgl32.XYZ)
 
 	ticker := time.NewTicker(time.Second / 60)
@@ -89,11 +81,11 @@ func main() {
 		keyboard.Handler.Update()
 		mouse.Handler.Update()
 
-		ApplyInputs(target, cam)
+		ApplyInputs(target)
 
 		target.ModifyRotationLocalQ(util.ScaleQuatRotation(rotationPerSecond, fps.Handler.DeltaTimeSeconds()))
 
-		cam.Update()
+		cam.Update(fps.Handler.DeltaTime())
 
 		// Set up Model-View-Projection Matrix and send it to the shader programs.
 		mvMatrix := cam.ModelView()
@@ -115,7 +107,7 @@ func main() {
 	}
 }
 
-func ApplyInputs(target *model.Model, cam camera.Camera) {
+func ApplyInputs(target *model.Model) {
 	var move mgl32.Vec2
 	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
 		move[0] += -1
@@ -135,7 +127,10 @@ func ApplyInputs(target *model.Model, cam camera.Camera) {
 
 	w, h := view.Window.GetSize()
 	if mouse.Handler.LeftPressed() {
-		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Position.Vec2())
+		move = mgl32.Vec2{
+			mouse.Handler.Position().X() - float32(w)/2,
+			-(mouse.Handler.Position().Y() - float32(h)/2),
+		}
 
 		move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
 		target.ModifyPosition(move[0], move[1], 0)

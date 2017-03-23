@@ -73,22 +73,28 @@ func main() {
 		//},
 	}
 
-	// Player is an empty model. It has no mesh so it can't be rendered, but it can still exist in the world.
-	player := &model.Model{}
+	player := model.Model{
+		Mesh:   mesh.NewCube(&color.NRGBA{0, 255, 255, 255}, gl.Texture{}),
+		Entity: entity.Default(),
+	}
 	player.Position[0] = 0
+
 	cam := &camera.TargetCamera{
-		Target:       player,
-		TargetOffset: mgl32.Vec3{0, -1500, 1000},
-		Up:           mgl32.Vec3{0, 1, 0},
+		Camera: camera.Camera{
+			Entity: entity.Default(),
+			Near:   0.1,
+			Far:    10000,
+			FOV:    math.Pi / 4.0,
+		},
+		Target:       &player,
+		TargetOffset: mgl32.Vec3{-500, -500, 1000},
 		Zoomer: zoom.NewScrollZoom(0.1, 3,
 			func() float32 {
 				return mouse.Handler.Scroll().Y()
 			},
 		),
-		Near: 0.1,
-		Far:  10000,
-		FOV:  math.Pi / 4.0,
 	}
+	cam.ModifyRotationLocal(mgl32.Vec3{math.Pi / 4, 0, 0})
 
 	ticker := time.NewTicker(*frameRate)
 	for !view.Window.ShouldClose() {
@@ -97,7 +103,7 @@ func main() {
 		keyboard.Handler.Update()
 		mouse.Handler.Update()
 
-		ApplyInputs(player, cam)
+		ApplyInputs(&player)
 
 		// Set up Model-View-Projection Matrix and send it to the shader program.
 		mvMatrix := cam.ModelView()
@@ -105,7 +111,7 @@ func main() {
 		pMatrix := cam.ProjectionPerspective(float32(w), float32(h))
 		shader.Model.SetMVPMatrix(pMatrix, mvMatrix)
 
-		cam.Update()
+		cam.Update(fps.Handler.DeltaTime())
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		model.RenderXYZAxes()
@@ -128,6 +134,7 @@ func main() {
 				}
 			}
 		}
+		player.Render()
 
 		// Swaps the buffer that was drawn on to be visible. The visible buffer becomes the one that gets drawn on until it's swapped again.
 		view.Window.SwapBuffers()
@@ -135,7 +142,7 @@ func main() {
 	}
 }
 
-func ApplyInputs(target *model.Model, cam camera.Camera) {
+func ApplyInputs(target *model.Model) {
 	var move mgl32.Vec2
 	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
 		move[0] += -1

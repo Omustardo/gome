@@ -267,19 +267,12 @@ func main() {
 	// Player is an empty model. It has no mesh so it can't be rendered, but it can still exist in the world.
 	player := &model.Model{}
 	player.Position[0] = 0
-	cam := &camera.TargetCamera{
-		Target:       player,
-		TargetOffset: mgl32.Vec3{0, 0, 1000},
-		Up:           mgl32.Vec3{0, 1, 0},
-		Zoomer: zoom.NewScrollZoom(0.1, 3,
-			func() float32 {
-				return mouse.Handler.Scroll().Y()
-			},
-		),
-		Near: 0.1,
-		Far:  10000,
-		FOV:  math.Pi / 4.0,
-	}
+	cam := camera.NewTargetCamera(player, mgl32.Vec3{0, 0, 1000})
+	cam.Zoomer = zoom.NewScrollZoom(0.1, 3,
+		func() float32 {
+			return mouse.Handler.Scroll().Y()
+		},
+	)
 
 	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4), float32(math.Pi/4), float32(math.Pi/4), mgl32.XYZ)
 
@@ -290,7 +283,7 @@ func main() {
 		keyboard.Handler.Update()
 		mouse.Handler.Update()
 
-		ApplyInputs(player, cam)
+		ApplyInputs(player)
 
 		// Update the rotation.
 		for i := range models {
@@ -303,7 +296,7 @@ func main() {
 		pMatrix := cam.ProjectionPerspective(float32(w), float32(h))
 		shader.Model.SetMVPMatrix(pMatrix, mvMatrix)
 
-		cam.Update()
+		cam.Update(fps.Handler.DeltaTime())
 		// Clear screen, then Draw everything
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		model.RenderXYZAxes()
@@ -318,7 +311,7 @@ func main() {
 	}
 }
 
-func ApplyInputs(target *model.Model, cam camera.Camera) {
+func ApplyInputs(target *model.Model) {
 	var move mgl32.Vec2
 	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
 		move[0] += -1
@@ -338,7 +331,10 @@ func ApplyInputs(target *model.Model, cam camera.Camera) {
 
 	w, h := view.Window.GetSize()
 	if mouse.Handler.LeftPressed() {
-		move = cam.ScreenToWorldCoord2D(mouse.Handler.Position(), w, h).Sub(target.Position.Vec2())
+		move = mgl32.Vec2{
+			mouse.Handler.Position().X() - float32(w)/2,
+			-(mouse.Handler.Position().Y() - float32(h)/2),
+		}
 
 		move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
 		target.ModifyPosition(move[0], move[1], 0)
