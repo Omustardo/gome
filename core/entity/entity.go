@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/omustardo/gome/util"
 )
 
 // Target provides a position. Functions that only deal with the position of an Entity should take a Target rather than
@@ -134,11 +133,6 @@ func (e *Entity) ModifyRotationGlobal(rot mgl32.Vec3) {
 // This means the current orientation of the entity is ignored so it is no longer a relative rotation, but an absolute one.
 func (e *Entity) ModifyRotationGlobalQ(rot mgl32.Quat) {
 	e.Rotation = rot.Mul(e.Rotation)
-}
-
-// RotationAngles returns the roll, pitch, and yaw of the Entity in radians. // TODO: confirm this works in the util package.
-func (e *Entity) RotationAngles() mgl32.Vec3 {
-	return util.QuatToEulerAngle(e.Rotation)
 }
 
 // validFloat32 checks for values that wouldn't exist in the coordinate system of the game world and returns
