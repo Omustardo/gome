@@ -17,8 +17,10 @@ var _ CameraI = (*TargetCamera)(nil)
 type TargetCamera struct {
 	Camera
 
+	// Target is an entity which the TargetCamera follows. The camera always faces it and stays TargetOffset away from it.
 	Target entity.Target
 	// TargetOffset determines where the camera is positioned in relation to the target.
+	// Camera.Target.Position + Camera.TargetOffset == Camera.Position
 	TargetOffset mgl32.Vec3
 	// Zoomer handles camera zoom.
 	Zoomer zoom.Zoom
@@ -55,13 +57,6 @@ func NewTargetCamera(target entity.Target, offset mgl32.Vec3) *TargetCamera {
 		Target:       target,
 		TargetOffset: offset,
 	}
-}
-
-func (c *TargetCamera) Forward() mgl32.Vec3 {
-	return c.TargetOffset
-}
-func (c *TargetCamera) Up() mgl32.Vec3 {
-	return mgl32.Vec3{0, 1, 0} // TODO: How do I rotate this to work with the Forward vector?
 }
 
 func (c *TargetCamera) GetCurrentZoomPercent() float32 {

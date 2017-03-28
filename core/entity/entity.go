@@ -136,8 +136,7 @@ func (e *Entity) ModifyRotationGlobalQ(rot mgl32.Quat) {
 	e.Rotation = rot.Mul(e.Rotation)
 }
 
-// RotationAngles returns the roll, pitch, and yaw of the Entity in radians. The
-// Note that multiple
+// RotationAngles returns the roll, pitch, and yaw of the Entity in radians. // TODO: confirm this works in the util package.
 func (e *Entity) RotationAngles() mgl32.Vec3 {
 	return util.QuatToEulerAngle(e.Rotation)
 }
