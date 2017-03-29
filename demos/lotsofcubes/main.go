@@ -70,7 +70,7 @@ func main() {
 		Hidden: true,
 	}
 
-	cam := camera.NewTargetCamera(target, mgl32.Vec3{0, 0, 1000})
+	cam := camera.NewRotateCamera(target, 1000)
 	rotationPerSecond := mgl32.AnglesToQuat(float32(math.Pi/4)*0.8, float32(math.Pi/4), float32(math.Pi/4)*1.3, mgl32.XYZ)
 
 	ticker := time.NewTicker(time.Second / 60)
@@ -109,30 +109,19 @@ func main() {
 
 func ApplyInputs(target *model.Model) {
 	var move mgl32.Vec2
-	if keyboard.Handler.IsKeyDown(glfw.KeyA, glfw.KeyLeft) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyA) {
 		move[0] += -1
 	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyD, glfw.KeyRight) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyD) {
 		move[0] += 1
 	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyW, glfw.KeyUp) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyW) {
 		move[1] += 1
 	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyS, glfw.KeyDown) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyS) {
 		move[1] += -1
 	}
 	moveSpeed := float32(500)
 	move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
 	target.ModifyPosition(move[0], move[1], 0)
-
-	w, h := view.Window.GetSize()
-	if mouse.Handler.LeftPressed() {
-		move = mgl32.Vec2{
-			mouse.Handler.Position().X() - float32(w)/2,
-			-(mouse.Handler.Position().Y() - float32(h)/2),
-		}
-
-		move = move.Normalize().Mul(moveSpeed * fps.Handler.DeltaTimeSeconds())
-		target.ModifyPosition(move[0], move[1], 0)
-	}
 }

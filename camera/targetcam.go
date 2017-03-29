@@ -36,6 +36,13 @@ func (c *TargetCamera) ModelView() mgl32.Mat4 {
 	return mgl32.LookAtV(c.Entity.Position, c.Target.GetPosition(), c.Up())
 }
 
+func (c *TargetCamera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
+	// Since distance from target doesn't do a "zoom" effect in an orthographic projection, simulate one
+	// by changing how wide the view is.
+	zoomPercent := c.GetCurrentZoomPercent()
+	return c.Camera.ProjectionOrthographic(width/zoomPercent, height/zoomPercent)
+}
+
 func (c *TargetCamera) Update(delta time.Duration) {
 	c.Camera.Update(delta)
 	if c.Zoomer != nil {

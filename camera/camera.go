@@ -17,12 +17,6 @@ type CameraI interface {
 	ProjectionPerspective(width, height float32) mgl32.Mat4
 	Update(delta time.Duration)
 	GetPosition() mgl32.Vec3
-
-	// GetCurrentZoomPercent returns how much the camera is zoomed in or out. If the camera doesn't implement zoom
-	// functions then this always returns 1.
-	// Values smaller than 1 indicate zoomed out. e.g. 0.25 means all objects are 25% of their original size.
-	// Values larger than 1 indicate zoomed in. e.g. 3.0 means all objects appear 3 times larger than their original size.
-	GetCurrentZoomPercent() float32
 }
 
 // Camera is the most basic camera type. It has no built in movement, zoom, or any special features.
@@ -64,11 +58,6 @@ func (c *Camera) ModelView() mgl32.Mat4 {
 }
 
 func (c *Camera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
-	// Since distance from target doesn't do a "zoom" effect in an orthographic projection, simulate one
-	// by changing how wide the view is.
-	zoomPercent := c.GetCurrentZoomPercent()
-	width /= zoomPercent
-	height /= zoomPercent
 	return mgl32.Ortho(-width/2, width/2,
 		-height/2, height/2,
 		c.Near, c.Far)
@@ -82,8 +71,4 @@ func (c *Camera) Update(delta time.Duration) {
 	if c.Near >= c.Far {
 		log.Println("camera's near is closer than far - nothing will render")
 	}
-}
-
-func (c *Camera) GetCurrentZoomPercent() float32 {
-	return 1
 }
