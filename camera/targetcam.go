@@ -24,16 +24,9 @@ type TargetCamera struct {
 	TargetOffset mgl32.Vec3
 	// Zoomer handles camera zoom.
 	Zoomer zoom.Zoom
-}
 
-func (c *TargetCamera) ModelView() mgl32.Mat4 {
-	if (c.Up() == mgl32.Vec3{0, 0, 0}) {
-		log.Println("invalid ModelView: up vector is (0,0,0)")
-	}
-	if (c.Forward() == mgl32.Vec3{0, 0, 0}) {
-		log.Println("invalid ModelView: forward vector is (0,0,0)")
-	}
-	return mgl32.LookAtV(c.Entity.Position, c.Target.GetPosition(), c.Up())
+	// prevOffset keeps track of the previous TargetOffset. This allows us to avoid recomputing some quaternions on every call to Update.
+	prevOffset mgl32.Vec3
 }
 
 func (c *TargetCamera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
@@ -48,14 +41,16 @@ func (c *TargetCamera) Update(delta time.Duration) {
 	if c.Zoomer != nil {
 		c.Zoomer.Update()
 	}
-
 	// Adjust the distance from camera to target by the amount of zoom.
 	// A zoom of 3 means everything should be 3 times as large, so the distance from target to camera should be 1/3 the default.
 	offset := c.TargetOffset.Mul(1.0 / c.GetCurrentZoomPercent())
-	c.Entity.Position = c.Target.GetPosition().Add(offset)
-	// TODO: I'm unsure if this rotation is being set properly. Easiest test would be to render the camera entity in a model
-	// so it's obvious what the rotation is.
-	c.Entity.Rotation = mgl32.QuatLookAtV(c.Position, c.Position.Sub(c.TargetOffset), c.Up()) // mgl32.QuatRotate(0, c.TargetOffset) // mgl32.QuatLookAtV(c.Entity.Position, c.Entity.Position.Add(c.TargetOffset), c.Up())
+	c.Position = c.Target.GetPosition().Add(offset)
+	// Only modify the camera rotation if the offset has changed.
+	// TODO: I added this because if I update Rotation every Update it causes the screen to flicker. I'm not sure why. This is a temporary workaround.
+	if c.prevOffset != c.TargetOffset {
+		c.prevOffset = c.TargetOffset
+		c.Rotation = mgl32.QuatLookAtV(c.Position, c.Position.Add(c.Forward()), c.Up())
+	}
 }
 
 func NewTargetCamera(target entity.Target, offset mgl32.Vec3) *TargetCamera {

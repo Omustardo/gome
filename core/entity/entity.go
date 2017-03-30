@@ -65,10 +65,14 @@ func Default() Entity {
 	}
 }
 
+// Forward returns a unit vector facing in the same direction as the Entity.
+// This depends on the Entity's default rotation facing directly down the positive X axis.
 func (e *Entity) Forward() mgl32.Vec3 {
-	return e.Position.Add(e.Rotation.Rotate(mgl32.Vec3{1, 0, 0}))
+	return e.Rotation.Rotate(mgl32.Vec3{1, 0, 0})
 }
 
+// Up returns a unit vector facing up from the Entity.
+// This is based on the Entity's default rotation being such that the positive Y axis is up.
 func (e *Entity) Up() mgl32.Vec3 {
 	return e.Rotation.Rotate(mgl32.Vec3{0, 1, 0})
 }

@@ -54,7 +54,7 @@ func (c *Camera) ModelView() mgl32.Mat4 {
 	if (c.Forward() == mgl32.Vec3{0, 0, 0}) {
 		log.Println("invalid ModelView: forward vector is (0,0,0)")
 	}
-	return mgl32.LookAtV(c.Entity.Position, c.Forward(), c.Up())
+	return mgl32.LookAtV(c.Position, c.Position.Add(c.Forward()), c.Up())
 }
 
 func (c *Camera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
