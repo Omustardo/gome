@@ -54,11 +54,14 @@ func (c *TargetCamera) Update(delta time.Duration) {
 }
 
 func NewTargetCamera(target entity.Target, offset mgl32.Vec3) *TargetCamera {
-	return &TargetCamera{
+	c := &TargetCamera{
 		Camera:       *NewCamera(),
 		Target:       target,
 		TargetOffset: offset,
 	}
+	// The camera should always face toward the target.
+	c.Rotation = mgl32.QuatLookAtV(c.Position, c.Position.Sub(offset.Normalize()), c.Up())
+	return c
 }
 
 func (c *TargetCamera) GetCurrentZoomPercent() float32 {
