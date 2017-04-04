@@ -48,6 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to load ship model: %v", err)
 	}
+	// Orient the mesh so Up is towards the +Y and Forward is toward the -Z. This is just based on how the mesh was created.
+	shipMesh.BaseRotation = mgl32.AnglesToQuat(0, mgl32.DegToRad(-90), 0, mgl32.XYZ)
+
 	shipTexture, err := asset.LoadTexture("assets/ship/ship.jpg")
 	if err != nil {
 		log.Fatalf("Unable to load asteroid texture: %v", err)

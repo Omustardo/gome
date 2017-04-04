@@ -60,7 +60,7 @@ If anyone has suggestions to improve file loading, I'm very open to them.
  confusing, please submit an issue and I'll make it easier to understand.
  * The built in axis rendering functions color them RGB for XYZ, in that order.
  * When working with Entity rotation, note that the default rotation considers up to be {0, 1, 0} and
- forward to be {1, 0, 0}. These are constants and you may need to adapt your meshes to be oriented in those directions
+ forward to be {0, 0, -1}. These are constants and you may need to adapt your meshes to be oriented in those directions
  or they may be more difficult to work with. This depends on your use case; if you only care about rotating
  and displaying a model then it shouldn't matter. You just apply an initial rotation when you load the model
  and go from there. On the other hand, if you want to have a spaceship that shoots forward, it's confusing

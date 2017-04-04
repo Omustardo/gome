@@ -32,7 +32,7 @@ func New(mesh mesh.Mesh) *Player {
 				// Remember that these rotations are applied in the order specified by the final parameter
 				// and that like a unit circle, positive values go to the "left" and negative values go to the "right".
 				// X,Y,Z correspond to Roll, Pitch, and Yaw.
-				Rotation: mgl32.AnglesToQuat(mgl32.DegToRad(90), mgl32.DegToRad(-90), 0, mgl32.XYZ),
+				Rotation: mgl32.AnglesToQuat(mgl32.DegToRad(90), 0, 0, mgl32.XYZ),
 				Scale:    mgl32.Vec3{50, 50, 50},
 			},
 		},
@@ -50,8 +50,7 @@ func (p *Player) FireWeapon() *bullet.Bullet {
 	p.canFireAt = time.Now().Add(p.FireRate)
 	b := bullet.New()
 
-	// TODO: This is an odd forward vector - it's dependent on how the model is originally defined and loaded facing -X
-	forward := p.Rotation.Rotate(mgl32.Vec3{-1, 0, 0}) // Forward is rotated to point in the direction the ship faces.
+	forward := p.Forward()
 	b.Velocity = forward.Mul(800)
 	b.Position = p.Position.Add(forward.Mul(p.Scale.X() * 1.3))
 	return b
@@ -71,10 +70,9 @@ func (p *Player) Move(forward, back bool, delta float32) {
 	}
 	moveSpeed := float32(500)
 
-	// TODO: This is an odd forward vector - it's dependent on how the model is originally defined and loaded facing -X
-	forwardDir := p.Rotation.Rotate(mgl32.Vec3{-1, 0, 0}) // Forward is rotated to point in the direction the ship faces.
-	forwardDir = forwardDir.Mul(move * moveSpeed)         // direction * speed = distance
-	p.ModifyPositionV(forwardDir)                         // current position + distance vector = final location
+	forwardDir := p.Forward()                     // Forward is rotated to point in the direction the ship faces.
+	forwardDir = forwardDir.Mul(move * moveSpeed) // direction * speed = distance
+	p.ModifyPositionV(forwardDir)                 // current position + distance vector = final location
 }
 
 func (p *Player) Rotate(left, right bool, delta float32) {

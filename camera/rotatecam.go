@@ -42,19 +42,13 @@ func (c *RotateCamera) Update(delta time.Duration) {
 		rotate[1] += 1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyUp) {
-		rotate[2] += -1
+		rotate[0] += -1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyDown) {
-		rotate[2] += 1
+		rotate[0] += 1
 	}
 	if rotate.Len() != 0 {
-		// rotation about the Y axis - to look left and right.
-		horizontalRotation := mgl32.Vec3{0, rotate[1], 0}
-		// rotation about the horizontal axis through the target - to look up and down.
-		verticalRotation := c.Rotation.Rotate(mgl32.Vec3{0, 0, rotate[2]})
-		// Sum the rotations to get the total rotation, then normalize and multiply to limit rotation per second.
-		rotate = horizontalRotation.Add(verticalRotation).Normalize().Mul(float32(delta.Seconds()) * c.RotateSpeed)
-		c.ModifyRotationGlobal(rotate)
+		c.ModifyRotationGlobal(rotate.Normalize().Mul(float32(delta.Seconds()) * c.RotateSpeed))
 	}
 	// TODO: Cap rotation to a set number of degrees so we can't flip upside down and make the controls become backwards.
 
@@ -62,7 +56,7 @@ func (c *RotateCamera) Update(delta time.Duration) {
 	// to move the camera "back" to where it should be.
 	// For example, if the camera is looking down the X axis and the offset is 5 units, we need to end up adding {-5,0,0}
 	// to the target's position to get to the proper location.
-	offset := c.Entity.Rotation.Rotate(mgl32.Vec3{-c.TargetOffset, 0, 0})
+	offset := c.Entity.Rotation.Rotate(entity.Forward.Mul(-c.TargetOffset))
 	c.Entity.Position = c.Target.GetPosition().Add(offset)
 }
 

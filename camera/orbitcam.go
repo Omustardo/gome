@@ -39,20 +39,20 @@ func (c *OrbitCamera) Update(delta time.Duration) {
 		rotate[1] = 1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyUp) {
-		rotate[2] = -1
+		rotate[0] = -1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyDown) {
-		rotate[2] = 1
+		rotate[0] = 1
 	}
 	if rotate.Len() > 0 {
-		c.ModifyRotationLocal(rotate.Normalize().Mul(float32(delta.Seconds()) * c.RotateSpeed)) // @@@@@@@@ does global vs local matter here?
+		c.ModifyRotationLocal(rotate.Normalize().Mul(float32(delta.Seconds()) * c.RotateSpeed))
 	}
 
 	// Take the Camera's rotation and desired distance from target. Negate it, and add it to the target position
 	// to move the camera "back" to where it should be.
 	// For example, if the camera is looking down the X axis and the offset is 5 units, we need to end up adding {-5,0,0}
 	// to the target's position to get to the proper location.
-	offset := c.Entity.Rotation.Rotate(mgl32.Vec3{-c.TargetOffset, 0, 0})
+	offset := c.Entity.Rotation.Rotate(entity.Forward.Mul(-c.TargetOffset))
 	c.Entity.Position = c.Target.GetPosition().Add(offset)
 }
 

@@ -47,6 +47,8 @@ func NewCamera() *Camera {
 	}
 }
 
+// ModelView returns a matrix used to transform from model space to camera coordinates.
+// http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 func (c *Camera) ModelView() mgl32.Mat4 {
 	if (c.Up() == mgl32.Vec3{0, 0, 0}) {
 		log.Println("invalid ModelView: up vector is (0,0,0)")
@@ -57,12 +59,15 @@ func (c *Camera) ModelView() mgl32.Mat4 {
 	return mgl32.LookAtV(c.Position, c.Position.Add(c.Forward()), c.Up())
 }
 
+// ProjectionOrthographic returns a matrix used to transform from camera space to screen space.
 func (c *Camera) ProjectionOrthographic(width, height float32) mgl32.Mat4 {
 	return mgl32.Ortho(-width/2, width/2,
 		-height/2, height/2,
 		c.Near, c.Far)
 }
 
+// ProjectionOrthographic returns a matrix used to transform from camera space to screen space.
+// http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 func (c *Camera) ProjectionPerspective(width, height float32) mgl32.Mat4 {
 	return mgl32.Perspective(c.FOV, float32(width)/float32(height), c.Near, c.Far)
 }

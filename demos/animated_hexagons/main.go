@@ -77,24 +77,10 @@ func main() {
 		Mesh:   mesh.NewCube(&color.NRGBA{0, 255, 255, 255}, gl.Texture{}),
 		Entity: entity.Default(),
 	}
-	player.Position[0] = 0
+	player.SetPosition(100, 300, 0)
 
-	cam := &camera.TargetCamera{
-		Camera: camera.Camera{
-			Entity: entity.Default(),
-			Near:   0.1,
-			Far:    10000,
-			FOV:    math.Pi / 4.0,
-		},
-		Target:       &player,
-		TargetOffset: mgl32.Vec3{-500, -500, 1000},
-		Zoomer: zoom.NewScrollZoom(0.1, 3,
-			func() float32 {
-				return mouse.Handler.Scroll().Y()
-			},
-		),
-	}
-	cam.ModifyRotationLocal(mgl32.Vec3{math.Pi / 4, 0, 0})
+	cam := camera.NewTargetCamera(&player, mgl32.Vec3{-500, 0, 3000})
+	cam.Zoomer = zoom.NewScrollZoom(0.1, 3, func() float32 { return mouse.Handler.Scroll().Y() })
 
 	ticker := time.NewTicker(*frameRate)
 	for !view.Window.ShouldClose() {

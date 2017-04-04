@@ -41,11 +41,11 @@ func (c *FreeCamera) Update(delta time.Duration) {
 	// WASD to move forward, back, left, right. Q,E for down and up.
 	// Arrows for rotation.
 	// TODO: Move this logic so keybinds are customizeable and so camera doesn't depend on keyboard package.
-	if keyboard.Handler.IsKeyDown(glfw.KeyW) {
-		move[0] = 1
-	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyS) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyA) {
 		move[0] = -1
+	}
+	if keyboard.Handler.IsKeyDown(glfw.KeyD) {
+		move[0] = 1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyQ) {
 		move[1] = -1
@@ -53,25 +53,29 @@ func (c *FreeCamera) Update(delta time.Duration) {
 	if keyboard.Handler.IsKeyDown(glfw.KeyE) {
 		move[1] = 1
 	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyA) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyW) {
 		move[2] = -1
 	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyD) {
+	if keyboard.Handler.IsKeyDown(glfw.KeyS) {
 		move[2] = 1
 	}
 
+	// Rotation about X axis
+	if keyboard.Handler.IsKeyDown(glfw.KeyUp) {
+		rotate[0] = 1
+	}
+	if keyboard.Handler.IsKeyDown(glfw.KeyDown) {
+		rotate[0] = -1
+	}
+
+	// Rotate about the Y axis
 	if keyboard.Handler.IsKeyDown(glfw.KeyLeft) {
 		rotate[1] = 1
 	}
 	if keyboard.Handler.IsKeyDown(glfw.KeyRight) {
 		rotate[1] = -1
 	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyUp) {
-		rotate[2] = 1
-	}
-	if keyboard.Handler.IsKeyDown(glfw.KeyDown) {
-		rotate[2] = -1
-	}
+
 	// TODO: I'm unsure whether to apply rotation or position changes first. The outcome is different, but since this
 	// should be done in very small steps over multiple frames, it shouldn't matter from a human perspective.
 	if move.Len() > 0 {

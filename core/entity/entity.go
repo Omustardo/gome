@@ -8,6 +8,13 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+// TODO: Consider making these package level functions. They should be constants but can't be due to Go, so having them accessible via function returns is the next best thing.
+var (
+	Forward = mgl32.Vec3{0, 0, -1}
+	Right   = mgl32.Vec3{1, 0, 0}
+	Up      = mgl32.Vec3{0, 1, 0}
+)
+
 // Target provides a position. Functions that only deal with the position of an Entity should take a Target rather than
 // a full entity.
 type Target interface {
@@ -17,9 +24,6 @@ type Target interface {
 type Entity struct {
 	// Position of the entity.
 	Position mgl32.Vec3
-
-	// TODO: Add a center value which is a added to position when rendering. As it is, position can be thought of as the
-	// bottom left corner of a cube that bounds a mesh. Being able to change positioning to an arbitrary center point will be necessary.
 
 	// Rotation about the center. Note that this is a quaternion - a mathematical way of representing rotation.
 	// Quaternions make some things easy, like having smooth rotations between different orientations, but
@@ -66,15 +70,21 @@ func Default() Entity {
 }
 
 // Forward returns a unit vector facing in the same direction as the Entity.
-// This depends on the Entity's default rotation facing directly down the positive X axis.
+// This depends on the Entity's default rotation facing directly down the negative Z axis.
 func (e *Entity) Forward() mgl32.Vec3 {
-	return e.Rotation.Rotate(mgl32.Vec3{1, 0, 0})
+	return e.Rotation.Rotate(Forward)
 }
 
 // Up returns a unit vector facing up from the Entity.
 // This is based on the Entity's default rotation being such that the positive Y axis is up.
 func (e *Entity) Up() mgl32.Vec3 {
-	return e.Rotation.Rotate(mgl32.Vec3{0, 1, 0})
+	return e.Rotation.Rotate(Up)
+}
+
+// Right returns a unit vector facing right from the Entity.
+// This is based on the Entity's default rotation being such that the positive X axis is right.
+func (e *Entity) Right() mgl32.Vec3 {
+	return e.Rotation.Rotate(Right)
 }
 
 // GetPosition gets the entity's position. Position is public and can be accessed directly, but this
