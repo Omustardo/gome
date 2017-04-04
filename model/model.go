@@ -41,7 +41,7 @@ func (m *Model) Render() {
 	}
 
 	shader.Model.SetTranslationMatrix(m.Position.X(), m.Position.Y(), m.Position.Z())
-	shader.Model.SetRotationMatrixQ(m.Rotation)
+	shader.Model.SetRotationMatrixQ(m.Rotation.Mul(m.Mesh.BaseRotation))
 	shader.Model.SetScaleMatrix(m.Scale.X(), m.Scale.Y(), m.Scale.Z())
 	shader.Model.SetColor(m.Mesh.Color)
 	shader.Model.SetTexture(m.Mesh.Texture())

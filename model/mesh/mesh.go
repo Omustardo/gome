@@ -73,6 +73,17 @@ type Mesh struct {
 	// Note that the color.Color interface's Color() function returns weird values (between 0 and 0xFFFF for avoiding overflow).
 	// I recommend just accessing the RGBA fields directly.
 	Color *color.NRGBA
+
+	// BaseRotation is a rotation applied to the mesh.
+	// This is intended to be used to orient the mesh so Up toward {0,1,0}, and Forward is towards {1,0,0}, since not all
+	// meshes will be created in this orientation. Note that if you don't want to modify the default rotation, this must
+	// be set to mgl32.QuatIdent().
+	// Encouraging a consistent orientation for all meshes makes dealing with them much easier, but it is not absolutely
+	// required.
+	BaseRotation mgl32.Quat
+
+	// TODO: Add a center value which is a added to position when rendering. As it is, position can be thought of as the
+	// bottom left corner of a cube that bounds a mesh. Being able to change positioning to an arbitrary center point will be necessary.
 }
 
 // NewMeshFromArrays copies the input vertices, normals, and texture coordinates into buffers on the GPU.
@@ -104,6 +115,7 @@ func NewMesh(vertices, vertexIndices, normals gl.Buffer, vboMode gl.Enum, itemCo
 		vboMode:       vboMode,
 		itemCount:     itemCount,
 		Color:         color,
+		BaseRotation:  mgl32.QuatIdent(),
 	}
 	m.SetNormalVBO(normals)
 	m.SetTexture(texture)
