@@ -39,10 +39,10 @@ func (c *TargetCamera) ModelView() mgl32.Mat4 {
 	// camera ModelView() being called, which would in turn call the TargetCamera.Camera.Entity's Forward and Up
 	// methods.
 
-	if (c.Up() == mgl32.Vec3{0, 0, 0}) {
+	if c.Up().ApproxEqual(mgl32.Vec3{0, 0, 0}) {
 		log.Println("invalid ModelView: up vector is (0,0,0)")
 	}
-	if (c.Forward() == mgl32.Vec3{0, 0, 0}) {
+	if c.Forward().ApproxEqual(mgl32.Vec3{0, 0, 0}) {
 		log.Println("invalid ModelView: forward vector is (0,0,0)")
 	}
 	return mgl32.LookAtV(c.Position, c.Position.Add(c.Forward()), c.Up())

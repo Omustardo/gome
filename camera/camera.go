@@ -50,10 +50,10 @@ func NewCamera() *Camera {
 // ModelView returns a matrix used to transform from model space to camera coordinates.
 // http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 func (c *Camera) ModelView() mgl32.Mat4 {
-	if (c.Up() == mgl32.Vec3{0, 0, 0}) {
+	if c.Up().ApproxEqual(mgl32.Vec3{0, 0, 0}) {
 		log.Println("invalid ModelView: up vector is (0,0,0)")
 	}
-	if (c.Forward() == mgl32.Vec3{0, 0, 0}) {
+	if c.Forward().ApproxEqual(mgl32.Vec3{0, 0, 0}) {
 		log.Println("invalid ModelView: forward vector is (0,0,0)")
 	}
 	return mgl32.LookAtV(c.Position, c.Position.Add(c.Forward()), c.Up())
