@@ -10,15 +10,10 @@ import (
 
 // Window is the singleton glfw window. It should be initialized with view.Initialize(), and then
 // all window related logic can access it directly.
+// It should be closed with view.Terminate()
 var Window *glfw.Window
 
 // Initialize sets up the singleton view.Window.
-// Sample Usage:
-//   if err := view.Initialize(*windowWidth, *windowHeight, "Window Demo"); err != nil {
-//     log.Fatal(err)
-//   }
-//   defer view.Terminate()
-//
 func Initialize(width, height int, windowName string) error {
 	if Window != nil {
 		panic("view.Window already initialized")
