@@ -202,7 +202,7 @@ func initializeHexMesh() {
 	gl.BufferData(gl.ARRAY_BUFFER, bytecoder.Vec3(binary.LittleEndian, normals...), gl.STATIC_DRAW)
 
 	hexMesh = mesh.NewMesh(vertexBuffer, gl.Buffer{}, normalBuffer, gl.TRIANGLES, len(triangles)*3, nil, gl.Texture{}, gl.Buffer{})
-	hexMesh.Color = &color.NRGBA{100, 10, 10, 255}
+	hexMesh.Color = &color.NRGBA{R:100, G:10, B:10, A:255}
 }
 
 func initializeHexWireframe() {

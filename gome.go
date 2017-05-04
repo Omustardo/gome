@@ -22,6 +22,9 @@ func Initialize(windowTitle string, windowWidth, windowHeight int, baseDir strin
 	asset.SetBaseDir(baseDir)
 
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.
+	if view.Window != nil {
+		log.Fatal("GLFW Window already initialized")
+	}
 	if err := view.Initialize(windowWidth, windowHeight, windowTitle); err != nil {
 		log.Fatal(err)
 	}

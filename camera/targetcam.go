@@ -11,8 +11,7 @@ import (
 
 var _ CameraI = (*TargetCamera)(nil)
 
-// TODO: TargetCamera does a lot of math for its basic calculations (like the Up function). Consider making more members
-// private so camera rotation can be cached.
+// TODO: TargetCamera does a lot of math for its basic calculations (like the Up function). Consider making more members private so camera rotation can be cached.
 
 // TargetCamera is a camera that is always positioned at an offset from the target entity.
 // Target Position + Offset = Camera Position.

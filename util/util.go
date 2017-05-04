@@ -30,9 +30,9 @@ func RandQuat() mgl32.Quat {
 // Note that percentages above 1.0 will increase the provided rotation as expected, and negative percentages will reverse the rotation.
 //
 // Sample usage to limit rotation based on a maximum amount per second:
-//   rotationSpeed := mgl32.AnglesToQuat(0, 0, 2 * math.Pi, mgl32.XYZ) // Allow one full rotation per second.
-//   deltaTime := 0.016 																							 // Time passed in the last frame is very small.
-//   rotation := util.ScaleQuatRotation(rotationSpeed, deltaTime)			 // rotationSpeed * time = rotation
+//   rotationSpeed := mgl32.AnglesToQuat(0, 0, 2 * math.Pi, mgl32.XYZ)	// Allow one full rotation per second.
+//   deltaTime := 0.016 												// Time passed in the last frame is very small.
+//   rotation := util.ScaleQuatRotation(rotationSpeed, deltaTime)		// rotationSpeed * time = rotation
 func ScaleQuatRotation(q mgl32.Quat, percent float32) mgl32.Quat {
 	// TODO: Consider using mgl32.QuatNlerp() as it's much faster and likely won't look different for small rotations.
 	return mgl32.QuatSlerp(mgl32.QuatIdent(), q, percent) // TODO: Confirm that this doesn't need to be normalized.
