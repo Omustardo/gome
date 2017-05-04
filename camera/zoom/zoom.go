@@ -10,6 +10,7 @@ import (
 // arbitrary number of scroll wheel ticks to change zoom from min to max. Balanced between large size for quick scrolling, and small size for smooth zooming. TODO: Use larger size, but interpolate so it's smooth no matter what.
 const step = 60
 
+// Zoom provides handling for zooming in and out.
 type Zoom interface {
 	// GetCurrentPercent returns the current percent zoom. Always a positive value.
 	GetCurrentPercent() float32
