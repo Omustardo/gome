@@ -13,12 +13,18 @@ import (
 	"github.com/omustardo/gome/shader"
 	"github.com/omustardo/gome/util/fps"
 	"github.com/omustardo/gome/view"
+	"os"
 )
 
 // Init should be called near the start of the main method.
 // It sets up the glfw window, shaders, input, and basic meshes among other things.
 // It returns a function which should be deferred, to cleanly close everything at the end.
 func Initialize(windowTitle string, windowWidth, windowHeight int, baseDir string) func() {
+	// log print with .go file and line number.
+	log.SetFlags(log.Lshortfile)
+	// avoid defaulting to stderr.
+	log.SetOutput(os.Stdout)
+
 	asset.SetBaseDir(baseDir)
 
 	// Initialize gl constants and the glfw window. Note that this must be done before all other gl usage.

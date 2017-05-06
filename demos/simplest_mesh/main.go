@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"image/color"
-	"log"
 	"math"
-	"os"
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -28,12 +26,6 @@ var (
 	windowWidth  = flag.Int("window_width", 1000, "initial window width")
 	windowHeight = flag.Int("window_height", 1000, "initial window height")
 )
-
-func init() {
-	// log print with .go file and line number.
-	log.SetFlags(log.Lshortfile)
-	log.SetOutput(os.Stdout)
-}
 
 func main() {
 	flag.Parse()

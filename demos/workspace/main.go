@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"log"
 	"math"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -41,12 +40,6 @@ var (
 	// use relative asset paths. More explanation in omustardo\gome\asset\asset.go
 	baseDir = flag.String("base_dir", `C:\workspace\Go\src\github.com\omustardo\gome\demos\workspace`, "All file paths should be specified relative to this root.")
 )
-
-func init() {
-	// log print with .go file and line number.
-	log.SetFlags(log.Lshortfile)
-	log.SetOutput(os.Stdout)
-}
 
 func main() {
 	flag.Parse()

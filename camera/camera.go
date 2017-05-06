@@ -20,8 +20,8 @@ type CameraI interface {
 }
 
 // Camera is the most basic camera type. It has no built in movement, zoom, or any special features.
-// Its position and rotation can be manipulated via its embedded Entity. Make sure to also update the Up vector
-// if you modify the rotation.
+// Its position and rotation can be manipulated via its embedded Entity. Note that the default Up vector is based
+// on the embedded Entity, so you will need to rotate it if the default isn't what you want.
 type Camera struct {
 	// Entity makes the Camera a part of the world. Note that Entity.Scale is unused.
 	// Entity.Up() is a vector pointing in the direction that the user will see as the top of the screen.
